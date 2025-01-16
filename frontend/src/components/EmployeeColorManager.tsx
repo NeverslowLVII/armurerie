@@ -102,7 +102,7 @@ export default function EmployeeColorManager({ open, onClose, employees, onUpdat
     try {
       const updateData: EmployeeCreate = {
         name: employee.name,
-        color: color
+        ...(color && { color }),
       };
       await updateEmployee(employee.id, updateData);
       if (onUpdate) onUpdate();
@@ -116,7 +116,7 @@ export default function EmployeeColorManager({ open, onClose, employees, onUpdat
       try {
         const updateData: EmployeeCreate = {
           name: newName,
-          color: employee.color || undefined,
+          ...(employee.color && { color: employee.color }),
           role: employee.role
         };
         await updateEmployee(employee.id, updateData);
@@ -133,7 +133,7 @@ export default function EmployeeColorManager({ open, onClose, employees, onUpdat
     try {
         const updateData: EmployeeCreate = {
             name: employee.name,
-            color: employee.color || undefined,
+            ...(employee.color && { color: employee.color }),
             role: newRole as Role
         };
         await updateEmployee(employee.id, updateData);
@@ -207,7 +207,7 @@ export default function EmployeeColorManager({ open, onClose, employees, onUpdat
     try {
       const newEmployee: EmployeeCreate = {
         name: newEmployeeName.trim(),
-        color: newEmployeeColor || undefined,
+        ...(newEmployeeColor && { color: newEmployeeColor }),
         role: "EMPLOYEE"
       };
       await createEmployee(newEmployee);

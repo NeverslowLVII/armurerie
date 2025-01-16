@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -84,13 +84,15 @@ export async function PUT(
       const weapon = await prisma.weapon.update({
         where: { id },
         data: {
-          horodateur: data.horodateur ? new Date(data.horodateur) : undefined,
-          detenteur: data.detenteur,
-          serigraphie: data.serigraphie,
-          prix: data.prix,
-          employee: data.employe_id ? {
-            connect: { id: parseInt(data.employe_id) }
-          } : undefined,
+          ...(data.horodateur && { horodateur: new Date(data.horodateur) }),
+          ...(data.detenteur && { detenteur: data.detenteur }),
+          ...(data.serigraphie && { serigraphie: data.serigraphie }),
+          ...(data.prix && { prix: data.prix }),
+          ...(data.employe_id && { 
+            employee: {
+              connect: { id: parseInt(data.employe_id) }
+            }
+          }),
           base_weapon: {
             connect: { nom: data.nom_arme }
           }
@@ -126,7 +128,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

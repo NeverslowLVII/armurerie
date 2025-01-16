@@ -116,17 +116,6 @@ const overlayVariants = {
     }
 };
 
-const inputVariants = {
-    changed: {
-        scale: [1, 1.02, 1],
-        backgroundColor: ["#fff", "rgba(79, 70, 229, 0.1)", "#fff"],
-        transition: {
-            duration: 0.3,
-            times: [0, 0.5, 1]
-        }
-    }
-};
-
 const textVariants = {
     initial: { 
         opacity: 0,
@@ -294,7 +283,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                             animate="visible"
                             exit="exit"
                         >
-                            <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
+                            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
                         </motion.div>
 
                         <motion.div

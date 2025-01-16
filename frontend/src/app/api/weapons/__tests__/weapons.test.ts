@@ -29,7 +29,7 @@ describe('Weapons API', () => {
   describe('GET /api/weapons', () => {
     it('should return all weapons', async () => {
       // Create test data
-      const testWeapon = await prisma.weapon.create({
+      await prisma.weapon.create({
         data: {
           employe_id: testEmployee.id,
           detenteur: 'Test User',

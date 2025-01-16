@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteWeapon, type Role, Weapon } from '../services/api';
+import { deleteWeapon, Weapon } from '../services/api';
 import EmployeeColorManager from './EmployeeColorManager';
 import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
@@ -38,10 +38,6 @@ export default function WeaponsTable() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
-  // Sorting
-  const [sortField, setSortField] = useState<keyof Weapon>('horodateur');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const handleLogin = (password: string) => {
     if (password === 'patron123') {
@@ -107,23 +103,9 @@ export default function WeaponsTable() {
     );
   });
 
-  const handleSort = (field: keyof Weapon) => {
-    if (field === sortField) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  };
-
-  const sortedAndFilteredWeapons = filteredWeapons.sort((a, b) => {
-    if (sortField === 'horodateur') {
-      return sortDirection === 'asc'
-        ? new Date(a.horodateur).getTime() - new Date(b.horodateur).getTime()
-        : new Date(b.horodateur).getTime() - new Date(a.horodateur).getTime();
-    }
-    return 0;
-  });
+  const sortedAndFilteredWeapons = filteredWeapons.sort((a, b) => 
+    new Date(b.horodateur).getTime() - new Date(a.horodateur).getTime()
+  );
 
   // Get current items
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -301,7 +283,7 @@ export default function WeaponsTable() {
                             className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
                               weapon.employee.color ? 'text-white' : 'text-gray-900 bg-gray-100'
                             }`}
-                            style={weapon.employee.color ? { backgroundColor: weapon.employee.color } : undefined}
+                            style={weapon.employee.color ? { backgroundColor: weapon.employee.color } : {}}
                           >
                             {weapon.employee.name}
                             {weapon.employee.role === "PATRON" && (

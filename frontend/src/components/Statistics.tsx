@@ -8,7 +8,6 @@ import {
 import {
     ChartBarIcon,
     CurrencyDollarIcon,
-    ShieldCheckIcon,
     FireIcon
 } from '@heroicons/react/24/outline';
 
@@ -73,7 +72,7 @@ interface EmployeeStats {
 interface StatCardProps {
     title: string;
     value: string | number;
-    icon: React.ComponentType<{ className?: string }>;
+    icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>;
     subtitle?: string;
 }
 
@@ -81,8 +80,6 @@ interface DateRange {
     startDate: Date;
     endDate: Date;
 }
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 type TabType = 'overview' | 'weapons' | 'employees';
 
@@ -133,7 +130,7 @@ const chartVariants = {
     }
 };
 
-const StatCard = ({ title, value, icon: Icon, subtitle }: StatCardProps) => (
+const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
     <motion.div
         variants={cardVariants}
         className="relative overflow-hidden bg-white/90 backdrop-blur-xl rounded-lg p-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100/50 hover:shadow-[0_8px_40px_rgb(99,102,241,0.12)] transition-shadow duration-300"
@@ -601,7 +598,7 @@ export default function Statistics() {
                                             outerRadius={100}
                                             label
                                         >
-                                            {weaponStats.weaponTypes.map((entry, index) => (
+                                            {weaponStats.weaponTypes.map((_, index) => (
                                                 <Cell 
                                                     key={`cell-${index}`} 
                                                     fill={`hsl(${(index * 360) / weaponStats.weaponTypes.length}, 70%, 60%)`}

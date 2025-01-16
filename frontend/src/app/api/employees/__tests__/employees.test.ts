@@ -6,7 +6,7 @@ describe('Employees API', () => {
   describe('GET /api/employees', () => {
     it('should return all employees', async () => {
       // Create test data
-      const testEmployee = await prisma.employee.create({
+      await prisma.employee.create({
         data: {
           name: 'Test Employee',
           color: '#FF0000',

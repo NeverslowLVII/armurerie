@@ -6,7 +6,7 @@ describe('Base Weapons API', () => {
   describe('GET /api/base-weapons', () => {
     it('should return all base weapons', async () => {
       // Create test data
-      const testBaseWeapon = await prisma.baseWeapon.create({
+      await prisma.baseWeapon.create({
         data: {
           nom: 'Test Base Weapon',
           prix_defaut: 100,
