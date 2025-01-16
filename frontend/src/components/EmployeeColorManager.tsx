@@ -1,11 +1,14 @@
-import { Dialog, Transition } from '@headlessui/react';
-import { Fragment, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Dialog } from '@headlessui/react';
 import { Employee, updateEmployee, EmployeeCreate, mergeEmployees, deleteEmployee, getEmployeeWeapons, reassignWeapons, createEmployee } from '../services/api';
-import { PencilIcon, TrashIcon, UserPlusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, UserPlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+
+type Role = "EMPLOYEE" | "CO_PATRON" | "PATRON";
 
 interface EmployeeColorManagerProps {
   open: boolean;
-  setOpen: (open: boolean) => void;
+  onClose: () => void;
   employees: Employee[];
   onUpdate?: () => void;
 }
@@ -28,7 +31,58 @@ const DEFAULT_COLORS: ColorOption[] = [
   { color: '#EC4899', name: 'Rose' },
 ];
 
-export default function EmployeeColorManager({ open, setOpen, employees, onUpdate }: EmployeeColorManagerProps) {
+interface RoleInfo {
+    value: Role;
+    label: string;
+    description: string;
+    commission: number;
+}
+
+const ROLES: RoleInfo[] = [
+    {
+        value: "EMPLOYEE",
+        label: "Employé",
+        description: "Vendeur standard avec accès aux fonctionnalités de base",
+        commission: 20
+    },
+    {
+        value: "CO_PATRON",
+        label: "Co-Patron",
+        description: "Accès étendu et commission majorée",
+        commission: 30
+    },
+    {
+        value: "PATRON",
+        label: "Patron",
+        description: "Accès complet à toutes les fonctionnalités",
+        commission: 30
+    }
+];
+
+const listItemVariants = {
+    hidden: { 
+        opacity: 0, 
+        y: 20,
+        scale: 0.95
+    },
+    visible: { 
+        opacity: 1, 
+        y: 0,
+        scale: 1,
+        backgroundColor: "rgba(255, 255, 255, 0)",
+        transition: {
+            duration: 0.2
+        }
+    },
+    hover: {
+        backgroundColor: "rgba(243, 244, 246, 0.8)",
+        transition: {
+            duration: 0.1
+        }
+    }
+};
+
+export default function EmployeeColorManager({ open, onClose, employees, onUpdate }: EmployeeColorManagerProps) {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [newName, setNewName] = useState('');
   const [selectedEmployees, setSelectedEmployees] = useState<Set<number>>(new Set());
@@ -36,6 +90,13 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
   const [isAddingEmployee, setIsAddingEmployee] = useState(false);
   const [newEmployeeName, setNewEmployeeName] = useState('');
   const [newEmployeeColor, setNewEmployeeColor] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedEmployees(new Set());
+    setEditingEmployee(null);
+    setNewName('');
+    setError(null);
+  }, [employees]);
 
   const handleColorChange = async (employee: Employee, color: string) => {
     try {
@@ -55,7 +116,8 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
       try {
         const updateData: EmployeeCreate = {
           name: newName,
-          color: employee.color || undefined
+          color: employee.color || undefined,
+          role: employee.role
         };
         await updateEmployee(employee.id, updateData);
         setEditingEmployee(null);
@@ -64,6 +126,20 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
       } catch (error) {
         console.error('Error updating employee name:', error);
       }
+    }
+  };
+
+  const handleRoleChange = async (employee: Employee, newRole: string) => {
+    try {
+        const updateData: EmployeeCreate = {
+            name: employee.name,
+            color: employee.color || undefined,
+            role: newRole as Role
+        };
+        await updateEmployee(employee.id, updateData);
+        if (onUpdate) onUpdate();
+    } catch (error) {
+        console.error('Error updating employee role:', error);
     }
   };
 
@@ -89,11 +165,9 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
 
   const handleDelete = async (employee: Employee) => {
     try {
-      // Vérifier d'abord si l'employé a des armes
       const weapons = await getEmployeeWeapons(employee.id);
       
       if (weapons.length > 0) {
-        // S'il y a des armes, demander à l'utilisateur de choisir un autre employé
         const otherEmployees = employees.filter(e => e.id !== employee.id);
         if (otherEmployees.length === 0) {
           setError("Impossible de supprimer le dernier employé avec des armes.");
@@ -109,7 +183,6 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
           if (onUpdate) onUpdate();
         }
       } else {
-        // Si pas d'armes, simplement confirmer et supprimer
         if (window.confirm(`Êtes-vous sûr de vouloir supprimer l'employé ${employee.name} ?`)) {
           await deleteEmployee(employee.id);
           if (onUpdate) onUpdate();
@@ -118,24 +191,11 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
-      } else if (typeof error === 'object' && error !== null && 'response' in error) {
-        const axiosError = error as { response?: { data?: { detail?: string } } };
-        setError(axiosError.response?.data?.detail || 'Erreur lors de la suppression');
       } else {
         setError('Erreur lors de la suppression');
       }
       setTimeout(() => setError(null), 5000);
     }
-  };
-
-  const toggleEmployeeSelection = (employee: Employee) => {
-    const newSelection = new Set(selectedEmployees);
-    if (newSelection.has(employee.id)) {
-      newSelection.delete(employee.id);
-    } else {
-      newSelection.add(employee.id);
-    }
-    setSelectedEmployees(newSelection);
   };
 
   const handleAddEmployee = async () => {
@@ -147,7 +207,8 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
     try {
       const newEmployee: EmployeeCreate = {
         name: newEmployeeName.trim(),
-        color: newEmployeeColor || undefined
+        color: newEmployeeColor || undefined,
+        role: "EMPLOYEE"
       };
       await createEmployee(newEmployee);
       setNewEmployeeName('');
@@ -161,233 +222,272 @@ export default function EmployeeColorManager({ open, setOpen, employees, onUpdat
   };
 
   return (
-    <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={setOpen}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+    <Dialog as="div" className="relative z-50" open={open} onClose={onClose}>
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/30"
+            />
 
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                <div>
-                  <div className="mt-3 text-center sm:mt-5">
-                    <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex min-h-full items-center justify-center p-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="relative w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-2xl"
+                >
+                  <div className="flex items-center justify-between bg-white px-4 py-4 sm:px-6">
+                    <Dialog.Title className="text-base font-semibold leading-6 text-gray-900">
                       Gestion des employés
                     </Dialog.Title>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Gérez les employés et leurs couleurs associées. Seuls les patrons peuvent effectuer ces modifications.
-                      </p>
-                    </div>
+                    <button
+                      type="button"
+                      className="rounded-md text-gray-400 hover:text-gray-500"
+                      onClick={onClose}
+                    >
+                      <XMarkIcon className="h-6 w-6" />
+                    </button>
                   </div>
-                  {error && (
-                    <div className="mt-2 rounded-md bg-red-50 p-4">
-                      <div className="text-sm text-red-700">{error}</div>
-                    </div>
-                  )}
-                  <div className="mt-4 space-y-6">
-                    <div className="flex justify-between items-center">
-                      <button
-                        type="button"
-                        onClick={() => setIsAddingEmployee(true)}
-                        className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                      >
-                        <UserPlusIcon className="h-5 w-5" />
-                        Nouvel employé
-                      </button>
-                    </div>
 
-                    {isAddingEmployee && (
-                      <div className="bg-gray-50 p-4 rounded-md space-y-4">
-                        <h4 className="text-sm font-medium text-gray-900">Ajouter un nouvel employé</h4>
-                        <div className="space-y-2">
-                          <input
-                            type="text"
-                            value={newEmployeeName}
-                            onChange={(e) => setNewEmployeeName(e.target.value)}
-                            placeholder="Nom de l'employé"
-                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                          />
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {DEFAULT_COLORS.map(({ color, name }) => (
-                              <button
-                                key={color}
-                                type="button"
-                                className={`group relative rounded-full p-0.5 ${
-                                  newEmployeeColor === color
-                                    ? 'ring-2 ring-gray-900'
-                                    : 'hover:ring-2 hover:ring-gray-400'
-                                }`}
-                                onClick={() => setNewEmployeeColor(color)}
-                              >
-                                <div
-                                  className="h-8 w-8 rounded-full"
-                                  style={{ backgroundColor: color }}
-                                />
-                                <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100">
-                                  {name}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                          <div className="flex justify-end gap-2 mt-4">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsAddingEmployee(false);
-                                setNewEmployeeName('');
-                                setNewEmployeeColor(null);
-                              }}
-                              className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                            >
-                              Annuler
-                            </button>
-                            <button
-                              type="button"
-                              onClick={handleAddEmployee}
-                              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                            >
-                              Ajouter
-                            </button>
-                          </div>
-                        </div>
+                  <div className="px-4 pb-6 sm:px-6">
+                    {error && (
+                      <div className="mb-4 rounded-md bg-red-50 p-4">
+                        <div className="text-sm text-red-700">{error}</div>
                       </div>
                     )}
 
-                    {selectedEmployees.size > 1 && (
-                      <div className="mb-4 flex justify-between items-center bg-blue-50 p-4 rounded-md">
-                        <span className="text-sm text-blue-700">
-                          {selectedEmployees.size} employés sélectionnés
-                        </span>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
                         <button
                           type="button"
-                          onClick={handleMerge}
-                          className="text-sm font-medium text-blue-700 hover:text-blue-600"
+                          onClick={() => setIsAddingEmployee(true)}
+                          className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                         >
-                          Fusionner les employés
+                          <UserPlusIcon className="h-5 w-5" />
+                          Nouvel employé
                         </button>
                       </div>
-                    )}
-                    {employees.map((employee) => {
-                      const isEditing = editingEmployee?.id === employee.id;
-                      const isSelected = selectedEmployees.has(employee.id);
 
-                      return (
-                        <div key={employee.id} className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => toggleEmployeeSelection(employee)}
-                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                              />
-                              {isEditing ? (
-                                <div className="flex items-center gap-2">
-                                  <input
-                                    type="text"
-                                    value={newName}
-                                    onChange={(e) => setNewName(e.target.value)}
-                                    className="block rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                    placeholder="Nouveau nom"
+                      {isAddingEmployee && (
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={listItemVariants}
+                          className="bg-gray-50 p-4 rounded-md space-y-4"
+                        >
+                          <h4 className="text-sm font-medium text-gray-900">Ajouter un nouvel employé</h4>
+                          <div className="space-y-2">
+                            <input
+                              type="text"
+                              value={newEmployeeName}
+                              onChange={(e) => setNewEmployeeName(e.target.value)}
+                              placeholder="Nom de l'employé"
+                              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                            />
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {DEFAULT_COLORS.map(({ color, name }) => (
+                                <button
+                                  key={color}
+                                  type="button"
+                                  className={`group relative rounded-full p-0.5 ${
+                                    newEmployeeColor === color
+                                      ? 'ring-2 ring-gray-900'
+                                      : 'hover:ring-2 hover:ring-gray-400'
+                                  }`}
+                                  onClick={() => setNewEmployeeColor(color)}
+                                >
+                                  <div
+                                    className="h-8 w-8 rounded-full"
+                                    style={{ backgroundColor: color }}
                                   />
-                                  <button
-                                    onClick={() => handleRename(employee)}
-                                    className="text-sm text-indigo-600 hover:text-indigo-900"
-                                  >
-                                    Sauvegarder
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  <span 
-                                    className={`text-sm font-medium px-3 py-1 rounded-full ${
-                                      employee.color ? 'text-white' : 'text-gray-900 bg-gray-100'
-                                    }`}
-                                    style={employee.color ? { backgroundColor: employee.color } : undefined}
-                                  >
-                                    {employee.name}
+                                  <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100">
+                                    {name}
                                   </span>
-                                  <div className="flex items-center gap-1">
-                                    <button
-                                      onClick={() => {
-                                        setEditingEmployee(employee);
-                                        setNewName(employee.name);
-                                      }}
-                                      className="text-gray-400 hover:text-gray-600"
-                                    >
-                                      <PencilIcon className="h-4 w-4" />
-                                    </button>
-                                    <button
-                                      onClick={() => handleDelete(employee)}
-                                      className="text-red-400 hover:text-red-600"
-                                    >
-                                      <TrashIcon className="h-4 w-4" />
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
+                                </button>
+                              ))}
+                            </div>
+                            <div className="flex justify-end gap-2 mt-4">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsAddingEmployee(false);
+                                  setNewEmployeeName('');
+                                  setNewEmployeeColor(null);
+                                }}
+                                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                              >
+                                Annuler
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleAddEmployee}
+                                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                              >
+                                Ajouter
+                              </button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {DEFAULT_COLORS.map(({ color, name }) => (
-                              <button
-                                key={color}
-                                type="button"
-                                className={`group relative rounded-full p-0.5 ${
-                                  employee.color === color
-                                    ? 'ring-2 ring-gray-900'
-                                    : 'hover:ring-2 hover:ring-gray-400'
-                                }`}
-                                onClick={() => handleColorChange(employee, color)}
-                              >
-                                <div
-                                  className="h-8 w-8 rounded-full"
-                                  style={{ backgroundColor: color }}
-                                />
-                                <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100">
-                                  {name}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })}
+                        </motion.div>
+                      )}
+
+                      {selectedEmployees.size > 1 && (
+                        <motion.div
+                          initial="hidden"
+                          animate="visible"
+                          variants={listItemVariants}
+                          className="mb-4 flex justify-between items-center bg-blue-50 p-4 rounded-md"
+                        >
+                          <span className="text-sm text-blue-700">
+                            {selectedEmployees.size} employés sélectionnés
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleMerge}
+                            className="text-sm font-medium text-blue-700 hover:text-blue-600"
+                          >
+                            Fusionner les employés
+                          </button>
+                        </motion.div>
+                      )}
+
+                      <AnimatePresence>
+                        {employees.map((employee) => {
+                          const isEditing = editingEmployee?.id === employee.id;
+                          const isSelected = selectedEmployees.has(employee.id);
+
+                          return (
+                            <motion.div
+                              key={employee.id}
+                              initial="hidden"
+                              animate="visible"
+                              exit="hidden"
+                              variants={listItemVariants}
+                              whileHover="hover"
+                              className="p-4 rounded-lg space-y-2"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => {
+                                      const newSelection = new Set(selectedEmployees);
+                                      if (newSelection.has(employee.id)) {
+                                        newSelection.delete(employee.id);
+                                      } else {
+                                        newSelection.add(employee.id);
+                                      }
+                                      setSelectedEmployees(newSelection);
+                                    }}
+                                    className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                                  />
+                                  {isEditing ? (
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        type="text"
+                                        value={newName}
+                                        onChange={(e) => setNewName(e.target.value)}
+                                        className="block rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
+                                        placeholder="Nouveau nom"
+                                      />
+                                      <button
+                                        onClick={() => handleRename(employee)}
+                                        className="text-sm text-indigo-600 hover:text-indigo-900"
+                                      >
+                                        Sauvegarder
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-2">
+                                      <span 
+                                        className={`text-sm font-medium px-3 py-1 rounded-full ${
+                                          employee.color ? 'text-white' : 'text-gray-900 bg-gray-100'
+                                        }`}
+                                        style={employee.color ? { backgroundColor: employee.color } : undefined}
+                                      >
+                                        {employee.name}
+                                      </span>
+                                      <div className="relative group">
+                                        <select
+                                          value={employee.role}
+                                          onChange={(e) => handleRoleChange(employee, e.target.value)}
+                                          className="text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        >
+                                          {ROLES.map(role => (
+                                            <option key={role.value} value={role.value}>
+                                              {role.label}
+                                            </option>
+                                          ))}
+                                        </select>
+                                        <div className="absolute left-0 top-full mt-2 w-64 bg-white rounded-md shadow-lg p-4 hidden group-hover:block z-10">
+                                          <div className="text-xs text-gray-500">
+                                            {ROLES.find(r => r.value === employee.role)?.description}
+                                            <div className="mt-1 font-medium text-indigo-600">
+                                              Commission: {ROLES.find(r => r.value === employee.role)?.commission}%
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        <button
+                                          onClick={() => {
+                                            setEditingEmployee(employee);
+                                            setNewName(employee.name);
+                                          }}
+                                          className="text-gray-400 hover:text-gray-600"
+                                        >
+                                          <PencilIcon className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleDelete(employee)}
+                                          className="text-red-400 hover:text-red-600"
+                                        >
+                                          <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {DEFAULT_COLORS.map(({ color, name }) => (
+                                  <button
+                                    key={color}
+                                    type="button"
+                                    className={`group relative rounded-full p-0.5 ${
+                                      employee.color === color
+                                        ? 'ring-2 ring-gray-900'
+                                        : 'hover:ring-2 hover:ring-gray-400'
+                                    }`}
+                                    onClick={() => handleColorChange(employee, color)}
+                                  >
+                                    <div
+                                      className="h-8 w-8 rounded-full"
+                                      style={{ backgroundColor: color }}
+                                    />
+                                    <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100">
+                                      {name}
+                                    </span>
+                                  </button>
+                                ))}
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </AnimatePresence>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                  <button
-                    type="button"
-                    className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                    onClick={() => setOpen(false)}
-                  >
-                    Fermer
-                  </button>
-                </div>
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+                </motion.div>
+              </div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
+    </Dialog>
   );
-} 
+}

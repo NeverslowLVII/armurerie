@@ -16,6 +16,9 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
     const [detenteur, setDetenteur] = useState('');
     const [serigraphie, setSerigraphie] = useState('');
     const [prix, setPrix] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState(false);
 
     const resetForm = () => {
         setSelectedEmployee(null);
@@ -23,11 +26,18 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
         setDetenteur('');
         setSerigraphie('');
         setPrix('');
+        setError(null);
+        setSuccess(false);
+        setIsLoading(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedEmployee || !selectedBaseWeapon) return;
+
+        setIsLoading(true);
+        setError(null);
+        setSuccess(false);
 
         try {
             await createWeapon({
@@ -36,13 +46,20 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                 nom_arme: selectedBaseWeapon.nom,
                 serigraphie,
                 prix: selectedBaseWeapon.prix_defaut,
+                cout_production: selectedBaseWeapon.cout_production_defaut,
                 horodateur: new Date().toISOString()
             });
+            setSuccess(true);
             onWeaponAdded();
-            onClose();
-            resetForm();
+            setTimeout(() => {
+                onClose();
+                resetForm();
+            }, 1000);
         } catch (error) {
             console.error('Erreur lors de l\'ajout de l\'arme:', error);
+            setError('Erreur lors de l\'ajout de l\'arme. Veuillez réessayer.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -65,6 +82,18 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                         Ajouter une arme
                     </Dialog.Title>
 
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                            {error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                            Arme ajoutée avec succès !
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -78,6 +107,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                 }}
                                 className="border p-2 rounded w-full"
                                 required
+                                disabled={isLoading}
                             >
                                 <option value="">Sélectionner un employé</option>
                                 {employees.map((employee) => (
@@ -100,6 +130,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                 }}
                                 className="border p-2 rounded w-full"
                                 required
+                                disabled={isLoading}
                             >
                                 <option value="">Sélectionner une arme de base</option>
                                 {baseWeapons.map((weapon) => (
@@ -123,6 +154,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                 onChange={(e) => setDetenteur(e.target.value)}
                                 className="border p-2 rounded w-full"
                                 required
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -136,6 +168,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                 onChange={(e) => setSerigraphie(e.target.value)}
                                 className="border p-2 rounded w-full"
                                 required
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -150,6 +183,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                 className="border p-2 rounded w-full"
                                 required
                                 readOnly
+                                disabled={isLoading}
                             />
                         </div>
 
@@ -161,19 +195,31 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                     resetForm();
                                 }}
                                 className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
+                                disabled={isLoading}
                             >
                                 Annuler
                             </button>
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                className={`${
+                                    isLoading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
+                                } text-white px-4 py-2 rounded flex items-center`}
+                                disabled={isLoading}
                             >
-                                Ajouter
+                                {isLoading ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Ajout en cours...
+                                    </>
+                                ) : 'Ajouter'}
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
         </Dialog>
-    )
+    );
 }

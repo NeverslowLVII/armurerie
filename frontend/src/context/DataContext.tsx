@@ -1,3 +1,5 @@
+'use client'
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getWeapons, getEmployees, getBaseWeapons, Weapon, Employee, BaseWeapon } from '../services/api';
 

@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
-import { deleteWeapon, Role, Weapon } from '../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
+import { deleteWeapon, type Role, Weapon } from '../services/api';
 import EmployeeColorManager from './EmployeeColorManager';
 import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
 import LoginDialog from './LoginDialog';
-import { MagnifyingGlassIcon, PencilIcon, TrashIcon, LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PencilIcon, TrashIcon, LockClosedIcon, LockOpenIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import BaseWeaponsManager from './BaseWeaponsManager';
 import { useData } from '../context/DataContext';
 
+const tableVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const rowVariants = {
+  hidden: { opacity: 0, x: -20 },
+  show: { opacity: 1, x: 0 }
+};
+
 export default function WeaponsTable() {
-  const { weapons, employees, loading, error, refreshWeapons } = useData();
+  const { weapons, employees, loading, error, refreshWeapons, refreshEmployees } = useData();
   const [isColorManagerOpen, setIsColorManagerOpen] = useState(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
@@ -135,18 +151,25 @@ export default function WeaponsTable() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
-      <div className="sm:flex sm:items-center">
+      <motion.div 
+        className="sm:flex sm:items-center"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="sm:flex-auto">
-          <h1 className="text-base font-semibold leading-6 text-gray-900">Registre des armes</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Registre des armes</h1>
           <p className="mt-2 text-sm text-gray-700">
             Liste des armes enregistrées dans le système.
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex space-x-3">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => isPatronLoggedIn ? handleLogout() : setIsLoginOpen(true)}
-            className="block rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            className="block rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-200"
           >
             {isPatronLoggedIn ? (
               <>
@@ -159,76 +182,83 @@ export default function WeaponsTable() {
                 Connexion Patron
               </>
             )}
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="button"
             onClick={handleManageEmployees}
-            className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ${
+            className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
               isPatronLoggedIn
                 ? 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
                 : 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
             }`}
             disabled={!isPatronLoggedIn}
           >
+            <UserGroupIcon className="inline-block h-5 w-5 mr-1" />
             Gérer les employés
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => isPatronLoggedIn ? setIsBaseWeaponsOpen(true) : setIsLoginOpen(true)}
-            className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset ${
+            className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
               isPatronLoggedIn
                 ? 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
                 : 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
             }`}
             disabled={!isPatronLoggedIn}
           >
+            <SparklesIcon className="inline-block h-5 w-5 mr-1" />
             Gérer les armes de base
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => setIsAddFormOpen(true)}
-            className="block rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            className="block rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:from-indigo-500 hover:to-purple-500 transition-all duration-200"
           >
             Ajouter une arme
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 mb-4">
+      <motion.div 
+        className="mt-8 mb-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
           <input
             type="text"
-            className="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            className="block w-full rounded-lg border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-all duration-200"
             placeholder="Rechercher une arme, un détenteur, un employé..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 flow-root">
+      <motion.div 
+        className="mt-8 flow-root"
+        variants={tableVariants}
+        initial="hidden"
+        animate="show"
+      >
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-          <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+          <div className="inline-block min-w-full py-2 align-middle">
+            <div className="overflow-hidden shadow-lg ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white/80 backdrop-blur-sm">
               <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-50/50">
                   <tr>
-                    <th 
-                      scope="col" 
-                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 cursor-pointer hover:bg-gray-100"
-                      onClick={() => handleSort('horodateur')}
-                    >
-                      <div className="flex items-center">
-                        Date et heure
-                        {sortField === 'horodateur' && (
-                          <span className="ml-2">
-                            {sortDirection === 'asc' ? '↑' : '↓'}
-                          </span>
-                        )}
-                      </div>
+                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      Date et heure
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Employé
@@ -250,67 +280,89 @@ export default function WeaponsTable() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {currentItems.map((weapon) => (
-                    <tr key={weapon.id}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
-                        {new Date(weapon.horodateur).toLocaleString()}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm">
-                        <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                            weapon.employee.color ? 'text-white' : 'text-gray-900 bg-gray-100'
-                          }`}
-                          style={weapon.employee.color ? { backgroundColor: weapon.employee.color } : undefined}
-                        >
-                          {weapon.employee.name}
-                          {weapon.employee.role === Role.PATRON && (
-                            <span className="ml-1 text-xs">(Patron)</span>
-                          )}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.detenteur}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.nom_arme}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.serigraphie}</td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
-                        {(weapon.prix / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleEdit(weapon)}
-                            className={`text-indigo-600 hover:text-indigo-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
-                            disabled={!isPatronLoggedIn}
+                <tbody className="divide-y divide-gray-200 bg-white/50">
+                  <AnimatePresence>
+                    {currentItems.map((weapon) => (
+                      <motion.tr
+                        key={weapon.id}
+                        variants={rowVariants}
+                        initial="hidden"
+                        animate="show"
+                        exit="hidden"
+                        whileHover={{ backgroundColor: "rgba(249, 250, 251, 0.5)" }}
+                        className="transition-colors duration-200"
+                      >
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
+                          {new Date(weapon.horodateur).toLocaleString()}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm">
+                          <motion.span
+                            whileHover={{ scale: 1.05 }}
+                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                              weapon.employee.color ? 'text-white' : 'text-gray-900 bg-gray-100'
+                            }`}
+                            style={weapon.employee.color ? { backgroundColor: weapon.employee.color } : undefined}
                           >
-                            <PencilIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(weapon)}
-                            className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
-                            disabled={!isPatronLoggedIn}
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            {weapon.employee.name}
+                            {weapon.employee.role === "PATRON" && (
+                              <span className="ml-1 text-xs">(Patron)</span>
+                            )}
+                          </motion.span>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.detenteur}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.nom_arme}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.serigraphie}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                          {(weapon.prix / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                        </td>
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                          <div className="flex justify-end gap-2">
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleEdit(weapon)}
+                              className={`text-indigo-600 hover:text-indigo-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
+                              disabled={!isPatronLoggedIn}
+                            >
+                              <PencilIcon className="h-5 w-5" />
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleDelete(weapon)}
+                              className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
+                              disabled={!isPatronLoggedIn}
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </motion.button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Pagination */}
-      <div className="mt-4 flex items-center justify-between">
+      <motion.div 
+        className="mt-4 flex items-center justify-between"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
         <div className="flex items-center">
           <span className="text-sm text-gray-700">
             Affichage de {indexOfFirstItem + 1} à {Math.min(indexOfLastItem, sortedAndFilteredWeapons.length)} sur {sortedAndFilteredWeapons.length} entrées
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
             className={`px-3 py-1 rounded-md ${
@@ -320,21 +372,25 @@ export default function WeaponsTable() {
             }`}
           >
             Précédent
-          </button>
+          </motion.button>
           {Array.from({ length: Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage) }).map((_, index) => (
-            <button
+            <motion.button
               key={index + 1}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => paginate(index + 1)}
               className={`px-3 py-1 rounded-md ${
                 currentPage === index + 1
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50 border'
               }`}
             >
               {index + 1}
-            </button>
+            </motion.button>
           ))}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)}
             className={`px-3 py-1 rounded-md ${
@@ -344,9 +400,9 @@ export default function WeaponsTable() {
             }`}
           >
             Suivant
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       <LoginDialog
         open={isLoginOpen}
@@ -356,9 +412,15 @@ export default function WeaponsTable() {
 
       <EmployeeColorManager
         open={isColorManagerOpen}
-        setOpen={setIsColorManagerOpen}
+        onClose={() => setIsColorManagerOpen(false)}
         employees={employees}
-        onUpdate={refreshWeapons}
+        onUpdate={async () => {
+          // Attendre que les deux mises à jour soient terminées
+          await Promise.all([
+            refreshEmployees(),
+            refreshWeapons()
+          ]);
+        }}
       />
 
       <AddWeaponForm

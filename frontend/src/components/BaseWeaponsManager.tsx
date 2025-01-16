@@ -1,179 +1,626 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { createBaseWeapon, updateBaseWeapon, deleteBaseWeapon } from '../services/api';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, PlusIcon, XMarkIcon, CurrencyDollarIcon, FireIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useData } from '../context/DataContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface BaseWeaponsManagerProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
+const calculateProfit = (price: number, cost: number): string => {
+    return ((price - cost) / price * 100).toFixed(1);
+};
+
+const ROW_HEIGHT = 68; // Hauteur exacte d'une ligne
+
+const listItemVariants = {
+    hidden: { 
+        opacity: 0, 
+        y: 20,
+        scale: 0.95
+    },
+    visible: { 
+        opacity: 1, 
+        y: 0,
+        scale: 1,
+        backgroundColor: "rgba(255, 255, 255, 0)",
+        transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 30
+        }
+    },
+    editing: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        backgroundColor: "rgba(79, 70, 229, 0.1)",
+        transition: {
+            duration: 0.2,
+            backgroundColor: {
+                duration: 0.3
+            }
+        }
+    },
+    exit: { 
+        opacity: 0,
+        x: -20,
+        transition: {
+            duration: 0.2
+        }
+    }
+};
+
+const successVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { 
+        opacity: 1, 
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 500,
+            damping: 30
+        }
+    },
+    exit: { 
+        opacity: 0, 
+        y: 20,
+        transition: {
+            duration: 0.2
+        }
+    }
+};
+
+const modalVariants = {
+    hidden: { 
+        opacity: 0,
+        scale: 0.95,
+        y: 20
+    },
+    visible: { 
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            duration: 0.3,
+            bounce: 0.25
+        }
+    },
+    exit: {
+        opacity: 0,
+        scale: 0.95,
+        y: 20,
+        transition: {
+            duration: 0.2
+        }
+    }
+};
+
+const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+        opacity: 1,
+        transition: {
+            duration: 0.2
+        }
+    },
+    exit: {
+        opacity: 0,
+        transition: {
+            duration: 0.2
+        }
+    }
+};
+
+const inputVariants = {
+    changed: {
+        scale: [1, 1.02, 1],
+        backgroundColor: ["#fff", "rgba(79, 70, 229, 0.1)", "#fff"],
+        transition: {
+            duration: 0.3,
+            times: [0, 0.5, 1]
+        }
+    }
+};
+
+const textVariants = {
+    initial: { 
+        opacity: 0,
+        x: -10,
+        display: "inline-block"
+    },
+    animate: { 
+        opacity: 1,
+        x: 0,
+        display: "inline-block",
+        transition: {
+            type: "spring",
+            stiffness: 500,
+            damping: 30,
+            mass: 0.5
+        }
+    }
+};
+
 export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManagerProps) {
     const { baseWeapons, refreshBaseWeapons } = useData();
     const [editingWeapon, setEditingWeapon] = useState<typeof baseWeapons[0] | null>(null);
     const [newWeaponName, setNewWeaponName] = useState('');
     const [newWeaponPrice, setNewWeaponPrice] = useState('');
+    const [newWeaponCostProduction, setNewWeaponCostProduction] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const listContainerRef = React.useRef<HTMLDivElement>(null);
+    
+    const filteredWeapons = useMemo(() => {
+        return baseWeapons
+            .filter(weapon => 
+                weapon.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                weapon.prix_defaut.toString().includes(searchQuery)
+            )
+            .sort((a, b) => {
+                const profitA = parseFloat(calculateProfit(a.prix_defaut, a.cout_production_defaut));
+                const profitB = parseFloat(calculateProfit(b.prix_defaut, b.cout_production_defaut));
+                return profitB - profitA;
+            });
+    }, [baseWeapons, searchQuery]);
+
+    const itemsPerPage = useMemo(() => {
+        if (!listContainerRef.current) return 5;
+        const availableHeight = listContainerRef.current.clientHeight;
+        return Math.max(Math.floor(availableHeight / ROW_HEIGHT), 1);
+    }, [listContainerRef.current?.clientHeight]);
+
+    const totalPages = Math.ceil(filteredWeapons.length / itemsPerPage);
+    
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(Math.max(1, totalPages));
+        }
+    }, [totalPages, currentPage]);
+
+    const paginatedWeapons = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        return filteredWeapons.slice(start, start + itemsPerPage);
+    }, [filteredWeapons, currentPage, itemsPerPage]);
 
     const handleAddWeapon = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true);
+        setError(null);
         try {
             await createBaseWeapon({
                 nom: newWeaponName,
-                prix_defaut: parseInt(newWeaponPrice) * 100
+                prix_defaut: parseInt(newWeaponPrice) * 100,
+                cout_production_defaut: parseInt(newWeaponCostProduction) * 100
             });
             setNewWeaponName('');
             setNewWeaponPrice('');
+            setNewWeaponCostProduction('');
+            setSuccess('Arme de base ajoutée avec succès !');
             refreshBaseWeapons();
+            setTimeout(() => setSuccess(null), 3000);
         } catch (error) {
+            setError('Erreur lors de l\'ajout de l\'arme de base');
             console.error('Erreur lors de l\'ajout de l\'arme de base:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleUpdateWeapon = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingWeapon) return;
+        setIsSubmitting(true);
+        setError(null);
 
         try {
             await updateBaseWeapon(editingWeapon.id, {
                 nom: newWeaponName,
-                prix_defaut: parseInt(newWeaponPrice) * 100
+                prix_defaut: parseInt(newWeaponPrice) * 100,
+                cout_production_defaut: parseInt(newWeaponCostProduction) * 100
             });
             setEditingWeapon(null);
             setNewWeaponName('');
             setNewWeaponPrice('');
+            setNewWeaponCostProduction('');
+            setSuccess('Arme de base mise à jour avec succès !');
             refreshBaseWeapons();
+            setTimeout(() => setSuccess(null), 3000);
         } catch (error) {
+            setError('Erreur lors de la mise à jour de l\'arme de base');
             console.error('Erreur lors de la mise à jour de l\'arme de base:', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleDeleteWeapon = async (weaponId: number) => {
         if (window.confirm('Êtes-vous sûr de vouloir supprimer cette arme de base ?')) {
+            setIsSubmitting(true);
+            setError(null);
             try {
                 await deleteBaseWeapon(weaponId);
+                setSuccess('Arme de base supprimée avec succès !');
                 refreshBaseWeapons();
+                setTimeout(() => setSuccess(null), 3000);
             } catch (error) {
+                setError('Erreur lors de la suppression de l\'arme de base');
                 console.error('Erreur lors de la suppression de l\'arme de base:', error);
+            } finally {
+                setIsSubmitting(false);
             }
         }
     };
 
     const startEditing = (weapon: typeof baseWeapons[0]) => {
         setEditingWeapon(weapon);
+        
+        // Animation séquentielle des champs sans réinitialisation
+        setTimeout(() => {
         setNewWeaponName(weapon.nom);
+            setTimeout(() => {
         setNewWeaponPrice((weapon.prix_defaut / 100).toString());
+                setTimeout(() => {
+                    setNewWeaponCostProduction((weapon.cout_production_defaut / 100).toString());
+                }, 100);
+            }, 100);
+        }, 100);
     };
 
     const cancelEditing = () => {
         setEditingWeapon(null);
         setNewWeaponName('');
         setNewWeaponPrice('');
+        setNewWeaponCostProduction('');
     };
 
     return (
-        <Dialog open={isOpen} onClose={onClose} className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen">
-                <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+        <AnimatePresence>
+            {isOpen && (
+                <Dialog open={isOpen} onClose={onClose} className="fixed inset-0 z-10 overflow-hidden">
+                    <div className="flex items-center justify-center min-h-screen p-2">
+                        <motion.div
+                            variants={overlayVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                        >
+                            <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
+                        </motion.div>
 
-                <div className="relative bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                    <Dialog.Title className="text-lg font-medium mb-4">
-                        Gérer les armes de base
+                        <motion.div
+                            variants={modalVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            className="relative bg-white rounded-lg shadow-xl w-full max-w-7xl h-[85vh] flex flex-col"
+                        >
+                            <div className="p-3 border-b border-gray-200">
+                                <div className="flex justify-between items-center">
+                                    <Dialog.Title className="text-xl font-semibold text-gray-900">
+                                        Gestionnaire d'armes de base
                     </Dialog.Title>
+                                    <div className="flex items-center space-x-4">
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Rechercher une arme..."
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                className="w-64 pl-4 pr-10 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                            />
+                                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={onClose}
+                                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                        >
+                                            Fermer
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <form onSubmit={editingWeapon ? handleUpdateWeapon : handleAddWeapon} className="mb-6">
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <div className="flex flex-1 min-h-0">
+                                {/* Panneau de gauche - Formulaire */}
+                                <div className="w-1/3 border-r border-gray-200 p-4 overflow-y-auto">
+                                    {error && (
+                                        <div className="mb-3 p-2 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm rounded">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    {success && (
+                                        <motion.div 
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
+                                            variants={successVariants}
+                                            className="mb-3 p-2 bg-green-100 border-l-4 border-green-500 text-green-700 text-sm rounded"
+                                        >
+                                            {success}
+                                        </motion.div>
+                                    )}
+
+                                    <form onSubmit={editingWeapon ? handleUpdateWeapon : handleAddWeapon} className="space-y-3">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Nom de l'arme
                             </label>
+                                            <motion.div
+                                                initial="initial"
+                                                animate="animate"
+                                                variants={textVariants}
+                                                className="block w-full"
+                                            >
                             <input
                                 type="text"
                                 value={newWeaponName}
                                 onChange={(e) => setNewWeaponName(e.target.value)}
-                                className="border p-2 rounded w-full"
+                                                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 required
+                                                    disabled={isSubmitting}
                             />
+                                            </motion.div>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Prix par défaut (en dollars)
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Prix par défaut ($)
                             </label>
+                                            <motion.div
+                                                initial="initial"
+                                                animate="animate"
+                                                variants={textVariants}
+                                                className="block w-full"
+                                            >
                             <input
                                 type="number"
                                 value={newWeaponPrice}
                                 onChange={(e) => setNewWeaponPrice(e.target.value)}
-                                className="border p-2 rounded w-full"
+                                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                    required
+                                                    min="0"
+                                                    step="0.01"
+                                                    disabled={isSubmitting}
+                                                />
+                                            </motion.div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Coût de production ($)
+                                            </label>
+                                            <motion.div
+                                                initial="initial"
+                                                animate="animate"
+                                                variants={textVariants}
+                                                className="block w-full"
+                                            >
+                                                <input
+                                                    type="number"
+                                                    value={newWeaponCostProduction}
+                                                    onChange={(e) => setNewWeaponCostProduction(e.target.value)}
+                                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 required
+                                                    min="0"
+                                                    step="0.01"
+                                                    disabled={isSubmitting}
                             />
+                                            </motion.div>
                         </div>
 
-                        <div className="flex justify-end space-x-2">
+                                        <div className="pt-2">
+                                            <div className="flex justify-between space-x-2">
                             {editingWeapon && (
                                 <button
                                     type="button"
                                     onClick={cancelEditing}
-                                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                                                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                        disabled={isSubmitting}
                                 >
+                                                        <XMarkIcon className="h-4 w-4 mr-1.5" />
                                     Annuler
                                 </button>
                             )}
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                            >
-                                {editingWeapon ? 'Mettre à jour' : 'Ajouter'}
+                                                    className={`flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
+                                                        isSubmitting
+                                                            ? 'bg-indigo-400'
+                                                            : 'bg-indigo-600 hover:bg-indigo-700'
+                                                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                                                    disabled={isSubmitting}
+                                                >
+                                                    {isSubmitting ? (
+                                                        <>
+                                                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                            </svg>
+                                                            {editingWeapon ? 'Mise à jour...' : 'Ajout...'}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            {editingWeapon ? (
+                                                                <>
+                                                                    <PencilIcon className="h-4 w-4 mr-1.5" />
+                                                                    Mettre à jour
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <PlusIcon className="h-4 w-4 mr-1.5" />
+                                                                    Ajouter
+                                                                </>
+                                                            )}
+                                                        </>
+                                                    )}
                             </button>
+                                            </div>
                         </div>
                     </form>
+                                </div>
 
-                    <div className="mt-6">
-                        <h3 className="text-sm font-medium text-gray-700 mb-2">Armes de base existantes</h3>
-                        <div className="space-y-2">
-                            {baseWeapons.map((weapon) => (
-                                <div
+                                {/* Panneau de droite - Liste */}
+                                <div className="flex-1 flex flex-col min-h-0">
+                                    <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="text-sm font-medium text-gray-900">
+                                                Armes de base existantes
+                                                <span className="ml-2 text-xs text-gray-500">
+                                                    ({filteredWeapons.length} résultats)
+                                                </span>
+                                            </h3>
+                                            <div className="flex items-center space-x-1 text-sm">
+                                                <button
+                                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                    disabled={currentPage === 1}
+                                                    className={`p-1 rounded ${
+                                                        currentPage === 1
+                                                            ? 'text-gray-400 cursor-not-allowed'
+                                                            : 'text-gray-600 hover:bg-gray-100'
+                                                    }`}
+                                                >
+                                                    <ChevronLeftIcon className="h-4 w-4" />
+                                                </button>
+                                                <span className="text-gray-600">
+                                                    {currentPage} / {totalPages}
+                                                </span>
+                                                <button
+                                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                                    disabled={currentPage === totalPages}
+                                                    className={`p-1 rounded ${
+                                                        currentPage === totalPages
+                                                            ? 'text-gray-400 cursor-not-allowed'
+                                                            : 'text-gray-600 hover:bg-gray-100'
+                                                    }`}
+                                                >
+                                                    <ChevronRightIcon className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ref={listContainerRef} className="flex-1 overflow-y-auto">
+                                        <div className="divide-y divide-gray-100">
+                                            <AnimatePresence mode="popLayout">
+                                                {paginatedWeapons.map((weapon, index) => (
+                                                    <motion.div
                                     key={weapon.id}
-                                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                                >
-                                    <div>
-                                        <span className="font-medium">{weapon.nom}</span>
-                                        <span className="ml-2 text-gray-500">
-                                            {new Intl.NumberFormat('en-US', {
+                                                        variants={listItemVariants}
+                                                        initial="hidden"
+                                                        animate={editingWeapon?.id === weapon.id ? "editing" : "visible"}
+                                                        exit="exit"
+                                                        custom={index}
+                                                        layout
+                                                        className="px-4 py-3 hover:bg-gray-50 transition-colors duration-150 rounded-lg"
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <motion.div 
+                                                                className="flex-1 min-w-0"
+                                                                whileHover={{ x: 5 }}
+                                                                transition={{ type: "spring", stiffness: 400 }}
+                                                            >
+                                                                <p className="text-sm font-medium text-indigo-600 truncate">
+                                                                    {weapon.nom}
+                                                                </p>
+                                                                <div className="mt-2 flex items-center text-sm text-gray-500 space-x-4">
+                                                                    <motion.div 
+                                                                        className="flex items-center"
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                    >
+                                                                        <CurrencyDollarIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                                                                        <span>
+                                                                            {new Intl.NumberFormat('fr-FR', {
                                                 style: 'currency',
                                                 currency: 'USD'
                                             }).format(weapon.prix_defaut / 100)}
                                         </span>
+                                                                    </motion.div>
+                                                                    <motion.div 
+                                                                        className="flex items-center"
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                    >
+                                                                        <FireIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                                                                        <span>
+                                                                            {new Intl.NumberFormat('fr-FR', {
+                                                                                style: 'currency',
+                                                                                currency: 'USD'
+                                                                            }).format(weapon.cout_production_defaut / 100)}
+                                                                        </span>
+                                                                    </motion.div>
+                                                                    <motion.div 
+                                                                        className="flex items-center"
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                    >
+                                                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                                            parseFloat(calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)) >= 30
+                                                                                ? 'bg-green-100 text-green-800'
+                                                                                : parseFloat(calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)) >= 15
+                                                                                ? 'bg-yellow-100 text-yellow-800'
+                                                                                : 'bg-red-100 text-red-800'
+                                                                        }`}>
+                                                                            Marge: {calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)}%
+                                                                        </span>
+                                                                    </motion.div>
                                     </div>
-                                    <div className="flex space-x-2">
-                                        <button
+                                                            </motion.div>
+                                                            <div className="flex items-center space-x-2">
+                                                                <motion.button
+                                                                    whileHover={{ scale: 1.1 }}
+                                                                    whileTap={{ scale: 0.9, rotate: -10 }}
                                             onClick={() => startEditing(weapon)}
-                                            className="text-indigo-600 hover:text-indigo-900"
+                                                                    className="p-2 text-indigo-600 hover:text-indigo-900 rounded-full hover:bg-indigo-50 transition-colors duration-150"
+                                                                    disabled={isSubmitting}
                                         >
                                             <PencilIcon className="h-5 w-5" />
-                                        </button>
-                                        <button
+                                                                </motion.button>
+                                                                <motion.button
+                                                                    whileHover={{ scale: 1.1 }}
+                                                                    whileTap={{ scale: 0.9, rotate: 10 }}
                                             onClick={() => handleDeleteWeapon(weapon.id)}
-                                            className="text-red-600 hover:text-red-900"
+                                                                    className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition-colors duration-150"
+                                                                    disabled={isSubmitting}
                                         >
                                             <TrashIcon className="h-5 w-5" />
-                                        </button>
+                                                                </motion.button>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </AnimatePresence>
+                                        </div>
+                                        {paginatedWeapons.length === 0 && (
+                                            <motion.div 
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                className="p-4 text-center text-gray-500"
+                                            >
+                                                Aucune arme trouvée
+                                            </motion.div>
+                                        )}
                                     </div>
                                 </div>
-                            ))}
                         </div>
-                    </div>
-
-                    <div className="mt-6 flex justify-end">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                        >
-                            Fermer
-                        </button>
-                    </div>
-                </div>
+                        </motion.div>
             </div>
         </Dialog>
+            )}
+        </AnimatePresence>
     );
 }

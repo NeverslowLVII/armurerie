@@ -1,51 +1,51 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import WeaponsTable from './components/WeaponsTable';
 import Statistics from './components/Statistics';
 import { DataProvider } from './context/DataContext';
+import Navbar from './components/Navbar';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'weapons' | 'statistics'>('weapons');
 
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 }
+  };
+
   return (
     <DataProvider>
-      <div className="min-h-screen bg-gray-100">
-        <nav className="bg-white shadow">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-16 justify-between">
-              <div className="flex">
-                <div className="flex flex-shrink-0 items-center">
-                  <h1 className="text-xl font-bold text-gray-900">Armurie</h1>
-                </div>
-                <div className="ml-6 flex space-x-8">
-                  <button
-                    onClick={() => setCurrentPage('weapons')}
-                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                      currentPage === 'weapons'
-                        ? 'border-b-2 border-indigo-500 text-gray-900'
-                        : 'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    }`}
-                  >
-                    Armes
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage('statistics')}
-                    className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                      currentPage === 'statistics'
-                        ? 'border-b-2 border-indigo-500 text-gray-900'
-                        : 'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    }`}
-                  >
-                    Statistiques
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+        <Navbar currentPage={currentPage} onPageChange={setCurrentPage} />
 
         <main>
           <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-            {currentPage === 'weapons' ? <WeaponsTable /> : <Statistics />}
+            <AnimatePresence mode="wait">
+              {currentPage === 'weapons' ? (
+                <motion.div
+                  key="weapons"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <WeaponsTable />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="statistics"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <Statistics />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </main>
       </div>

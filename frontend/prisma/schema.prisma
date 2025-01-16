@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id      Int      @id @default(autoincrement())
+  name    String
+  color   String?
+  role    String   @default("EMPLOYEE")
+  weapons Weapon[]
+}
+
+model BaseWeapon {
+  id                    Int      @id @default(autoincrement())
+  nom                   String   @unique
+  prix_defaut          Int
+  cout_production_defaut Int     @default(0)
+  weapons              Weapon[]
+}
+
+model Weapon {
+  id          Int         @id @default(autoincrement())
+  horodateur  DateTime
+  employe_id  Int
+  employee    Employee    @relation(fields: [employe_id], references: [id])
+  detenteur   String
+  nom_arme    String
+  serigraphie String      @unique
+  prix        Int
+  base_weapon BaseWeapon? @relation(fields: [nom_arme], references: [nom])
+} 
