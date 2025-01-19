@@ -10,6 +10,8 @@ import {
     CurrencyDollarIcon,
     FireIcon
 } from '@heroicons/react/24/outline';
+import { getCommissionRate, getRoleName } from '@/utils/roles';
+import { Role } from '@/services/api';
 
 interface WeaponStats {
     totalWeapons: number;
@@ -149,16 +151,6 @@ const PERIOD_PRESETS = [
     { label: 'Cette année', days: 365 }
 ];
 
-const getCommissionRate = (role: string): number => {
-    switch (role.toUpperCase()) {
-        case 'PATRON':
-        case 'CO_PATRON':
-            return 0.3;
-        default:
-            return 0.2;
-    }
-};
-
 export default function Statistics() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -291,7 +283,7 @@ export default function Statistics() {
                     return sum + (weapon.prix - productionCost);
                 }, 0);
 
-                const commissionRate = getCommissionRate(emp.role);
+                const commissionRate = getCommissionRate(emp.role as Role);
                 const commission = totalProfit * commissionRate;
                 
                 acc.employeePerformance.push({
@@ -630,7 +622,7 @@ export default function Statistics() {
                                                 </span>
                                             </div>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Commission ({employee.role === 'PATRON' || employee.role === 'CO_PATRON' ? '30%' : '20%'})</span>
+                                                <span className="text-gray-600">Commission ({getCommissionRate(employee.role as Role) * 100}%)</span>
                                                 <span className="font-bold text-lg text-green-500">
                                                     {new Intl.NumberFormat('fr-FR', { 
                                                         style: 'currency', 

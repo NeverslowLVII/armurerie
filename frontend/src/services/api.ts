@@ -6,7 +6,11 @@ axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 axios.defaults.headers.common['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS';
 axios.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
 
-export type Role = "EMPLOYEE" | "CO_PATRON" | "PATRON";
+export enum Role {
+  EMPLOYEE = "EMPLOYEE",
+  CO_PATRON = "CO_PATRON",
+  PATRON = "PATRON"
+}
 
 export interface Employee {
   id: number;

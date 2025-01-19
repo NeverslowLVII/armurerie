@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { Role } from '@/services/api'
+import { isValidRole } from '@/utils/roles'
 
 export async function GET(
   _request: NextRequest,
@@ -37,12 +39,40 @@ export async function PUT(
     const id = parseInt(params.id)
     const data = await request.json()
     
+    // Validate role
+    if (data.role && !isValidRole(data.role)) {
+      return NextResponse.json(
+        { error: 'Invalid role. Must be EMPLOYEE, CO_PATRON, or PATRON' },
+        { status: 400 }
+      )
+    }
+
+    // Check if trying to demote last PATRON
+    if (data.role && data.role !== Role.PATRON) {
+      const currentEmployee = await prisma.employee.findUnique({
+        where: { id }
+      });
+
+      if (currentEmployee?.role === Role.PATRON) {
+        const patronCount = await prisma.employee.count({
+          where: { role: Role.PATRON }
+        });
+
+        if (patronCount <= 1) {
+          return NextResponse.json(
+            { error: 'Cannot demote the last PATRON' },
+            { status: 400 }
+          )
+        }
+      }
+    }
+    
     const employee = await prisma.employee.update({
       where: { id },
       data: {
         name: data.name,
         color: data.color,
-        role: data.role
+        role: data.role as Role
       },
       include: { weapons: true }
     })

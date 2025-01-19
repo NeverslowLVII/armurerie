@@ -8,6 +8,8 @@ import LoginDialog from './LoginDialog';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, LockClosedIcon, LockOpenIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import BaseWeaponsManager from './BaseWeaponsManager';
 import { useData } from '../context/DataContext';
+import { hasPermission, getRoleName } from '@/utils/roles';
+import { Role } from '@/services/api';
 
 const tableVariants = {
   hidden: { opacity: 0 },
@@ -171,11 +173,11 @@ export default function WeaponsTable() {
             type="button"
             onClick={handleManageEmployees}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              isPatronLoggedIn
+              isPatronLoggedIn && hasPermission(Role.PATRON, 'canManageEmployees')
                 ? 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
                 : 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
             }`}
-            disabled={!isPatronLoggedIn}
+            disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canManageEmployees')}
           >
             <UserGroupIcon className="inline-block h-5 w-5 mr-1" />
             Gérer les employés
@@ -186,11 +188,11 @@ export default function WeaponsTable() {
             type="button"
             onClick={() => isPatronLoggedIn ? setIsBaseWeaponsOpen(true) : setIsLoginOpen(true)}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              isPatronLoggedIn
+              isPatronLoggedIn && hasPermission(Role.PATRON, 'canManageBaseWeapons')
                 ? 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
                 : 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
             }`}
-            disabled={!isPatronLoggedIn}
+            disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canManageBaseWeapons')}
           >
             <SparklesIcon className="inline-block h-5 w-5 mr-1" />
             Gérer les armes de base
@@ -286,8 +288,8 @@ export default function WeaponsTable() {
                             style={weapon.employee.color ? { backgroundColor: weapon.employee.color } : {}}
                           >
                             {weapon.employee.name}
-                            {weapon.employee.role === "PATRON" && (
-                              <span className="ml-1 text-xs">(Patron)</span>
+                            {weapon.employee.role !== Role.EMPLOYEE && (
+                              <span className="ml-1 text-xs">({getRoleName(weapon.employee.role as Role)})</span>
                             )}
                           </motion.span>
                         </td>
@@ -304,7 +306,7 @@ export default function WeaponsTable() {
                               whileTap={{ scale: 0.9 }}
                               onClick={() => handleEdit(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
-                              disabled={!isPatronLoggedIn}
+                              disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canEditWeapons')}
                             >
                               <PencilIcon className="h-5 w-5" />
                             </motion.button>
@@ -313,7 +315,7 @@ export default function WeaponsTable() {
                               whileTap={{ scale: 0.9 }}
                               onClick={() => handleDelete(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
-                              disabled={!isPatronLoggedIn}
+                              disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canDeleteWeapons')}
                             >
                               <TrashIcon className="h-5 w-5" />
                             </motion.button>
