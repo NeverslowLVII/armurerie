@@ -23,7 +23,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <h1 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
                 Armurerie
               </h1>
             </motion.div>
@@ -34,7 +34,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
                 onHoverEnd={() => setIsHovered(null)}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium relative ${
                   currentPage === 'weapons'
-                    ? 'text-indigo-600'
+                    ? 'text-red-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
                 whileHover={{ scale: 1.05 }}
@@ -44,7 +44,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
                 {isHovered === 'weapons' && (
                   <motion.div
                     layoutId="hover-effect"
-                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-600 to-purple-600"
+                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -53,7 +53,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
                 {currentPage === 'weapons' && (
                   <motion.div
                     layoutId="active-tab"
-                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-600 to-purple-600"
+                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
                   />
                 )}
               </motion.button>
@@ -63,7 +63,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
                 onHoverEnd={() => setIsHovered(null)}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium relative ${
                   currentPage === 'statistics'
-                    ? 'text-indigo-600'
+                    ? 'text-red-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
                 whileHover={{ scale: 1.05 }}
@@ -73,7 +73,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
                 {isHovered === 'statistics' && (
                   <motion.div
                     layoutId="hover-effect"
-                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-600 to-purple-600"
+                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -82,7 +82,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
                 {currentPage === 'statistics' && (
                   <motion.div
                     layoutId="active-tab"
-                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-600 to-purple-600"
+                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
                   />
                 )}
               </motion.button>

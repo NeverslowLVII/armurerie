@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { deleteWeapon, Weapon } from '../services/api';
-import EmployeeColorManager from './EmployeeColorManager';
+import EmployeeColorManager from './EmployeeManager';
 import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
 import LoginDialog from './LoginDialog';
@@ -200,7 +200,7 @@ export default function WeaponsTable() {
             whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => setIsAddFormOpen(true)}
-            className="block rounded-md bg-gradient-to-r from-indigo-600 to-purple-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:from-indigo-500 hover:to-purple-500 transition-all duration-200"
+            className="block rounded-md bg-gradient-to-r from-red-600 to-orange-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:from-red-500 hover:to-orange-500 transition-all duration-200"
           >
             Ajouter une arme
           </motion.button>
@@ -219,7 +219,7 @@ export default function WeaponsTable() {
           </div>
           <input
             type="text"
-            className="block w-full rounded-lg border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 transition-all duration-200"
+            className="block w-full rounded-lg border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 transition-all duration-200"
             placeholder="Rechercher une arme, un détenteur, un employé..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -303,7 +303,7 @@ export default function WeaponsTable() {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => handleEdit(weapon)}
-                              className={`text-indigo-600 hover:text-indigo-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
+                              className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
                               disabled={!isPatronLoggedIn}
                             >
                               <PencilIcon className="h-5 w-5" />
@@ -363,7 +363,7 @@ export default function WeaponsTable() {
               onClick={() => paginate(index + 1)}
               className={`px-3 py-1 rounded-md ${
                 currentPage === index + 1
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white'
                   : 'bg-white text-gray-700 hover:bg-gray-50 border'
               }`}
             >

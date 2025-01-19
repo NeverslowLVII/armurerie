@@ -26,7 +26,7 @@ const listItemVariants = {
         opacity: 1, 
         y: 0,
         scale: 1,
-        backgroundColor: "rgba(255, 255, 255, 0)",
+        backgroundColor: "rgb(255 255 255 / 0)",
         transition: {
             type: "spring",
             stiffness: 300,
@@ -37,7 +37,7 @@ const listItemVariants = {
         opacity: 1,
         y: 0,
         scale: 1,
-        backgroundColor: "rgba(79, 70, 229, 0.1)",
+        backgroundColor: "rgb(79 70 229 / 0.1)",
         transition: {
             duration: 0.2,
             backgroundColor: {
@@ -283,7 +283,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                             animate="visible"
                             exit="exit"
                         >
-                            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
+                            <div className="fixed inset-0 bg-neutral-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
                         </motion.div>
 
                         <motion.div
@@ -293,9 +293,9 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                             exit="exit"
                             className="relative bg-white rounded-lg shadow-xl w-full max-w-7xl h-[85vh] flex flex-col"
                         >
-                            <div className="p-3 border-b border-gray-200">
+                            <div className="p-3 border-b border-neutral-200">
                                 <div className="flex justify-between items-center">
-                                    <Dialog.Title className="text-xl font-semibold text-gray-900">
+                                    <Dialog.Title className="text-xl font-semibold text-neutral-900">
                                         Gestionnaire d'armes de base
                     </Dialog.Title>
                                     <div className="flex items-center space-x-4">
@@ -305,10 +305,10 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                 placeholder="Rechercher une arme..."
                                                 value={searchQuery}
                                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                                className="w-64 pl-4 pr-10 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                                className="w-64 pl-4 pr-10 py-1.5 text-sm border border-neutral-300 rounded-md focus:ring-red-500 focus:border-red-500"
                                             />
                                             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                                <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="h-4 w-4 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                                 </svg>
                                             </div>
@@ -316,7 +316,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                         <button
                                             type="button"
                                             onClick={onClose}
-                                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-neutral-600 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500"
                                         >
                                             Fermer
                                         </button>
@@ -326,7 +326,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
 
                             <div className="flex flex-1 min-h-0">
                                 {/* Panneau de gauche - Formulaire */}
-                                <div className="w-1/3 border-r border-gray-200 p-4 overflow-y-auto">
+                                <div className="w-1/3 border-r border-neutral-200 p-4 overflow-y-auto">
                                     {error && (
                                         <div className="mb-3 p-2 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm rounded">
                                             {error}
@@ -339,7 +339,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                             animate="visible"
                                             exit="exit"
                                             variants={successVariants}
-                                            className="mb-3 p-2 bg-green-100 border-l-4 border-green-500 text-green-700 text-sm rounded"
+                                            className="mb-3 p-2 bg-emerald-100 border-l-4 border-emerald-500 text-emerald-700 text-sm rounded"
                                         >
                                             {success}
                                         </motion.div>
@@ -347,7 +347,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
 
                                     <form onSubmit={editingWeapon ? handleUpdateWeapon : handleAddWeapon} className="space-y-3">
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-neutral-700 mb-1">
                                 Nom de l'arme
                             </label>
                                             <motion.div
@@ -360,7 +360,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                 type="text"
                                 value={newWeaponName}
                                 onChange={(e) => setNewWeaponName(e.target.value)}
-                                                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                    className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md"
                                 required
                                                     disabled={isSubmitting}
                             />
@@ -368,7 +368,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-neutral-700 mb-1">
                                                 Prix par défaut ($)
                             </label>
                                             <motion.div
@@ -381,7 +381,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                 type="number"
                                 value={newWeaponPrice}
                                 onChange={(e) => setNewWeaponPrice(e.target.value)}
-                                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                    className="focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md"
                                                     required
                                                     min="0"
                                                     step="0.01"
@@ -391,7 +391,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            <label className="block text-sm font-medium text-neutral-700 mb-1">
                                                 Coût de production ($)
                                             </label>
                                             <motion.div
@@ -404,7 +404,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                     type="number"
                                                     value={newWeaponCostProduction}
                                                     onChange={(e) => setNewWeaponCostProduction(e.target.value)}
-                                                    className="focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                                    className="focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md"
                                 required
                                                     min="0"
                                                     step="0.01"
@@ -419,7 +419,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                 <button
                                     type="button"
                                     onClick={cancelEditing}
-                                                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                        className="inline-flex items-center px-3 py-1.5 border border-neutral-300 shadow-sm text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                                         disabled={isSubmitting}
                                 >
                                                         <XMarkIcon className="h-4 w-4 mr-1.5" />
@@ -430,9 +430,9 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                 type="submit"
                                                     className={`flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                                                         isSubmitting
-                                                            ? 'bg-indigo-400'
-                                                            : 'bg-indigo-600 hover:bg-indigo-700'
-                                                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+                                                            ? 'bg-red-400'
+                                                            : 'bg-red-600 hover:bg-red-700'
+                                                    } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
                                                     disabled={isSubmitting}
                                                 >
                                                     {isSubmitting ? (
@@ -466,11 +466,11 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
 
                                 {/* Panneau de droite - Liste */}
                                 <div className="flex-1 flex flex-col min-h-0">
-                                    <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                                    <div className="px-4 py-2 bg-neutral-50 border-b border-neutral-200">
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-sm font-medium text-gray-900">
+                                            <h3 className="text-sm font-medium text-neutral-900">
                                                 Armes de base existantes
-                                                <span className="ml-2 text-xs text-gray-500">
+                                                <span className="ml-2 text-xs text-neutral-500">
                                                     ({filteredWeapons.length} résultats)
                                                 </span>
                                             </h3>
@@ -480,13 +480,13 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                     disabled={currentPage === 1}
                                                     className={`p-1 rounded ${
                                                         currentPage === 1
-                                                            ? 'text-gray-400 cursor-not-allowed'
-                                                            : 'text-gray-600 hover:bg-gray-100'
+                                                            ? 'text-neutral-400 cursor-not-allowed'
+                                                            : 'text-neutral-600 hover:bg-neutral-100'
                                                     }`}
                                                 >
                                                     <ChevronLeftIcon className="h-4 w-4" />
                                                 </button>
-                                                <span className="text-gray-600">
+                                                <span className="text-neutral-600">
                                                     {currentPage} / {totalPages}
                                                 </span>
                                                 <button
@@ -494,8 +494,8 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                     disabled={currentPage === totalPages}
                                                     className={`p-1 rounded ${
                                                         currentPage === totalPages
-                                                            ? 'text-gray-400 cursor-not-allowed'
-                                                            : 'text-gray-600 hover:bg-gray-100'
+                                                            ? 'text-neutral-400 cursor-not-allowed'
+                                                            : 'text-neutral-600 hover:bg-neutral-100'
                                                     }`}
                                                 >
                                                     <ChevronRightIcon className="h-4 w-4" />
@@ -505,7 +505,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                     </div>
 
                                     <div ref={listContainerRef} className="flex-1 overflow-y-auto">
-                                        <div className="divide-y divide-gray-100">
+                                        <div className="divide-y divide-neutral-100">
                                             <AnimatePresence mode="popLayout">
                                                 {paginatedWeapons.map((weapon, index) => (
                                                     <motion.div
@@ -516,7 +516,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                         exit="exit"
                                                         custom={index}
                                                         layout
-                                                        className="px-4 py-3 hover:bg-gray-50 transition-colors duration-150 rounded-lg"
+                                                        className="px-4 py-3 hover:bg-neutral-50 transition-colors duration-150 rounded-lg"
                                                     >
                                                         <div className="flex items-center justify-between">
                                                             <motion.div 
@@ -524,15 +524,15 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                                 whileHover={{ x: 5 }}
                                                                 transition={{ type: "spring", stiffness: 400 }}
                                                             >
-                                                                <p className="text-sm font-medium text-indigo-600 truncate">
+                                                                <p className="text-sm font-medium text-red-600 truncate">
                                                                     {weapon.nom}
                                                                 </p>
-                                                                <div className="mt-2 flex items-center text-sm text-gray-500 space-x-4">
+                                                                <div className="mt-2 flex items-center text-sm text-neutral-500 space-x-4">
                                                                     <motion.div 
                                                                         className="flex items-center"
                                                                         whileHover={{ scale: 1.05 }}
                                                                     >
-                                                                        <CurrencyDollarIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                                                                        <CurrencyDollarIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-neutral-400" />
                                                                         <span>
                                                                             {new Intl.NumberFormat('fr-FR', {
                                                 style: 'currency',
@@ -544,7 +544,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                                         className="flex items-center"
                                                                         whileHover={{ scale: 1.05 }}
                                                                     >
-                                                                        <FireIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                                                                        <FireIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-neutral-400" />
                                                                         <span>
                                                                             {new Intl.NumberFormat('fr-FR', {
                                                                                 style: 'currency',
@@ -558,9 +558,9 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                                     >
                                                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                                                                             parseFloat(calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)) >= 30
-                                                                                ? 'bg-green-100 text-green-800'
+                                                                                ? 'bg-emerald-100 text-emerald-800'
                                                                                 : parseFloat(calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)) >= 15
-                                                                                ? 'bg-yellow-100 text-yellow-800'
+                                                                                ? 'bg-amber-100 text-amber-800'
                                                                                 : 'bg-red-100 text-red-800'
                                                                         }`}>
                                                                             Marge: {calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)}%
@@ -573,7 +573,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                                     whileHover={{ scale: 1.1 }}
                                                                     whileTap={{ scale: 0.9, rotate: -10 }}
                                             onClick={() => startEditing(weapon)}
-                                                                    className="p-2 text-indigo-600 hover:text-indigo-900 rounded-full hover:bg-indigo-50 transition-colors duration-150"
+                                                                    className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition-colors duration-150"
                                                                     disabled={isSubmitting}
                                         >
                                             <PencilIcon className="h-5 w-5" />
@@ -598,7 +598,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
-                                                className="p-4 text-center text-gray-500"
+                                                className="p-4 text-center text-neutral-500"
                                             >
                                                 Aucune arme trouvée
                                             </motion.div>

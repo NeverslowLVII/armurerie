@@ -227,7 +227,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <button
                                 type="submit"
                                 className={`${
-                                    isLoading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
+                                    isLoading ? 'bg-red-300' : 'bg-red-500 hover:bg-red-600'
                                 } text-white px-4 py-2 rounded flex items-center`}
                                 disabled={isLoading}
                             >
