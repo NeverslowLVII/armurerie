@@ -10,7 +10,7 @@ import {
     CurrencyDollarIcon,
     FireIcon
 } from '@heroicons/react/24/outline';
-import { getCommissionRate, getRoleName } from '@/utils/roles';
+import { getCommissionRate } from '@/utils/roles';
 import { Role } from '@/services/api';
 
 interface WeaponStats {

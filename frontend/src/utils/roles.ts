@@ -37,7 +37,7 @@ export const getRolePermissions = (role: Role): Permission => {
 };
 
 export const hasPermission = (role: Role, permission: keyof Permission): boolean => {
-  return RolePermissions[role][permission];
+  return RolePermissions[role][permission] as boolean;
 };
 
 export const getCommissionRate = (role: Role): number => {

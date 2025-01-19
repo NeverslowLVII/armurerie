@@ -16,12 +16,32 @@ enum Role {
   PATRON
 }
 
+enum FeedbackType {
+  BUG
+  FEATURE_REQUEST
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+model Developer {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  password String
+  name     String
+}
+
 model Employee {
   id      Int      @id @default(autoincrement())
   name    String
   color   String?
   role    Role     @default(EMPLOYEE)
   weapons Weapon[]
+  feedback Feedback[]
 }
 
 model BaseWeapon {
@@ -42,4 +62,16 @@ model Weapon {
   serigraphie String      @unique
   prix        Int
   base_weapon BaseWeapon? @relation(fields: [nom_arme], references: [nom])
+}
+
+model Feedback {
+  id          Int           @id @default(autoincrement())
+  type        FeedbackType
+  title       String
+  description String
+  status      FeedbackStatus @default(OPEN)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  submittedBy Int
+  employee    Employee      @relation(fields: [submittedBy], references: [id])
 } 
