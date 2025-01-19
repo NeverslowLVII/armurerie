@@ -1,34 +1,29 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
 
-async function getCurrentEmployee() {
-  const currentEmployeeName = localStorage.getItem('currentEmployee');
-  if (!currentEmployeeName) return null;
-
-  return await prisma.employee.findFirst({
-    where: { name: currentEmployeeName }
-  });
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
 
 async function isDeveloper() {
-  const employee = await getCurrentEmployee();
-  return employee?.role === 'DEVELOPER';
+  const devToken = cookies().get('dev_token')?.value;
+  if (!devToken) return false;
+  
+  try {
+    const decoded = jwt.verify(devToken, JWT_SECRET) as { type: string };
+    return decoded.type === 'developer';
+  } catch {
+    return false;
+  }
 }
 
 export async function POST(request: Request) {
   try {
-    const employee = await getCurrentEmployee();
-    if (!employee) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const { type, title, description, status } = await request.json();
+    const { type, title, description, status, employeeId } = await request.json();
+    const isDev = await isDeveloper();
 
     // Only developers can set status, others default to OPEN
-    const finalStatus = employee.role === 'DEVELOPER' ? status : 'OPEN';
+    const finalStatus = isDev ? status : 'OPEN';
 
     const feedback = await prisma.feedback.create({
       data: {
@@ -36,11 +31,13 @@ export async function POST(request: Request) {
         title,
         description,
         status: finalStatus,
-        submittedBy: employee.id,
+        ...(employeeId ? { submittedBy: employeeId } : {}),
       },
-      include: {
-        employee: true,
-      },
+      ...(employeeId ? {
+        include: {
+          employee: true,
+        },
+      } : {}),
     });
 
     return NextResponse.json(feedback);
@@ -55,8 +52,8 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const employee = await getCurrentEmployee();
-    if (!employee || employee.role !== 'DEVELOPER') {
+    const isDev = await isDeveloper();
+    if (!isDev) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -84,8 +81,8 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const employee = await getCurrentEmployee();
-    if (!employee || employee.role !== 'DEVELOPER') {
+    const isDev = await isDeveloper();
+    if (!isDev) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -107,6 +104,40 @@ export async function PATCH(request: Request) {
     console.error('Error updating feedback:', error);
     return NextResponse.json(
       { error: 'Failed to update feedback' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const isDev = await isDeveloper();
+    if (!isDev) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = parseInt(searchParams.get('id') || '');
+
+    if (!id || isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Invalid feedback ID' },
+        { status: 400 }
+      );
+    }
+
+    await prisma.feedback.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting feedback:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete feedback' },
       { status: 500 }
     );
   }

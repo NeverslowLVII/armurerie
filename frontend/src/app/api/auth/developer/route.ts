@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -55,9 +56,9 @@ export async function POST(request: Request) {
 }
 
 // Verify developer token
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const devToken = request.cookies.get('dev_token')?.value;
+    const devToken = cookies().get('dev_token')?.value;
     
     if (!devToken) {
       return NextResponse.json(

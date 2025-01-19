@@ -561,7 +561,9 @@ export default function Statistics() {
                                             {weaponStats.weaponTypes.map((_, index) => (
                                                 <Cell 
                                                     key={`cell-${index}`} 
-                                                    fill={index % 2 === 0 ? '#ef4444' : '#f43f5e'}
+                                                    fill={index < 3 
+                                                        ? `hsl(${0 + (index * 16)}, 85%, 55%)` // Tons chauds pour le top 3
+                                                        : `hsl(${90 + (index * 12)}, 60%, ${65 - (index * 2)}%)`} // Tons plus froids pour le reste
                                                 />
                                             ))}
                                         </Pie>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PencilIcon, CheckIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import DeveloperLogin from './DeveloperLogin';
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  employeeId?: number | undefined;
 }
 
 const modalVariants = {
@@ -82,11 +83,6 @@ const successVariants = {
   exit: { opacity: 0, y: 20 }
 };
 
-const textVariants = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 }
-};
-
 interface Feedback {
   id: number;
   type: 'BUG' | 'FEATURE_REQUEST';
@@ -100,9 +96,8 @@ interface Feedback {
   };
 }
 
-export default function FeedbackManager({ open, onClose }: Props) {
+export default function FeedbackManager({ open, onClose, employeeId }: Props) {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
-  const [editingFeedback, setEditingFeedback] = useState<Feedback | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'BUG' | 'FEATURE_REQUEST'>('BUG');
@@ -174,6 +169,7 @@ export default function FeedbackManager({ open, onClose }: Props) {
           description,
           type,
           status: isDeveloper ? status : 'OPEN',
+          employeeId: employeeId || null,
         }),
       });
 
@@ -191,6 +187,49 @@ export default function FeedbackManager({ open, onClose }: Props) {
       setError('Erreur lors de la soumission du retour');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleStatusChange = async (feedbackId: number, newStatus: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED') => {
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: feedbackId,
+          status: newStatus,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update feedback status');
+      
+      fetchFeedbacks();
+      setSuccess('Statut mis à jour avec succès !');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error('Error updating feedback status:', error);
+      setError('Erreur lors de la mise à jour du statut');
+    }
+  };
+
+  const handleDelete = async (feedbackId: number) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce retour ?')) return;
+
+    try {
+      const response = await fetch(`/api/feedback?id=${feedbackId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete feedback');
+      
+      fetchFeedbacks();
+      setSuccess('Retour supprimé avec succès !');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+      setError('Erreur lors de la suppression du retour');
     }
   };
 
@@ -425,8 +464,26 @@ export default function FeedbackManager({ open, onClose }: Props) {
                                   <div className="flex flex-col">
                                     <span className="text-lg font-medium text-red-600">{feedback.title}</span>
                                     <span className="text-sm text-gray-500">
-                                      Par {feedback.employee.name} - {new Date(feedback.createdAt).toLocaleDateString()}
+                                      {feedback.employee ? `Par ${feedback.employee.name}` : 'Anonyme'} - {new Date(feedback.createdAt).toLocaleDateString()}
                                     </span>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    <select
+                                      value={feedback.status}
+                                      onChange={(e) => handleStatusChange(feedback.id, e.target.value as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED')}
+                                      className="text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                                    >
+                                      <option value="OPEN">Ouvert</option>
+                                      <option value="IN_PROGRESS">En cours</option>
+                                      <option value="RESOLVED">Résolu</option>
+                                      <option value="REJECTED">Rejeté</option>
+                                    </select>
+                                    <button
+                                      onClick={() => handleDelete(feedback.id)}
+                                      className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                    >
+                                      <TrashIcon className="h-5 w-5" />
+                                    </button>
                                   </div>
                                 </div>
 

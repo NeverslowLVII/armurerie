@@ -72,6 +72,6 @@ model Feedback {
   status      FeedbackStatus @default(OPEN)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  submittedBy Int
-  employee    Employee      @relation(fields: [submittedBy], references: [id])
+  submittedBy Int?
+  employee    Employee?     @relation(fields: [submittedBy], references: [id])
 } 

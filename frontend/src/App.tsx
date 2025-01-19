@@ -8,10 +8,12 @@ import Navbar from './components/Navbar';
 import { store } from './redux/store';
 import { fetchEmployees } from './redux/slices/employeeSlice';
 import FeedbackManager from './components/FeedbackManager';
+import { employeeStore } from './stores/employeeStore';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<'weapons' | 'statistics'>('weapons');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [currentEmployeeId, setCurrentEmployeeId] = useState<number | undefined>();
 
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
@@ -19,9 +21,19 @@ function App() {
     exit: { opacity: 0, y: -20 }
   };
 
-  // Fetch employees when app starts
+  // Fetch employees when app starts and get current employee ID
   useEffect(() => {
     store.dispatch(fetchEmployees());
+    const getCurrentEmployeeId = async () => {
+      const currentEmployeeName = localStorage.getItem('currentEmployee');
+      if (currentEmployeeName) {
+        const employee = await employeeStore.getEmployee(currentEmployeeName);
+        if (employee) {
+          setCurrentEmployeeId(employee.id);
+        }
+      }
+    };
+    getCurrentEmployeeId();
   }, []);
 
   return (
@@ -83,7 +95,11 @@ function App() {
             </button>
           </div>
 
-          <FeedbackManager open={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+          <FeedbackManager 
+            open={isFeedbackOpen} 
+            onClose={() => setIsFeedbackOpen(false)} 
+            employeeId={currentEmployeeId || 0}
+          />
         </div>
       </DataProvider>
     </Provider>
