@@ -1,8 +1,9 @@
 -- CreateTable
 CREATE TABLE "Employee" (
     "id" SERIAL NOT NULL,
-    "nom" TEXT NOT NULL,
-    "role" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "color" TEXT,
+    "role" TEXT NOT NULL DEFAULT 'EMPLOYEE',
 
     CONSTRAINT "Employee_pkey" PRIMARY KEY ("id")
 );
@@ -11,7 +12,8 @@ CREATE TABLE "Employee" (
 CREATE TABLE "BaseWeapon" (
     "id" SERIAL NOT NULL,
     "nom" TEXT NOT NULL,
-    "prix" INTEGER NOT NULL,
+    "prix_defaut" INTEGER NOT NULL,
+    "cout_production_defaut" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "BaseWeapon_pkey" PRIMARY KEY ("id")
 );
