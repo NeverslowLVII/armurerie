@@ -40,6 +40,16 @@ export async function POST(request: Request) {
       } : {}),
     });
 
+    // Email notifications temporarily disabled
+    // Uncomment and configure SMTP settings in Vercel to enable
+    /*
+    try {
+      await sendFeedbackNotification(feedback);
+    } catch (emailError) {
+      console.error('Error sending feedback notification email:', emailError);
+    }
+    */
+
     return NextResponse.json(feedback);
   } catch (error) {
     console.error('Error creating feedback:', error);

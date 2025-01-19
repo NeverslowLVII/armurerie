@@ -8,10 +8,12 @@ import {
 import {
     ChartBarIcon,
     CurrencyDollarIcon,
-    FireIcon
+    FireIcon,
+    LockClosedIcon
 } from '@heroicons/react/24/outline';
 import { getCommissionRate } from '@/utils/roles';
 import { Role } from '@/services/api';
+import LoginDialog from './LoginDialog';
 
 interface WeaponStats {
     totalWeapons: number;
@@ -50,13 +52,6 @@ interface Weapon {
     serigraphie: string;
     prix: number;
     base_weapon?: BaseWeapon;
-}
-
-interface Employee {
-    id: number;
-    name: string;
-    color?: string;
-    role: string;
 }
 
 interface EmployeeStats {
@@ -152,6 +147,8 @@ const PERIOD_PRESETS = [
 ];
 
 export default function Statistics() {
+    const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [weaponStats, setWeaponStats] = useState<WeaponStats>({
@@ -177,13 +174,37 @@ export default function Statistics() {
     });
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [dateRange, setDateRange] = useState<DateRange>({
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+        startDate: new Date(new Date().setDate(new Date().getDate() - 30)),
         endDate: new Date()
     });
 
+    // Check authentication on mount
     useEffect(() => {
-        fetchData();
-    }, [dateRange]);
+        const patronAuth = localStorage.getItem('patronAuth');
+        if (patronAuth === 'true') {
+            setIsAuthenticated(true);
+            fetchData();
+        }
+    }, []);
+
+    // Fetch data when date range changes and user is authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchData();
+        }
+    }, [dateRange, isAuthenticated]);
+
+    const handleLogin = async (password: string) => {
+        setError(null);
+        if (password === 'patron123') {
+            setIsAuthenticated(true);
+            localStorage.setItem('patronAuth', 'true');
+            setIsLoginDialogOpen(false);
+            await fetchData();
+        } else {
+            setError("Mot de passe incorrect.");
+        }
+    };
 
     const filterDataByDateRange = (data: Weapon[]) => {
         return data.filter(weapon => {
@@ -194,10 +215,19 @@ export default function Statistics() {
 
     const fetchData = async () => {
         try {
+            console.log('Starting data fetch...');
             setLoading(true);
-            const [weapons, employees] = await Promise.all([getWeapons(), getEmployees()]) as [Weapon[], Employee[]];
+            setError(null);
             
-            const filteredWeapons = filterDataByDateRange(weapons);
+            const [weaponsData, employeesData] = await Promise.all([
+                getWeapons(),
+                getEmployees()
+            ]);
+            
+            console.log('Data received:', { weaponsCount: weaponsData.length, employeesCount: employeesData.length });
+            
+            const filteredWeapons = filterDataByDateRange(weaponsData);
+            console.log('Filtered weapons:', filteredWeapons.length);
             
             // Normaliser et calculer les statistiques des armes
             const weaponTypeMap = new Map<string, number>();
@@ -262,20 +292,20 @@ export default function Statistics() {
                 totalValue,
                 totalCostProduction,
                 totalProfit,
-                averagePrice: totalValue / filteredWeapons.length,
-                averageCostProduction: totalCostProduction / filteredWeapons.length,
-                averageProfit: totalProfit / filteredWeapons.length,
-                profitMargin: (totalProfit / totalValue) * 100,
+                averagePrice: totalValue / filteredWeapons.length || 0,
+                averageCostProduction: totalCostProduction / filteredWeapons.length || 0,
+                averageProfit: totalProfit / filteredWeapons.length || 0,
+                profitMargin: totalValue > 0 ? (totalProfit / totalValue) * 100 : 0,
                 weaponTypes,
                 dailyStats,
                 profitByType
             });
 
             // Calculer les statistiques des employés
-            const employeeStats = employees.reduce((acc: { 
+            const employeeStats = employeesData.reduce<{
                 employeePerformance: { name: string; count: number }[];
                 employeeProfits: { name: string; profit: number; sales: number; commission: number; role: string }[];
-            }, emp: Employee) => {
+            }>((acc, emp) => {
                 const empWeapons = filteredWeapons.filter(w => w.employee.name === emp.name);
                 
                 const totalProfit = empWeapons.reduce((sum, weapon) => {
@@ -283,7 +313,7 @@ export default function Statistics() {
                     return sum + (weapon.prix - productionCost);
                 }, 0);
 
-                const commissionRate = getCommissionRate(emp.role as Role);
+                const commissionRate = getCommissionRate(emp.role);
                 const commission = totalProfit * commissionRate;
                 
                 acc.employeePerformance.push({
@@ -306,21 +336,22 @@ export default function Statistics() {
             });
 
             setEmployeeStats({
-                totalEmployees: employees.length,
+                totalEmployees: employeesData.length,
                 employeeWeaponCounts: {},
                 employeeValueTotals: {},
                 employeeProfits: employeeStats.employeeProfits.sort((a, b) => b.profit - a.profit),
-                topEmployee: employeeStats.employeePerformance.reduce((max: { name: string; count: number } | null, emp: { name: string; count: number }) => 
+                topEmployee: employeeStats.employeePerformance.reduce<{ name: string; count: number } | null>((max, emp) => 
                     !max || emp.count > max.count ? { name: emp.name, count: emp.count } : max
                 , null),
-                employeePerformance: employeeStats.employeePerformance.sort((a: { count: number }, b: { count: number }) => b.count - a.count)
+                employeePerformance: employeeStats.employeePerformance.sort((a, b) => b.count - a.count)
             });
 
+            console.log('Setting final stats:', { weaponStats, employeeStats });
+            setLoading(false);
             setError(null);
         } catch (err) {
-            setError('Erreur lors du chargement des statistiques');
             console.error('Error fetching statistics:', err);
-        } finally {
+            setError('Erreur lors du chargement des statistiques');
             setLoading(false);
         }
     };
@@ -334,6 +365,31 @@ export default function Statistics() {
             endDate
         });
     };
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow">
+                <LockClosedIcon className="w-12 h-12 text-gray-400 mb-4" />
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">Accès Restreint</h2>
+                <p className="text-gray-600 mb-4 text-center">
+                    Cette section est réservée au patron.
+                    <br />
+                    Veuillez vous connecter pour accéder aux statistiques.
+                </p>
+                <button
+                    onClick={() => setIsLoginDialogOpen(true)}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                    Se connecter
+                </button>
+                <LoginDialog
+                    open={isLoginDialogOpen}
+                    setOpen={setIsLoginDialogOpen}
+                    onLogin={handleLogin}
+                />
+            </div>
+        );
+    }
 
     if (loading) {
         return (
@@ -469,11 +525,6 @@ export default function Statistics() {
                         <StatCard
                             title="Bénéfice total"
                             value={new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(weaponStats.totalProfit / 100)}
-                            icon={CurrencyDollarIcon}
-                        />
-                        <StatCard
-                            title="Commission (20%)"
-                            value={new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format((weaponStats.totalProfit * 0.2) / 100)}
                             icon={CurrencyDollarIcon}
                         />
                         <StatCard

@@ -34,7 +34,10 @@ export default function WeaponsTable() {
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isPatronLoggedIn, setIsPatronLoggedIn] = useState(false);
+  const [isPatronLoggedIn, setIsPatronLoggedIn] = useState(() => {
+    // Initialiser l'état à partir de localStorage au chargement
+    return localStorage.getItem('patronAuth') === 'true';
+  });
   const [isBaseWeaponsOpen, setIsBaseWeaponsOpen] = useState(false);
   
   // Pagination
@@ -44,11 +47,14 @@ export default function WeaponsTable() {
   const handleLogin = (password: string) => {
     if (password === 'patron123') {
       setIsPatronLoggedIn(true);
+      localStorage.setItem('patronAuth', 'true');
+      setIsLoginOpen(false);
     }
   };
 
   const handleLogout = () => {
     setIsPatronLoggedIn(false);
+    localStorage.removeItem('patronAuth');
   };
 
   const handleEdit = (weapon: Weapon) => {
