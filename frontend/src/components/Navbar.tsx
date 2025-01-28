@@ -1,5 +1,5 @@
+import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
 
 interface NavbarProps {
   currentPage: 'weapons' | 'statistics';
@@ -7,8 +7,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
-  const [isHovered, setIsHovered] = useState<'weapons' | 'statistics' | null>(null);
-
   return (
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
@@ -28,64 +26,38 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
               </h1>
             </motion.div>
             <div className="ml-6 flex space-x-8 relative">
-              <motion.button
+              <Button
                 onClick={() => onPageChange('weapons')}
-                onHoverStart={() => setIsHovered('weapons')}
-                onHoverEnd={() => setIsHovered(null)}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium relative ${
                   currentPage === 'weapons'
                     ? 'text-red-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 Armes
-                {isHovered === 'weapons' && (
-                  <motion.div
-                    layoutId="hover-effect"
-                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  />
-                )}
                 {currentPage === 'weapons' && (
                   <motion.div
                     layoutId="active-tab"
                     className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
                   />
                 )}
-              </motion.button>
-              <motion.button
+                  </Button>
+              <Button
                 onClick={() => onPageChange('statistics')}
-                onHoverStart={() => setIsHovered('statistics')}
-                onHoverEnd={() => setIsHovered(null)}
                 className={`inline-flex items-center px-1 pt-1 text-sm font-medium relative ${
                   currentPage === 'statistics'
                     ? 'text-red-600'
                     : 'text-gray-500 hover:text-gray-700'
                 }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 Statistiques
-                {isHovered === 'statistics' && (
-                  <motion.div
-                    layoutId="hover-effect"
-                    className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  />
-                )}
                 {currentPage === 'statistics' && (
                   <motion.div
                     layoutId="active-tab"
                     className="absolute -bottom-[1.5px] left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 to-orange-600"
                   />
                 )}
-              </motion.button>
+              </Button>
             </div>
           </div>
         </div>

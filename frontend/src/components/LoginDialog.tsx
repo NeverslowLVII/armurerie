@@ -1,7 +1,8 @@
 import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { LockClosedIcon } from '@heroicons/react/24/outline'
-
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
 interface LoginDialogProps {
   open: boolean;
   setOpen: (open: boolean) => void;
@@ -67,7 +68,7 @@ export default function LoginDialog({ open, setOpen, onLogin }: LoginDialogProps
                 </div>
 
                 <form onSubmit={handleSubmit} className="mt-5 sm:mt-6">
-                  <input
+                  <Input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -79,12 +80,12 @@ export default function LoginDialog({ open, setOpen, onLogin }: LoginDialogProps
                       {error}
                     </p>
                   )}
-                  <button
+                  <Button
                     type="submit"
                     className="mt-3 inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
                   >
                     Se connecter
-                  </button>
+                  </Button>
                 </form>
               </Dialog.Panel>
             </Transition.Child>

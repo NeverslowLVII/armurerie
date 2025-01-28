@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
 
 interface Props {
   open: boolean;
@@ -123,7 +125,7 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Nom d'utilisateur
                 </label>
-                <input
+                <Input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -137,7 +139,7 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Mot de passe
                 </label>
-                <input
+                <Input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -148,15 +150,15 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
               </div>
 
               <div className="flex justify-end space-x-3 pt-4">
-                <button
+                <Button
                   type="button"
                   onClick={onClose}
                   className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   disabled={isSubmitting}
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
                   className={`inline-flex justify-center px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md ${
                     isSubmitting
@@ -176,7 +178,7 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
                   ) : (
                     'Se connecter'
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </motion.div>

@@ -7,7 +7,7 @@ import { forwardRef, useEffect } from "react";
 
 import { cn } from "../../lib/utils";
 import { Command, CommandGroup, CommandItem, CommandList } from "./command";
-
+import { Button } from '@/components/ui/button';
 export interface Option {
   value: string;
   label: string;
@@ -465,7 +465,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                   data-disabled={option.disable ?? false}
                 >
                   {option.label}
-                  <button
+                  <Button
                     className="absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-lg border border-transparent p-0 text-muted-foreground/80 outline-0 transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
@@ -480,7 +480,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     aria-label="Remove"
                   >
                     <X size={14} strokeWidth={2} aria-hidden="true" />
-                  </button>
+                  </Button>
                 </div>
               );
             })}
@@ -518,7 +518,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 inputProps?.className,
               )}
             />
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setSelected(selected.filter((s) => s.fixed));
@@ -535,7 +535,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
               aria-label="Clear all"
             >
               <X size={16} strokeWidth={2} aria-hidden="true" />
-            </button>
+            </Button>
           </div>
         </div>
         <div className="relative">

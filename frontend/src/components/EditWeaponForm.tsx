@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { Weapon, updateWeapon } from '../services/api';
 import { useData } from '../context/DataContext';
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { SelectNative } from "@/components/ui/select-native";
 
 interface EditWeaponFormProps {
     isOpen: boolean;
@@ -109,7 +112,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Date et heure
                             </label>
-                            <input
+                            <Input
                                 type="datetime-local"
                                 value={horodatage}
                                 onChange={(e) => setHorodatage(e.target.value)}
@@ -123,7 +126,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Employé
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={employe}
                                 readOnly
@@ -136,7 +139,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Arme de base
                             </label>
-                            <select
+                            <SelectNative
                                 value={selectedBaseWeapon?.id || ''}
                                 onChange={(e) => {
                                     const baseWeapon = baseWeapons.find(w => w.id === parseInt(e.target.value));
@@ -154,14 +157,14 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                                         }).format(weapon.prix_defaut / 100)}
                                     </option>
                                 ))}
-                            </select>
+                            </SelectNative>
                         </div>
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Détenteur
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={detenteur}
                                 onChange={(e) => setDetenteur(e.target.value)}
@@ -175,7 +178,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Nom de l'arme
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={nomArme}
                                 onChange={(e) => setNomArme(e.target.value)}
@@ -190,7 +193,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Sérigraphie
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={serigraphie}
                                 onChange={(e) => setSerigraphie(e.target.value)}
@@ -204,7 +207,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Prix (en dollars)
                             </label>
-                            <input
+                            <Input
                                 type="number"
                                 value={prix}
                                 onChange={(e) => setPrix(e.target.value)}
@@ -216,15 +219,15 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                         </div>
 
                         <div className="flex justify-end">
-                            <button
+                            <Button
                                 type="button"
                                 onClick={onClose}
                                 className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
                                 disabled={isLoading}
                             >
                                 Annuler
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="submit"
                                 className={`${
                                     isLoading ? 'bg-red-300' : 'bg-red-500 hover:bg-red-600'
@@ -240,7 +243,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                                         Mise à jour...
                                     </>
                                 ) : 'Mettre à jour'}
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>

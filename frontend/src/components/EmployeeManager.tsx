@@ -4,7 +4,9 @@ import { useAppDispatch } from '../redux/hooks';
 import { updateEmployee } from '../redux/slices/employeeSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PencilIcon, CheckIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
-
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { SelectNative } from "@/components/ui/select-native";
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -209,7 +211,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                   </Dialog.Title>
                   <div className="flex items-center space-x-4">
                     <div className="relative">
-                      <input
+                      <Input
                         type="text"
                         placeholder="Rechercher un employé..."
                         className="w-64 pl-4 pr-10 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
@@ -220,12 +222,12 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                         </svg>
                       </div>
                     </div>
-                    <button
+                    <Button
                       onClick={onClose}
                       className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                     >
                       Fermer
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -262,7 +264,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                         variants={textVariants}
                         className="block w-full"
                       >
-                        <input
+                        <Input
                           type="text"
                           value={newEmployeeName}
                           onChange={(e) => setNewEmployeeName(e.target.value)}
@@ -283,7 +285,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                         variants={textVariants}
                         className="block w-full"
                       >
-                        <select
+                        <SelectNative
                           value={tempRole}
                           onChange={(e) => setTempRole(e.target.value)}
                           className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
@@ -294,7 +296,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                           <option value="EMPLOYEE">Employé</option>
                           <option value="CO_PATRON">Co-Patron</option>
                           <option value="PATRON">Patron</option>
-                        </select>
+                        </SelectNative>
                       </motion.div>
                     </div>
 
@@ -308,7 +310,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                         variants={textVariants}
                         className="block w-full"
                       >
-                        <input
+                        <Input
                           type="color"
                           value={tempColor}
                           onChange={(e) => setTempColor(e.target.value)}
@@ -321,7 +323,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                     <div className="pt-2">
                       <div className="flex justify-between space-x-2">
                         {editingEmployee && (
-                          <button
+                          <Button
                             type="button"
                             onClick={handleCancel}
                             className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -329,9 +331,9 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                           >
                             <XMarkIcon className="h-4 w-4 mr-1.5" />
                             Annuler
-                          </button>
+                          </Button>
                         )}
-                        <button
+                        <Button
                           type="submit"
                           className={`flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                             isSubmitting
@@ -364,7 +366,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                               )}
                             </>
                           )}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </form>
@@ -415,32 +417,26 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                 </div>
                                 {editingEmployee === id ? (
                                   <div className="flex items-center space-x-2">
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
+                                    <Button
                                       onClick={(e) => handleEmployeeUpdate(e as React.FormEvent)}
                                       className="p-2 text-green-600 hover:text-green-900 rounded-full hover:bg-green-50"
                                     >
                                       <CheckIcon className="h-5 w-5" />
-                                    </motion.button>
-                                    <motion.button
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
+                                    </Button>
+                                    <Button
                                       onClick={() => setEditingEmployee(null)}
                                       className="p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-50"
                                     >
                                       <XMarkIcon className="h-5 w-5" />
-                                    </motion.button>
+                                    </Button>
                                   </div>
                                 ) : (
-                                  <motion.button
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
+                                  <Button
                                     onClick={() => startEditing(id, employee)}
                                     className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50"
                                   >
                                     <PencilIcon className="h-5 w-5" />
-                                  </motion.button>
+                                  </Button>
                                 )}
                               </div>
 
@@ -450,7 +446,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Rôle
                                     </label>
-                                    <select
+                                    <SelectNative
                                       value={tempRole}
                                       onChange={(e) => setTempRole(e.target.value)}
                                       className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
@@ -459,13 +455,13 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                       <option value="EMPLOYEE">Employé</option>
                                       <option value="CO_PATRON">Co-Patron</option>
                                       <option value="PATRON">Patron</option>
-                                    </select>
+                                    </SelectNative>
                                   </div>
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Couleur
                                     </label>
-                                    <input
+                                    <Input
                                       type="color"
                                       value={tempColor}
                                       onChange={(e) => setTempColor(e.target.value)}

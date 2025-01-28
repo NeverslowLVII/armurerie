@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { createWeapon } from '../services/api';
 import { useData } from '../context/DataContext';
-
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { SelectNative } from "@/components/ui/select-native";
 interface AddWeaponFormProps {
     isOpen: boolean;
     onClose: () => void;
@@ -99,7 +101,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Employé
                             </label>
-                            <select
+                            <SelectNative
                                 value={selectedEmployee?.id || ''}
                                 onChange={(e) => {
                                     const employee = employees.find(emp => emp.id === parseInt(e.target.value));
@@ -115,14 +117,14 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                         {employee.name}
                                     </option>
                                 ))}
-                            </select>
+                            </SelectNative>
                         </div>
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Arme de base
                             </label>
-                            <select
+                            <SelectNative
                                 value={selectedBaseWeapon?.id || ''}
                                 onChange={(e) => {
                                     const baseWeapon = baseWeapons.find(w => w.id === parseInt(e.target.value));
@@ -141,14 +143,14 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                         }).format(weapon.prix_defaut / 100)}
                                     </option>
                                 ))}
-                            </select>
+                            </SelectNative>
                         </div>
 
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Détenteur
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={detenteur}
                                 onChange={(e) => setDetenteur(e.target.value)}
@@ -162,7 +164,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Sérigraphie
                             </label>
-                            <input
+                            <Input
                                 type="text"
                                 value={serigraphie}
                                 onChange={(e) => setSerigraphie(e.target.value)}
@@ -176,7 +178,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Prix (en dollars)
                             </label>
-                            <input
+                            <Input
                                 type="number"
                                 value={prix}
                                 onChange={(e) => setPrix(e.target.value)}
@@ -188,7 +190,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                         </div>
 
                         <div className="flex justify-end">
-                            <button
+                            <Button
                                 type="button"
                                 onClick={() => {
                                     onClose();
@@ -198,8 +200,8 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                 disabled={isLoading}
                             >
                                 Annuler
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 type="submit"
                                 className={`${
                                     isLoading ? 'bg-red-300' : 'bg-red-500 hover:bg-red-600'
@@ -215,7 +217,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                         Ajout en cours...
                                     </>
                                 ) : 'Ajouter'}
-                            </button>
+                            </Button>
                         </div>
                     </form>
                 </div>

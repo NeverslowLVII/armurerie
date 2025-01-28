@@ -10,6 +10,8 @@ import BaseWeaponsManager from './BaseWeaponsManager';
 import { useData } from '../context/DataContext';
 import { hasPermission, getRoleName } from '@/utils/roles';
 import { Role } from '@/services/api';
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
 
 const tableVariants = {
   hidden: { opacity: 0 },
@@ -154,9 +156,7 @@ export default function WeaponsTable() {
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex space-x-3">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
             type="button"
             onClick={() => isPatronLoggedIn ? handleLogout() : setIsLoginOpen(true)}
             className="block rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-200"
@@ -172,10 +172,8 @@ export default function WeaponsTable() {
                 Connexion Patron
               </>
             )}
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          </Button>
+          <Button
             type="button"
             onClick={handleManageEmployees}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
@@ -187,10 +185,8 @@ export default function WeaponsTable() {
           >
             <UserGroupIcon className="inline-block h-5 w-5 mr-1" />
             Gérer les employés
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          </Button>
+          <Button
             type="button"
             onClick={() => isPatronLoggedIn ? setIsBaseWeaponsOpen(true) : setIsLoginOpen(true)}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
@@ -202,16 +198,14 @@ export default function WeaponsTable() {
           >
             <SparklesIcon className="inline-block h-5 w-5 mr-1" />
             Gérer les armes de base
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          </Button>
+          <Button
             type="button"
             onClick={() => setIsAddFormOpen(true)}
             className="block rounded-md bg-gradient-to-r from-red-600 to-orange-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:from-red-500 hover:to-orange-500 transition-all duration-200"
           >
             Ajouter une arme
-          </motion.button>
+          </Button>
         </div>
       </motion.div>
 
@@ -225,7 +219,7 @@ export default function WeaponsTable() {
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </div>
-          <input
+          <Input
             type="text"
             className="block w-full rounded-lg border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 transition-all duration-200"
             placeholder="Rechercher une arme, un détenteur, un employé..."
@@ -307,24 +301,20 @@ export default function WeaponsTable() {
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <div className="flex justify-end gap-2">
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
+                            <Button
                               onClick={() => handleEdit(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
                               disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canEditWeapons')}
                             >
                               <PencilIcon className="h-5 w-5" />
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
+                            </Button>
+                            <Button
                               onClick={() => handleDelete(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
                               disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canDeleteWeapons')}
                             >
                               <TrashIcon className="h-5 w-5" />
-                            </motion.button>
+                            </Button>
                           </div>
                         </td>
                       </motion.tr>
@@ -350,9 +340,7 @@ export default function WeaponsTable() {
           </span>
         </div>
         <div className="flex items-center space-x-2">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
             className={`px-3 py-1 rounded-md ${
@@ -362,12 +350,10 @@ export default function WeaponsTable() {
             }`}
           >
             Précédent
-          </motion.button>
+          </Button>
           {Array.from({ length: Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage) }).map((_, index) => (
-            <motion.button
+            <Button
               key={index + 1}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
               onClick={() => paginate(index + 1)}
               className={`px-3 py-1 rounded-md ${
                 currentPage === index + 1
@@ -376,11 +362,9 @@ export default function WeaponsTable() {
               }`}
             >
               {index + 1}
-            </motion.button>
+            </Button>
           ))}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <Button
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)}
             className={`px-3 py-1 rounded-md ${
@@ -390,7 +374,7 @@ export default function WeaponsTable() {
             }`}
           >
             Suivant
-          </motion.button>
+          </Button>
         </div>
       </motion.div>
 

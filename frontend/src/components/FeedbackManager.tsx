@@ -3,6 +3,9 @@ import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import DeveloperLogin from './DeveloperLogin';
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { SelectNative } from "@/components/ui/select-native";
 
 interface Props {
   open: boolean;
@@ -284,16 +287,16 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                   </Dialog.Title>
                   <div className="flex items-center space-x-4">
                     {!isDeveloper && (
-                      <button
+                      <Button
                         onClick={handleDeveloperLogin}
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         Connexion développeur
-                      </button>
+                      </Button>
                     )}
                     {isDeveloper && (
                       <div className="relative">
-                        <input
+                        <Input
                           type="text"
                           placeholder="Rechercher un retour..."
                           value={searchQuery}
@@ -307,12 +310,12 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                         </div>
                       </div>
                     )}
-                    <button
+                    <Button
                       onClick={onClose}
                       className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                     >
                       Fermer
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -343,7 +346,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Type
                       </label>
-                      <select
+                      <SelectNative
                         value={type}
                         onChange={(e) => setType(e.target.value as 'BUG' | 'FEATURE_REQUEST')}
                         className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
@@ -352,14 +355,14 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                       >
                         <option value="BUG">Bug</option>
                         <option value="FEATURE_REQUEST">Nouvelle fonctionnalité</option>
-                      </select>
+                      </SelectNative>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Titre
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
@@ -388,7 +391,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Statut
                         </label>
-                        <select
+                        <SelectNative
                           value={status}
                           onChange={(e) => setStatus(e.target.value as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED')}
                           className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
@@ -399,12 +402,12 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                           <option value="IN_PROGRESS">En cours</option>
                           <option value="RESOLVED">Résolu</option>
                           <option value="REJECTED">Rejeté</option>
-                        </select>
+                        </SelectNative>
                       </div>
                     )}
 
                     <div className="pt-2">
-                      <button
+                      <Button
                         type="submit"
                         className={`w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                           isSubmitting
@@ -427,7 +430,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                             Soumettre le retour
                           </>
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </div>
@@ -468,7 +471,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                                     </span>
                                   </div>
                                   <div className="flex items-center space-x-2">
-                                    <select
+                                    <SelectNative
                                       value={feedback.status}
                                       onChange={(e) => handleStatusChange(feedback.id, e.target.value as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED')}
                                       className="text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
@@ -477,13 +480,13 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                                       <option value="IN_PROGRESS">En cours</option>
                                       <option value="RESOLVED">Résolu</option>
                                       <option value="REJECTED">Rejeté</option>
-                                    </select>
-                                    <button
+                                    </SelectNative>
+                                    <Button
                                       onClick={() => handleDelete(feedback.id)}
                                       className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                     >
                                       <TrashIcon className="h-5 w-5" />
-                                    </button>
+                                    </Button>
                                   </div>
                                 </div>
 

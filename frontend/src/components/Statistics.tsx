@@ -14,7 +14,8 @@ import {
 import { getCommissionRate } from '@/utils/roles';
 import { Role } from '@/services/api';
 import LoginDialog from './LoginDialog';
-
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
 interface WeaponStats {
     totalWeapons: number;
     totalValue: number;
@@ -376,12 +377,12 @@ export default function Statistics() {
                     <br />
                     Veuillez vous connecter pour accéder aux statistiques.
                 </p>
-                <button
+                <Button
                     onClick={() => setIsLoginDialogOpen(true)}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
                     Se connecter
-                </button>
+                </Button>
                 <LoginDialog
                     open={isLoginDialogOpen}
                     setOpen={setIsLoginDialogOpen}
@@ -426,7 +427,7 @@ export default function Statistics() {
                 <div className="mt-3 sm:mt-0 sm:ml-4">
                     <div className="flex flex-wrap gap-2 mb-2">
                         {PERIOD_PRESETS.map(preset => (
-                            <button
+                            <Button
                                 key={preset.days}
                                 onClick={() => handlePresetClick(preset.days)}
                                 className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200
@@ -435,11 +436,11 @@ export default function Statistics() {
                                     : 'text-gray-600 hover:text-gray-900 bg-gray-100/80 backdrop-blur-sm'}`}
                             >
                                 {preset.label}
-                            </button>
+                            </Button>
                         ))}
                     </div>
                     <div className="flex items-center gap-2">
-                        <input
+                        <Input
                             type="date"
                             value={dateRange.startDate.toISOString().split('T')[0]}
                             onChange={(e) => {
@@ -452,7 +453,7 @@ export default function Statistics() {
                             className="px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
                         />
                         <span className="text-gray-600 text-sm">à</span>
-                        <input
+                        <Input
                             type="date"
                             value={dateRange.endDate.toISOString().split('T')[0]}
                             onChange={(e) => {
@@ -476,7 +477,7 @@ export default function Statistics() {
             >
                 <nav className="flex gap-2">
                     {(['overview', 'weapons', 'employees'] as TabType[]).map((tab) => (
-                        <motion.button
+                        <Button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
@@ -484,12 +485,10 @@ export default function Statistics() {
                                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
                                     : 'text-gray-600 hover:text-gray-900 bg-gray-100/80 backdrop-blur-sm'
                             }`}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
                         >
                             {tab === 'overview' ? 'Vue d\'ensemble' : 
                              tab === 'weapons' ? 'Armes' : 'Employés'}
-                        </motion.button>
+                        </Button>
                     ))}
                 </nav>
             </motion.div>

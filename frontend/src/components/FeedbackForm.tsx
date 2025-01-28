@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { employeeStore } from '../stores/employeeStore';
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
+import { SelectNative } from "@/components/ui/select-native";
 
 type FeedbackType = 'BUG' | 'FEATURE_REQUEST';
 
@@ -59,7 +62,7 @@ export default function FeedbackForm({ open, onClose }: FeedbackFormProps) {
               <label className="block text-sm font-medium text-gray-700">
                 Type
               </label>
-              <select
+              <SelectNative
                 value={type}
                 onChange={(e) => setType(e.target.value as FeedbackType)}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -67,13 +70,13 @@ export default function FeedbackForm({ open, onClose }: FeedbackFormProps) {
               >
                 <option value="BUG">Bug</option>
                 <option value="FEATURE_REQUEST">Nouvelle fonctionnalité</option>
-              </select>
+              </SelectNative>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Titre
               </label>
-              <input
+              <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -94,19 +97,19 @@ export default function FeedbackForm({ open, onClose }: FeedbackFormProps) {
               />
             </div>
             <div className="mt-4 flex justify-end space-x-2">
-              <button
+              <Button
                 type="button"
                 onClick={onClose}
                 className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Annuler
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
                 className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Soumettre
-              </button>
+              </Button>
             </div>
           </form>
         </Dialog.Panel>

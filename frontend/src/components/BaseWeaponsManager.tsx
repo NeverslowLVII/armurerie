@@ -4,6 +4,8 @@ import { createBaseWeapon, updateBaseWeapon, deleteBaseWeapon } from '../service
 import { PencilIcon, TrashIcon, PlusIcon, XMarkIcon, CurrencyDollarIcon, FireIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useData } from '../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Input } from "@/components/ui/input";
+import { Button } from '@/components/ui/button';
 
 interface BaseWeaponsManagerProps {
     isOpen: boolean;
@@ -300,7 +302,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                     </Dialog.Title>
                                     <div className="flex items-center space-x-4">
                                         <div className="relative">
-                                            <input
+                                            <Input
                                                 type="text"
                                                 placeholder="Rechercher une arme..."
                                                 value={searchQuery}
@@ -313,13 +315,13 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                 </svg>
                                             </div>
                                         </div>
-                                        <button
+                                        <Button
                                             type="button"
                                             onClick={onClose}
                                             className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-neutral-600 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500"
                                         >
                                             Fermer
-                                        </button>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -356,7 +358,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                 variants={textVariants}
                                                 className="block w-full"
                                             >
-                            <input
+                            <Input
                                 type="text"
                                 value={newWeaponName}
                                 onChange={(e) => setNewWeaponName(e.target.value)}
@@ -377,7 +379,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                 variants={textVariants}
                                                 className="block w-full"
                                             >
-                            <input
+                            <Input
                                 type="number"
                                 value={newWeaponPrice}
                                 onChange={(e) => setNewWeaponPrice(e.target.value)}
@@ -400,7 +402,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                 variants={textVariants}
                                                 className="block w-full"
                                             >
-                                                <input
+                                                <Input
                                                     type="number"
                                                     value={newWeaponCostProduction}
                                                     onChange={(e) => setNewWeaponCostProduction(e.target.value)}
@@ -416,7 +418,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                         <div className="pt-2">
                                             <div className="flex justify-between space-x-2">
                             {editingWeapon && (
-                                <button
+                                <Button
                                     type="button"
                                     onClick={cancelEditing}
                                                         className="inline-flex items-center px-3 py-1.5 border border-neutral-300 shadow-sm text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -424,9 +426,9 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                 >
                                                         <XMarkIcon className="h-4 w-4 mr-1.5" />
                                     Annuler
-                                </button>
+                                </Button>
                             )}
-                            <button
+                            <Button
                                 type="submit"
                                                     className={`flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                                                         isSubmitting
@@ -458,7 +460,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                             )}
                                                         </>
                                                     )}
-                            </button>
+                            </Button>
                                             </div>
                         </div>
                     </form>
@@ -475,7 +477,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                 </span>
                                             </h3>
                                             <div className="flex items-center space-x-1 text-sm">
-                                                <button
+                                                <Button
                                                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                                                     disabled={currentPage === 1}
                                                     className={`p-1 rounded ${
@@ -485,11 +487,11 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                     }`}
                                                 >
                                                     <ChevronLeftIcon className="h-4 w-4" />
-                                                </button>
+                                                </Button>
                                                 <span className="text-neutral-600">
                                                     {currentPage} / {totalPages}
                                                 </span>
-                                                <button
+                                                <Button
                                                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                                                     disabled={currentPage === totalPages}
                                                     className={`p-1 rounded ${
@@ -499,7 +501,7 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                                     }`}
                                                 >
                                                     <ChevronRightIcon className="h-4 w-4" />
-                                                </button>
+                                                </Button>
                                             </div>
                                         </div>
                                     </div>
@@ -569,24 +571,20 @@ export default function BaseWeaponsManager({ isOpen, onClose }: BaseWeaponsManag
                                     </div>
                                                             </motion.div>
                                                             <div className="flex items-center space-x-2">
-                                                                <motion.button
-                                                                    whileHover={{ scale: 1.1 }}
-                                                                    whileTap={{ scale: 0.9, rotate: -10 }}
-                                            onClick={() => startEditing(weapon)}
+                                                                <Button
+                                                                    onClick={() => startEditing(weapon)}
                                                                     className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition-colors duration-150"
                                                                     disabled={isSubmitting}
                                         >
                                             <PencilIcon className="h-5 w-5" />
-                                                                </motion.button>
-                                                                <motion.button
-                                                                    whileHover={{ scale: 1.1 }}
-                                                                    whileTap={{ scale: 0.9, rotate: 10 }}
-                                            onClick={() => handleDeleteWeapon(weapon.id)}
+                                                                </Button>
+                                                                <Button
+                                                                    onClick={() => handleDeleteWeapon(weapon.id)}
                                                                     className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition-colors duration-150"
                                                                     disabled={isSubmitting}
                                         >
                                             <TrashIcon className="h-5 w-5" />
-                                                                </motion.button>
+                                                                </Button>
                                                             </div>
                                                         </div>
                                                     </motion.div>
