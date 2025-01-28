@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "../../lib/utils";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ComponentProps } from "react";

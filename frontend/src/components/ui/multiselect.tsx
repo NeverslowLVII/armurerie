@@ -5,8 +5,8 @@ import { X } from "lucide-react";
 import * as React from "react";
 import { forwardRef, useEffect } from "react";
 
-import { cn } from "@/registry/default/lib/utils";
-import { Command, CommandGroup, CommandItem, CommandList } from "@/registry/default/ui/command";
+import { cn } from "../../lib/utils";
+import { Command, CommandGroup, CommandItem, CommandList } from "./command";
 
 export interface Option {
   value: string;
@@ -89,7 +89,7 @@ export function useDebounce<T>(value: T, delay?: number): T {
   const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
+    const timer = setTimeout(() => setDebouncedValue(value), delay ?? 500);
 
     return () => {
       clearTimeout(timer);
@@ -148,7 +148,7 @@ const CommandEmpty = forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof CommandPrimitive.Empty>
 >(({ className, ...props }, forwardedRef) => {
-  const render = useCommandState((state) => state.filtered.count === 0);
+  const render = useCommandState((state: any) => state.filtered.count === 0);
 
   if (!render) return null;
 
@@ -205,7 +205,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       transToGroupOption(arrayDefaultOptions, groupBy),
     );
     const [inputValue, setInputValue] = React.useState("");
-    const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
+    const debouncedSearchTerm = useDebounce(inputValue, delay ?? 500);
 
     React.useImperativeHandle(
       ref,
@@ -356,7 +356,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         <CommandItem
           value={inputValue}
           className="cursor-pointer"
-          onMouseDown={(e) => {
+          onMouseDown={(e: any) => {
             e.preventDefault();
             e.stopPropagation();
           }}
@@ -427,7 +427,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       <Command
         ref={dropdownRef}
         {...commandProps}
-        onKeyDown={(e) => {
+        onKeyDown={(e: any) => {
           handleKeyDown(e);
           commandProps?.onKeyDown?.(e);
         }}
@@ -435,7 +435,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         shouldFilter={
           commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch
         } // When onSearch is provided, we don&lsquo;t want to filter the options. You can still override it.
-        filter={commandFilter()}
+        filter={commandFilter() ?? (() => -1)}
       >
         <div
           className={cn(
@@ -462,7 +462,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     badgeClassName,
                   )}
                   data-fixed={option.fixed}
-                  data-disabled={disabled || undefined}
+                  data-disabled={option.disable ?? false}
                 >
                   {option.label}
                   <button
@@ -489,18 +489,18 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
               {...inputProps}
               ref={inputRef}
               value={inputValue}
-              disabled={disabled}
-              onValueChange={(value) => {
+              disabled={disabled ?? false}
+              onValueChange={(value: any) => {
                 setInputValue(value);
                 inputProps?.onValueChange?.(value);
               }}
-              onBlur={(event) => {
+              onBlur={(event: any) => {
                 if (!onScrollbar) {
                   setOpen(false);
                 }
                 inputProps?.onBlur?.(event);
               }}
-              onFocus={(event) => {
+              onFocus={(event: any) => {
                 setOpen(true);
                 if (triggerSearchOnFocus) {
                   onSearch?.(debouncedSearchTerm);
@@ -575,8 +575,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                               <CommandItem
                                 key={option.value}
                                 value={option.value}
-                                disabled={option.disable}
-                                onMouseDown={(e) => {
+                                disabled={option.disable ?? false}
+                                onMouseDown={(e: any) => {
                                   e.preventDefault();
                                   e.stopPropagation();
                                 }}

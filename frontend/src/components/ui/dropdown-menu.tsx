@@ -4,7 +4,7 @@ import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
 import * as React from "react";
 
-import { cn } from "@/registry/default/lib/utils";
+import { cn } from "../../lib/utils";
 
 type PointerDownEvent = Parameters<
   NonNullable<DropdownMenuPrimitive.DropdownMenuContentProps["onPointerDown"]>
@@ -151,7 +151,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
       "relative flex cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className,
     )}
-    checked={checked}
+    checked={checked ?? false}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
