@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  CO_PATRON
+  PATRON
+}
+
+enum FeedbackType {
+  BUG
+  FEATURE_REQUEST
+}
+
+enum FeedbackStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+model Developer {
+  id       Int      @id @default(autoincrement())
+  username String   @unique
+  password String
+  name     String
+}
+
+model Employee {
+  id      Int      @id @default(autoincrement())
+  name    String
+  color   String?
+  role    Role     @default(EMPLOYEE)
+  weapons Weapon[]
+  feedback Feedback[]
+}
+
+model BaseWeapon {
+  id                    Int      @id @default(autoincrement())
+  nom                   String   @unique
+  prix_defaut          Int
+  cout_production_defaut Int     @default(0)
+  weapons              Weapon[]
+}
+
+model Weapon {
+  id          Int         @id @default(autoincrement())
+  horodateur  DateTime
+  employe_id  Int
+  employee    Employee    @relation(fields: [employe_id], references: [id])
+  detenteur   String
+  nom_arme    String
+  serigraphie String      @unique
+  prix        Int
+  base_weapon BaseWeapon? @relation(fields: [nom_arme], references: [nom])
+}
+
+model Feedback {
+  id          Int           @id @default(autoincrement())
+  type        FeedbackType
+  title       String
+  description String
+  status      FeedbackStatus @default(OPEN)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  submittedBy Int?
+  employee    Employee?     @relation(fields: [submittedBy], references: [id])
+} 
