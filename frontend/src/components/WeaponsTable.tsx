@@ -4,7 +4,7 @@ import { deleteWeapon, Weapon } from '../services/api';
 import EmployeeColorManager from './EmployeeManager';
 import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
-import LoginDialog from './LoginDialog';
+import { LoginDialog } from './LoginDialog';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, LockClosedIcon, LockOpenIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import BaseWeaponsManager from './BaseWeaponsManager';
 import { useData } from '../context/DataContext';
@@ -29,7 +29,7 @@ const rowVariants = {
 };
 
 export default function WeaponsTable() {
-  const { weapons, employees, loading, error, refreshWeapons, refreshEmployees } = useData();
+  const { weapons, employees, loading, error: apiError, refreshWeapons, refreshEmployees } = useData();
   const [isColorManagerOpen, setIsColorManagerOpen] = useState(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
@@ -37,26 +37,32 @@ export default function WeaponsTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isPatronLoggedIn, setIsPatronLoggedIn] = useState(() => {
-    // Initialiser l'état à partir de localStorage au chargement
+    if (typeof window === 'undefined') return false;
     return localStorage.getItem('patronAuth') === 'true';
   });
   const [isBaseWeaponsOpen, setIsBaseWeaponsOpen] = useState(false);
-  
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-
-  const handleLogin = (password: string) => {
+  const [loginError, setLoginError] = useState<string | null>(null);
+  
+  const handleLogin = async (password: string) => {
+    setLoginError(null);
     if (password === 'patron123') {
       setIsPatronLoggedIn(true);
-      localStorage.setItem('patronAuth', 'true');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('patronAuth', 'true');
+      }
       setIsLoginOpen(false);
+    } else {
+      setLoginError("Mot de passe incorrect.");
     }
   };
 
   const handleLogout = () => {
     setIsPatronLoggedIn(false);
-    localStorage.removeItem('patronAuth');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('patronAuth');
+    }
   };
 
   const handleEdit = (weapon: Weapon) => {
@@ -133,10 +139,10 @@ export default function WeaponsTable() {
     );
   }
 
-  if (error) {
+  if (apiError) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-red-600">{error}</div>
+        <div className="text-red-600">{apiError}</div>
       </div>
     );
   }
@@ -379,9 +385,10 @@ export default function WeaponsTable() {
       </motion.div>
 
       <LoginDialog
-        open={isLoginOpen}
-        setOpen={setIsLoginOpen}
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
         onLogin={handleLogin}
+        error={loginError}
       />
 
       <EmployeeColorManager

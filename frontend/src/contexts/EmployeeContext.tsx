@@ -92,6 +92,11 @@ export function EmployeeProvider({ children }: { children: React.ReactNode }) {
     isAvailable: false,
     
     init() {
+      if (typeof window === 'undefined') {
+        this.isAvailable = false;
+        return;
+      }
+
       try {
         const testKey = '__storage_test__';
         localStorage.setItem(testKey, testKey);
@@ -170,7 +175,8 @@ export function EmployeeProvider({ children }: { children: React.ReactNode }) {
         }
 
         // Then fetch from backend
-        const response = await fetch('/api/employees');
+        const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+        const response = await fetch(`${baseUrl}/api/employees`);
         if (!response.ok) throw new Error('Failed to fetch employees');
         
         const employees: Employee[] = await response.json();

@@ -5,24 +5,24 @@ import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
 
-type FeedbackType = 'BUG' | 'FEATURE_REQUEST';
+type FeedbackType = 'BUG' | 'FEATURE' | 'OTHER';
 
 interface FeedbackFormProps {
-  open: boolean;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export default function FeedbackForm({ open, onClose }: FeedbackFormProps) {
+export default function FeedbackForm({ isOpen, onClose }: FeedbackFormProps) {
   const [type, setType] = useState<FeedbackType>('BUG');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const employee = await employeeStore.getEmployee(localStorage.getItem('currentEmployee') || '');
-    if (!employee) return;
-
     try {
+      const currentEmployee = typeof window !== 'undefined' ? localStorage.getItem('currentEmployee') : null;
+      const employee = currentEmployee ? await employeeStore.getEmployee(currentEmployee) : null;
+
       const response = await fetch('/api/feedback', {
         method: 'POST',
         headers: {
@@ -32,7 +32,7 @@ export default function FeedbackForm({ open, onClose }: FeedbackFormProps) {
           type,
           title,
           description,
-          submittedBy: employee.id,
+          employeeId: employee?.id,
         }),
       });
 
@@ -50,12 +50,12 @@ export default function FeedbackForm({ open, onClose }: FeedbackFormProps) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} className="relative z-50">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="mx-auto max-w-sm rounded-lg bg-white p-6 shadow-xl">
           <Dialog.Title className="text-lg font-medium leading-6 text-gray-900">
-            Soumettre un retour
+            Soumettre un feedback
           </Dialog.Title>
           <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div>
@@ -69,7 +69,8 @@ export default function FeedbackForm({ open, onClose }: FeedbackFormProps) {
                 required
               >
                 <option value="BUG">Bug</option>
-                <option value="FEATURE_REQUEST">Nouvelle fonctionnalité</option>
+                <option value="FEATURE">Suggestion de fonctionnalité</option>
+                <option value="OTHER">Autre</option>
               </SelectNative>
             </div>
             <div>

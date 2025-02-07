@@ -25,6 +25,11 @@ class EmployeeStore {
   }
 
   private checkStorageAvailability() {
+    if (typeof window === 'undefined') {
+      this.isStorageAvailable = false;
+      return;
+    }
+
     try {
       const testKey = '__storage_test__';
       localStorage.setItem(testKey, testKey);
@@ -72,7 +77,9 @@ class EmployeeStore {
 
   private async initializeFromBackend() {
     try {
-      const response = await fetch('/api/employees');
+      // Use absolute URL for server-side rendering
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${baseUrl}/api/employees`);
       if (!response.ok) {
         throw new Error('Failed to fetch employees');
       }

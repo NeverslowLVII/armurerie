@@ -11,7 +11,7 @@ import FeedbackManager from './components/FeedbackManager';
 import { employeeStore } from './stores/employeeStore';
 import { Button } from '@/components/ui/button';
 
-function App() {
+const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'weapons' | 'statistics'>('weapons');
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [currentEmployeeId, setCurrentEmployeeId] = useState<number | undefined>();

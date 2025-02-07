@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { getCommissionRate } from '@/utils/roles';
 import { Role } from '@/services/api';
-import LoginDialog from './LoginDialog';
+import { LoginDialog } from './LoginDialog';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 interface WeaponStats {
@@ -185,10 +185,12 @@ export default function Statistics() {
 
     // Check authentication on mount
     useEffect(() => {
-        const patronAuth = localStorage.getItem('patronAuth');
-        if (patronAuth === 'true') {
-            setIsAuthenticated(true);
-            fetchData();
+        if (typeof window !== 'undefined') {
+            const patronAuth = localStorage.getItem('patronAuth');
+            if (patronAuth === 'true') {
+                setIsAuthenticated(true);
+                fetchData();
+            }
         }
     }, []);
 
@@ -203,7 +205,9 @@ export default function Statistics() {
         setError(null);
         if (password === 'patron123') {
             setIsAuthenticated(true);
-            localStorage.setItem('patronAuth', 'true');
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('patronAuth', 'true');
+            }
             setIsLoginDialogOpen(false);
             await fetchData();
         } else {
@@ -394,9 +398,10 @@ export default function Statistics() {
                     Se connecter
                 </Button>
                 <LoginDialog
-                    open={isLoginDialogOpen}
-                    setOpen={setIsLoginDialogOpen}
+                    isOpen={isLoginDialogOpen}
+                    onClose={() => setIsLoginDialogOpen(false)}
                     onLogin={handleLogin}
+                    error={error}
                 />
             </div>
         );
