@@ -184,7 +184,8 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                 onChange={(e) => setPrix(e.target.value)}
                                 className="border p-2 rounded w-full"
                                 required
-                                readOnly
+                                min="0"
+                                step="0.01"
                                 disabled={isLoading}
                             />
                         </div>

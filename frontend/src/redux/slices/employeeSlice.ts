@@ -72,6 +72,20 @@ export const mergeEmployees = createAsyncThunk(
   }
 );
 
+export const deleteEmployee = createAsyncThunk(
+  'employees/deleteEmployee',
+  async (id: number) => {
+    const response = await fetch(`/api/employees/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete employee');
+    }
+    return id;
+  }
+);
+
 const employeeSlice = createSlice({
   name: 'employees',
   initialState,
@@ -112,6 +126,15 @@ const employeeSlice = createSlice({
           delete state.employees[name];
         });
         state.employees[targetEmployee.name] = targetEmployee;
+      })
+      // Delete employee
+      .addCase(deleteEmployee.fulfilled, (state, action) => {
+        const employeeToDelete = Object.entries(state.employees).find(
+          ([_, employee]) => employee.id === action.payload
+        );
+        if (employeeToDelete) {
+          delete state.employees[employeeToDelete[0]];
+        }
       });
   },
 });

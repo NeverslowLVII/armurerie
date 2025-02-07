@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { useAppDispatch } from '../redux/hooks';
-import { updateEmployee } from '../redux/slices/employeeSlice';
+import { updateEmployee, deleteEmployee } from '../redux/slices/employeeSlice';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PencilIcon, CheckIcon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, CheckIcon, XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
@@ -183,6 +183,27 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
     setTempRole('');
   };
 
+  const handleDeleteEmployee = async (id: string, employee: any) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'employé ${employee.name} ?`)) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      await dispatch(deleteEmployee(employee.id));
+      await onUpdate();
+      setSuccess('Employé supprimé avec succès !');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      setError('Erreur lors de la suppression de l\'employé');
+      console.error('Error deleting employee:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -341,7 +362,6 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                               : 'bg-red-600 hover:bg-red-700'
                           } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
                           disabled={isSubmitting}
-                          onClick={(e) => handleEmployeeUpdate(e as React.FormEvent)}
                         >
                           {isSubmitting ? (
                             <>
@@ -431,12 +451,20 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                     </Button>
                                   </div>
                                 ) : (
-                                  <Button
-                                    onClick={() => startEditing(id, employee)}
-                                    className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50"
-                                  >
-                                    <PencilIcon className="h-5 w-5" />
-                                  </Button>
+                                  <div className="flex items-center space-x-2">
+                                    <Button
+                                      onClick={() => startEditing(id, employee)}
+                                      className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50"
+                                    >
+                                      <PencilIcon className="h-5 w-5" />
+                                    </Button>
+                                    <Button
+                                      onClick={() => handleDeleteEmployee(id, employee)}
+                                      className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50"
+                                    >
+                                      <TrashIcon className="h-5 w-5" />
+                                    </Button>
+                                  </div>
                                 )}
                               </div>
 
