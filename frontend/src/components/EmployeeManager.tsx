@@ -183,7 +183,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
     setTempRole('');
   };
 
-  const handleDeleteEmployee = async (id: string, employee: any) => {
+  const handleDeleteEmployee = async (employee: any) => {
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'employé ${employee.name} ?`)) {
       return;
     }
@@ -459,7 +459,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                       <PencilIcon className="h-5 w-5" />
                                     </Button>
                                     <Button
-                                      onClick={() => handleDeleteEmployee(id, employee)}
+                                      onClick={() => handleDeleteEmployee(employee)}
                                       className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50"
                                     >
                                       <TrashIcon className="h-5 w-5" />

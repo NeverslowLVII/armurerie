@@ -21,6 +21,8 @@ interface WeaponStats {
     totalValue: number;
     totalCostProduction: number;
     totalProfit: number;
+    totalTaxes: number;
+    profitAfterTaxes: number;
     averagePrice: number;
     averageCostProduction: number;
     averageProfit: number;
@@ -157,6 +159,8 @@ export default function Statistics() {
         totalValue: 0,
         totalCostProduction: 0,
         totalProfit: 0,
+        totalTaxes: 0,
+        profitAfterTaxes: 0,
         averagePrice: 0,
         averageCostProduction: 0,
         averageProfit: 0,
@@ -287,12 +291,16 @@ export default function Statistics() {
 
             const totalValue = filteredWeapons.reduce((sum, w) => sum + w.prix, 0);
             const totalProfit = totalValue - totalCostProduction;
+            const totalTaxes = Math.round(totalProfit * 0.10); // 10% d'impôts
+            const profitAfterTaxes = totalProfit - totalTaxes;
 
             setWeaponStats({
                 totalWeapons: filteredWeapons.length,
                 totalValue,
                 totalCostProduction,
                 totalProfit,
+                totalTaxes,
+                profitAfterTaxes,
                 averagePrice: totalValue / filteredWeapons.length || 0,
                 averageCostProduction: totalCostProduction / filteredWeapons.length || 0,
                 averageProfit: totalProfit / filteredWeapons.length || 0,
@@ -314,8 +322,10 @@ export default function Statistics() {
                     return sum + (weapon.prix - productionCost);
                 }, 0);
 
+                const taxes = Math.round(totalProfit * 0.10); // 10% d'impôts
+                const profitAfterTaxes = totalProfit - taxes;
                 const commissionRate = getCommissionRate(emp.role);
-                const commission = totalProfit * commissionRate;
+                const commission = Math.round(profitAfterTaxes * commissionRate); // Commission calculée sur le bénéfice après impôts
                 
                 acc.employeePerformance.push({
                     name: emp.name,
@@ -522,8 +532,19 @@ export default function Statistics() {
                             icon={FireIcon}
                         />
                         <StatCard
-                            title="Bénéfice total"
+                            title="Bénéfice brut"
                             value={new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(weaponStats.totalProfit / 100)}
+                            icon={CurrencyDollarIcon}
+                        />
+                        <StatCard
+                            title="Impôts (10%)"
+                            value={new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(weaponStats.totalTaxes / 100)}
+                            icon={CurrencyDollarIcon}
+                            subtitle="10% du bénéfice brut"
+                        />
+                        <StatCard
+                            title="Bénéfice après impôts"
+                            value={new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(weaponStats.profitAfterTaxes / 100)}
                             icon={CurrencyDollarIcon}
                         />
                         <StatCard
