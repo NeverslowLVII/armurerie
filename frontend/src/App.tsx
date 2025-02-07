@@ -43,7 +43,7 @@ const App: React.FC = () => {
         <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
           <Navbar currentPage={currentPage} onPageChange={setCurrentPage} />
 
-          <main>
+          <main className="pt-32">
             <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
               <AnimatePresence mode="wait">
                 {currentPage === 'weapons' ? (
