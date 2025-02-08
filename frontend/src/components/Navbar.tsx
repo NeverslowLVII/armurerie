@@ -10,7 +10,7 @@ interface NavbarProps {
 export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 50], [0.8, 1]);
+  const opacity = useTransform(scrollY, [0, 50], [1, 1]);
   const blur = useTransform(scrollY, [0, 50], [8, 12]);
   const scale = useTransform(scrollY, [0, 50], [1, 0.98]);
 
@@ -69,7 +69,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
         opacity,
         scale
       }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-10 transition-all duration-300 ${
         isScrolled ? 'py-4' : 'py-6'
       }`}
     >
@@ -77,7 +77,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
         style={{
           backdropFilter: `blur(${blur}px)`
         }}
-        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-white/60 rounded-2xl border border-white/20 shadow-lg"
+        className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-white rounded-2xl border border-white/20 shadow-lg"
       >
         <div className="flex h-16 items-center justify-between">
           <motion.div 
