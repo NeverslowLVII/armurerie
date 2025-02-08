@@ -29,7 +29,8 @@
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+    "types": ["jest", "node"]
   },
   "include": [
     "next-env.d.ts",

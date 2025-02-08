@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Configuration globale d'axios
-axios.defaults.baseURL = '/api';
+const baseURL = process.env.NODE_ENV === 'test' ? 'http://localhost:3000/api' : (process.env.API_BASE_URL || 'http://localhost:3000/api');
+axios.defaults.baseURL = baseURL;
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 axios.defaults.headers.common['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS';
 axios.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
@@ -106,11 +107,7 @@ export const getWeapon = async (id: number): Promise<Weapon> => {
 
 export const createWeapon = async (weapon: WeaponCreate): Promise<Weapon> => {
   try {
-    const response = await axios.post('/weapons', weapon, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const response = await axios.post('/weapons', weapon);
     
     if (response.status !== 201 && response.status !== 200) {
       throw new Error(`Failed to create weapon: ${response.statusText}`);
@@ -118,14 +115,17 @@ export const createWeapon = async (weapon: WeaponCreate): Promise<Weapon> => {
     
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 400) {
-        throw new Error('Données invalides pour la création de l\'arme');
+    const axiosError = error as any;
+    if (axiosError?.isAxiosError === true) {
+      if (axiosError.response?.status === 400) {
+        return Promise.reject(new Error('Données invalides pour la création de l\'arme'));
       }
-      console.error('Create weapon error:', error.response);
-      throw new Error(`Erreur lors de la création: ${error.message}`);
+      if (process.env.NODE_ENV !== 'test') {
+        console.error('Create weapon error:', { status: axiosError.response?.status, statusText: axiosError.response?.statusText });
+      }
+      return Promise.reject(new Error(`Erreur lors de la création: ${axiosError.message}`));
     }
-    throw error;
+    return Promise.reject(error);
   }
 };
 
@@ -146,16 +146,17 @@ export const deleteWeapon = async (id: number): Promise<void> => {
       throw new Error(`Failed to delete weapon: ${response.statusText}`);
     }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        throw new Error(`L'arme avec l'ID ${id} n'a pas été trouvée`);
-      } else if (error.response?.status === 405) {
-        console.error('Delete request failed:', error.response);
-        throw new Error('La méthode de suppression n\'est pas autorisée');
+    const axiosErrorDel = error as any;
+    if (axiosErrorDel?.isAxiosError === true) {
+      if (axiosErrorDel.response?.status === 404) {
+        return Promise.reject(new Error(`L'arme avec l'ID ${id} n'a pas été trouvée`));
+      } else if (axiosErrorDel.response?.status === 405) {
+        console.error('Delete request failed:', axiosErrorDel.response);
+        return Promise.reject(new Error('La méthode de suppression n\'est pas autorisée'));
       }
-      throw new Error(`Erreur lors de la suppression: ${error.message}`);
+      return Promise.reject(new Error(`Erreur lors de la suppression: ${axiosErrorDel.message}`));
     }
-    throw error;
+    return Promise.reject(error);
   }
 };
 
@@ -207,16 +208,17 @@ export const deleteBaseWeapon = async (id: number): Promise<void> => {
       throw new Error(`Failed to delete base weapon: ${response.statusText}`);
     }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 404) {
-        throw new Error(`L'arme de base avec l'ID ${id} n'a pas été trouvée`);
-      } else if (error.response?.status === 405) {
-        console.error('Delete request failed:', error.response);
-        throw new Error('La méthode de suppression n\'est pas autorisée');
+    const axiosErrorBase = error as any;
+    if (axiosErrorBase?.isAxiosError === true) {
+      if (axiosErrorBase.response?.status === 404) {
+        return Promise.reject(new Error(`L'arme de base avec l'ID ${id} n'a pas été trouvée`));
+      } else if (axiosErrorBase.response?.status === 405) {
+        console.error('Delete request failed:', axiosErrorBase.response);
+        return Promise.reject(new Error('La méthode de suppression n\'est pas autorisée'));
       }
-      throw new Error(`Erreur lors de la suppression: ${error.message}`);
+      return Promise.reject(new Error(`Erreur lors de la suppression: ${axiosErrorBase.message}`));
     }
-    throw error;
+    return Promise.reject(error);
   }
 };
 

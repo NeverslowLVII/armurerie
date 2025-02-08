@@ -1,0 +1,44 @@
+{
+    "rules": {
+        "context_initialization": {
+            "description": "Point de départ pour chaque interaction",
+            "steps": [
+                "TOUJOURS lire `.notes/project_overview.md` et `.notes/task_list.md`"
+            ]
+        },
+        "operational_protocol": {
+            "description": "Comment aborder les tâches",
+            "before_action": [
+                "Créer une décomposition MECE des tâches"
+            ],
+            "code_changes": [
+                "Lire les sections de code pertinentes avant modification",
+                "Préserver la fonctionnalité existante",
+                "Maintenir la sécurité des types"
+            ]
+        },
+        "safety_requirements": [
+            "NE JAMAIS compromettre la sécurité des types",
+            "TOUJOURS maintenir une gestion appropriée des erreurs",
+            "TOUJOURS documenter le nouveau code"
+        ],
+        "priorities": [
+            {
+                "source": ".notes/",
+                "weight": 1.0
+            }
+        ],
+        "modes": {
+            "base": {
+                "description": "Pour les tâches routinières"
+            },
+            "enhanced": {
+                "description": "Pour les problèmes complexes"
+            }
+        },
+        "project_directives": {
+            "name": "armurie",
+            "ai_first": true
+        }
+    }
+} 
