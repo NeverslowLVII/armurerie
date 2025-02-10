@@ -46,6 +46,7 @@
 - [ ] Mise à jour des dépendances
 - [ ] Optimisation des performances
 - [ ] Refactoring du code legacy
+- [ ] Refactoriser les duplications de code (DRY) : Analyser et réduire les clones détectés par jscpd pour améliorer la lisibilité et la maintenabilité du code.
 
 ## Bugs Connus
 

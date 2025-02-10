@@ -27,18 +27,6 @@
                 "source": ".notes/",
                 "weight": 1.0
             }
-        ],
-        "modes": {
-            "base": {
-                "description": "Pour les tâches routinières"
-            },
-            "enhanced": {
-                "description": "Pour les problèmes complexes"
-            }
-        },
-        "project_directives": {
-            "name": "armurie",
-            "ai_first": true
-        }
+        ]
     }
 } 

@@ -6,11 +6,12 @@ Développer une application web moderne pour la gestion d'une armurerie, permett
 
 ## Architecture
 
-- **Frontend :** Application React avec TypeScript
+- **Frontend :** Application Next.js (basé sur React) avec TypeScript
+  - Framework React pour une interface dynamique avec rendu côté serveur
   - UI moderne avec Framer Motion pour les animations
-  - Composants UI personnalisés basés sur Radix UI
-  - Gestion d'état contextuelle
-- **Backend :** API RESTful (implicite dans les appels API du frontend)
+  - Composants UI personnalisés inspirés de Radix UI
+  - Gestion d'état contextuelle via React Context et autres librairies
+- **Backend :** API RESTful intégrée via les API Routes de Next.js ou services externes
 - **Sécurité :** Système d'authentification multi-niveaux (employés, développeurs)
 
 ## Fonctionnalités Clés
