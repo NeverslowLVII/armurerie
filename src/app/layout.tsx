@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import './globals.css'
-import { DataProvider } from '../context/DataContext'
+import { Providers } from './providers'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '700'] })
 
 export const metadata: Metadata = {
   title: 'Armurerie',
@@ -16,11 +16,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr">
-      <body className={inter.className}>
-        <DataProvider>
+    <html lang="fr" suppressHydrationWarning>
+      <body className={`${poppins.className} min-h-screen`}>
+        <Providers>
           {children}
-        </DataProvider>
+        </Providers>
       </body>
     </html>
   )

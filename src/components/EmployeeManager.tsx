@@ -215,7 +215,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
               animate="visible"
               exit="exit"
             >
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
+              <div className="fixed inset-0 bg-neutral-500 bg-opacity-75 transition-opacity backdrop-blur-sm dark:bg-neutral-900" />
             </motion.div>
 
             <motion.div
@@ -223,11 +223,11 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="relative bg-white rounded-lg shadow-xl w-full max-w-7xl h-[85vh] flex flex-col"
+              className="relative bg-white dark:bg-neutral-800 rounded-lg shadow-xl w-full max-w-7xl h-[85vh] flex flex-col"
             >
-              <div className="p-3 border-b border-gray-200">
+              <div className="p-3 border-b border-neutral-200 dark:border-neutral-700">
                 <div className="flex justify-between items-center">
-                  <Dialog.Title className="text-xl font-semibold text-gray-900">
+                  <Dialog.Title className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                     Gérer les employés
                   </Dialog.Title>
                   <div className="flex items-center space-x-4">
@@ -235,17 +235,17 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                       <Input
                         type="text"
                         placeholder="Rechercher un employé..."
-                        className="w-64 pl-4 pr-10 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                        className="w-64 pl-4 pr-10 py-1.5 text-sm border border-neutral-300 dark:border-neutral-600 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-neutral-700 dark:text-white"
                       />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="h-4 w-4 text-neutral-400 dark:text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                       </div>
                     </div>
                     <Button
                       onClick={onClose}
-                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-neutral-600 dark:bg-neutral-700 hover:bg-neutral-700 dark:hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500"
                     >
                       Fermer
                     </Button>
@@ -255,9 +255,9 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
 
               <div className="flex flex-1 min-h-0">
                 {/* Panneau de gauche - Formulaire */}
-                <div className="w-1/3 border-r border-gray-200 p-4 overflow-y-auto">
+                <div className="w-1/3 border-r border-neutral-200 dark:border-neutral-700 p-4 overflow-y-auto">
                   {error && (
-                    <div className="mb-3 p-2 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm rounded">
+                    <div className="mb-3 p-2 bg-red-100 dark:bg-red-800 border-l-4 border-red-500 dark:border-red-700 text-red-700 dark:text-red-300 text-sm rounded">
                       {error}
                     </div>
                   )}
@@ -268,7 +268,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                       animate="visible"
                       exit="exit"
                       variants={successVariants}
-                      className="mb-3 p-2 bg-green-100 border-l-4 border-green-500 text-green-700 text-sm rounded"
+                      className="mb-3 p-2 bg-green-100 dark:bg-green-800 border-l-4 border-green-500 dark:border-green-700 text-green-700 dark:text-green-300 text-sm rounded"
                     >
                       {success}
                     </motion.div>
@@ -276,7 +276,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
 
                   <form onSubmit={editingEmployee ? handleEmployeeUpdate : handleAddEmployee} className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                         Nom de l'employé
                       </label>
                       <motion.div
@@ -289,7 +289,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                           type="text"
                           value={newEmployeeName}
                           onChange={(e) => setNewEmployeeName(e.target.value)}
-                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 dark:border-neutral-600 rounded-md dark:bg-neutral-700 dark:text-white"
                           required
                           disabled={isSubmitting}
                         />
@@ -297,7 +297,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                         Rôle
                       </label>
                       <motion.div
@@ -309,7 +309,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                         <SelectNative
                           value={tempRole}
                           onChange={(e) => setTempRole(e.target.value)}
-                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 dark:border-neutral-600 rounded-md dark:bg-neutral-700 dark:text-white"
                           required
                           disabled={isSubmitting}
                         >
@@ -322,7 +322,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                         Couleur
                       </label>
                       <motion.div
@@ -335,7 +335,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                           type="color"
                           value={tempColor}
                           onChange={(e) => setTempColor(e.target.value)}
-                          className="w-full h-10 rounded cursor-pointer"
+                          className="w-full h-10 rounded cursor-pointer dark:bg-neutral-800 dark:border-neutral-600"
                           disabled={isSubmitting}
                         />
                       </motion.div>
@@ -347,7 +347,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                           <Button
                             type="button"
                             onClick={handleCancel}
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            className="inline-flex items-center px-3 py-1.5 border border-neutral-300 dark:border-neutral-600 shadow-sm text-sm font-medium rounded-md text-neutral-700 dark:text-neutral-200 bg-white dark:bg-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                             disabled={isSubmitting}
                           >
                             <XMarkIcon className="h-4 w-4 mr-1.5" />
@@ -358,8 +358,8 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                           type="submit"
                           className={`flex-1 inline-flex justify-center items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                             isSubmitting
-                              ? 'bg-red-400'
-                              : 'bg-red-600 hover:bg-red-700'
+                              ? 'bg-red-400 dark:bg-red-300'
+                              : 'bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600'
                           } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
                           disabled={isSubmitting}
                         >
@@ -394,11 +394,11 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
 
                 {/* Panneau de droite - Liste */}
                 <div className="flex-1 flex flex-col min-h-0">
-                  <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                  <div className="px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-sm font-medium text-gray-900">
+                      <h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
                         Employés existants
-                        <span className="ml-2 text-xs text-gray-500">
+                        <span className="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
                           ({Object.keys(employees).length} résultats)
                         </span>
                       </h3>
@@ -411,7 +411,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
-                        className="m-4 p-2 bg-green-100 border-l-4 border-green-500 text-green-700 text-sm rounded"
+                        className="m-4 p-2 bg-green-100 dark:bg-green-800 border-l-4 border-green-500 dark:border-green-700 text-green-700 dark:text-green-300 text-sm rounded"
                       >
                         {success}
                       </motion.div>
@@ -427,25 +427,25 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                             animate={editingEmployee === id ? "editing" : "visible"}
                             exit="exit"
                             layout
-                            className="p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-150"
+                            className="p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-150"
                           >
                             <div className="space-y-3">
                               <div className="flex items-center justify-between">
                                 <div className="flex flex-col">
-                                  <span className="text-lg font-medium text-red-600">{employee.name}</span>
-                                  <span className="text-sm text-gray-500">{employee.role}</span>
+                                  <span className="text-lg font-medium text-red-600 dark:text-red-400">{employee.name}</span>
+                                  <span className="text-sm text-neutral-500 dark:text-neutral-400">{employee.role}</span>
                                 </div>
                                 {editingEmployee === id ? (
                                   <div className="flex items-center space-x-2">
                                     <Button
                                       onClick={(e) => handleEmployeeUpdate(e as React.FormEvent)}
-                                      className="p-2 text-green-600 hover:text-green-900 rounded-full hover:bg-green-50"
+                                      className="p-2 text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-500 rounded-full hover:bg-green-50 dark:hover:bg-green-800"
                                     >
                                       <CheckIcon className="h-5 w-5" />
                                     </Button>
                                     <Button
                                       onClick={() => setEditingEmployee(null)}
-                                      className="p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-50"
+                                      className="p-2 text-neutral-400 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 rounded-full hover:bg-neutral-50 dark:hover:bg-neutral-800"
                                     >
                                       <XMarkIcon className="h-5 w-5" />
                                     </Button>
@@ -454,13 +454,13 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                   <div className="flex items-center space-x-2">
                                     <Button
                                       onClick={() => startEditing(id, employee)}
-                                      className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50"
+                                      className="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-800"
                                     >
                                       <PencilIcon className="h-5 w-5" />
                                     </Button>
                                     <Button
                                       onClick={() => handleDeleteEmployee(employee)}
-                                      className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50"
+                                      className="p-2 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-800"
                                     >
                                       <TrashIcon className="h-5 w-5" />
                                     </Button>
@@ -471,13 +471,13 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                               {editingEmployee === id ? (
                                 <div className="space-y-3">
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                                       Rôle
                                     </label>
                                     <SelectNative
                                       value={tempRole}
                                       onChange={(e) => setTempRole(e.target.value)}
-                                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                                      className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 dark:bg-neutral-700 dark:text-white"
                                     >
                                       <option value="">Sélectionner un rôle</option>
                                       <option value="EMPLOYEE">Employé</option>
@@ -486,14 +486,14 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                     </SelectNative>
                                   </div>
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                                       Couleur
                                     </label>
                                     <Input
                                       type="color"
                                       value={tempColor}
                                       onChange={(e) => setTempColor(e.target.value)}
-                                      className="w-full h-10 rounded cursor-pointer"
+                                      className="w-full h-10 rounded cursor-pointer dark:bg-neutral-800 dark:border-neutral-600"
                                     />
                                   </div>
                                 </div>
@@ -503,7 +503,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                     className="w-4 h-4 rounded"
                                     style={{ backgroundColor: employee.color || '#000000' }}
                                   />
-                                  <span className="text-sm text-gray-500">
+                                  <span className="text-sm text-neutral-500 dark:text-neutral-400">
                                     {employee.color || 'Couleur par défaut'}
                                   </span>
                                 </div>

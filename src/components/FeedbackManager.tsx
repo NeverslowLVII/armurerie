@@ -245,16 +245,18 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'OPEN': return 'bg-blue-100 text-blue-800';
-      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800';
-      case 'RESOLVED': return 'bg-green-100 text-green-800';
-      case 'REJECTED': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'OPEN': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'RESOLVED': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'REJECTED': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default: return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200';
     }
   };
 
   const getTypeColor = (type: string) => {
-    return type === 'BUG' ? 'bg-red-100 text-red-800' : 'bg-purple-100 text-purple-800';
+    return type === 'BUG'
+      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+      : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
   };
 
   if (!open) return null;
@@ -270,7 +272,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
               animate="visible"
               exit="exit"
             >
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
+              <div className="fixed inset-0 bg-neutral-500 bg-opacity-75 transition-opacity backdrop-blur-sm dark:bg-neutral-900 dark:bg-opacity-75" />
             </motion.div>
 
             <motion.div
@@ -278,18 +280,18 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="relative bg-white rounded-lg shadow-xl w-full max-w-7xl h-[85vh] flex flex-col"
+              className="relative bg-white dark:bg-neutral-800 rounded-lg shadow-xl w-full max-w-7xl h-[85vh] flex flex-col"
             >
-              <div className="p-3 border-b border-gray-200">
+              <div className="p-3 border-b border-neutral-200 dark:border-neutral-700">
                 <div className="flex justify-between items-center">
-                  <Dialog.Title className="text-xl font-semibold text-gray-900">
+                  <Dialog.Title className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
                     {isDeveloper ? 'Gestionnaire de retours' : 'Soumettre un retour'}
                   </Dialog.Title>
                   <div className="flex items-center space-x-4">
                     {!isDeveloper && (
                       <Button
                         onClick={handleDeveloperLogin}
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         Connexion développeur
                       </Button>
@@ -301,10 +303,10 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                           placeholder="Rechercher un retour..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-64 pl-4 pr-10 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                          className="w-64 pl-4 pr-10 py-1.5 text-sm border border-neutral-300 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-neutral-800 dark:border-neutral-600 dark:text-white dark:placeholder-neutral-400"
                         />
                         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <svg className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="h-4 w-4 text-neutral-400 dark:text-neutral-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                           </svg>
                         </div>
@@ -312,7 +314,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                     )}
                     <Button
                       onClick={onClose}
-                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-neutral-600 hover:bg-neutral-700 dark:bg-neutral-700 dark:hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500"
                     >
                       Fermer
                     </Button>
@@ -322,9 +324,9 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
 
               <div className={`flex flex-1 min-h-0 ${!isDeveloper ? 'justify-center items-center' : ''}`}>
                 {/* Form Panel - Always visible */}
-                <div className={isDeveloper ? "w-1/3 border-r border-gray-200 p-4 overflow-y-auto" : "w-full max-w-lg p-4"}>
+                <div className={isDeveloper ? "w-1/3 border-r border-neutral-200 dark:border-neutral-700 p-4 overflow-y-auto" : "w-full max-w-lg p-4"}>
                   {error && (
-                    <div className="mb-3 p-2 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm rounded">
+                    <div className="mb-3 p-2 bg-red-100 dark:bg-red-900 border-l-4 border-red-500 dark:border-red-700 text-red-700 dark:text-red-200 text-sm rounded">
                       {error}
                     </div>
                   )}
@@ -335,7 +337,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                       animate="visible"
                       exit="exit"
                       variants={successVariants}
-                      className="mb-3 p-2 bg-green-100 border-l-4 border-green-500 text-green-700 text-sm rounded"
+                      className="mb-3 p-2 bg-green-100 dark:bg-green-900 border-l-4 border-green-500 dark:border-green-700 text-green-700 dark:text-green-200 text-sm rounded"
                     >
                       {success}
                     </motion.div>
@@ -343,13 +345,13 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
 
                   <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                         Type
                       </label>
                       <SelectNative
                         value={type}
                         onChange={(e) => setType(e.target.value as 'BUG' | 'FEATURE_REQUEST')}
-                        className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md dark:bg-neutral-800 dark:border-neutral-600 dark:text-white"
                         required
                         disabled={isSubmitting}
                       >
@@ -359,28 +361,28 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                         Titre
                       </label>
                       <Input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md dark:bg-neutral-800 dark:border-neutral-600 dark:text-white dark:placeholder-neutral-400"
                         required
                         disabled={isSubmitting}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                         Description
                       </label>
                       <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={4}
-                        className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md dark:bg-neutral-800 dark:border-neutral-600 dark:text-white dark:placeholder-neutral-400"
                         required
                         disabled={isSubmitting}
                       />
@@ -388,13 +390,13 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
 
                     {isDeveloper && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                           Statut
                         </label>
                         <SelectNative
                           value={status}
                           onChange={(e) => setStatus(e.target.value as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED')}
-                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md dark:bg-neutral-800 dark:border-neutral-600 dark:text-white"
                           required
                           disabled={isSubmitting}
                         >
@@ -411,8 +413,8 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                         type="submit"
                         className={`w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
                           isSubmitting
-                            ? 'bg-red-400'
-                            : 'bg-red-600 hover:bg-red-700'
+                            ? 'bg-red-400 dark:bg-red-500'
+                            : 'bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600'
                         } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
                         disabled={isSubmitting}
                       >
@@ -438,11 +440,11 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                 {/* Feedback List - Only visible to developers */}
                 {isDeveloper && (
                   <div className="flex-1 flex flex-col min-h-0">
-                    <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
+                    <div className="px-4 py-2 bg-neutral-50 dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
                       <div className="flex justify-between items-center">
-                        <h3 className="text-sm font-medium text-gray-900">
+                        <h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
                           Retours existants
-                          <span className="ml-2 text-xs text-gray-500">
+                          <span className="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
                             ({filteredFeedbacks.length} résultats)
                           </span>
                         </h3>
@@ -460,13 +462,13 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                               animate="visible"
                               exit="exit"
                               layout
-                              className="p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors duration-150"
+                              className="p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors duration-150"
                             >
                               <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                   <div className="flex flex-col">
-                                    <span className="text-lg font-medium text-red-600">{feedback.title}</span>
-                                    <span className="text-sm text-gray-500">
+                                    <span className="text-lg font-medium text-red-600 dark:text-red-400">{feedback.title}</span>
+                                    <span className="text-sm text-neutral-500 dark:text-neutral-400">
                                       {feedback.employee ? `Par ${feedback.employee.name}` : 'Anonyme'} - {new Date(feedback.createdAt).toLocaleDateString()}
                                     </span>
                                   </div>
@@ -474,7 +476,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                                     <SelectNative
                                       value={feedback.status}
                                       onChange={(e) => handleStatusChange(feedback.id, e.target.value as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED')}
-                                      className="text-sm border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
+                                      className="text-sm border-neutral-300 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-neutral-800 dark:border-neutral-600 dark:text-white"
                                     >
                                       <option value="OPEN">Ouvert</option>
                                       <option value="IN_PROGRESS">En cours</option>
@@ -483,14 +485,14 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                                     </SelectNative>
                                     <Button
                                       onClick={() => handleDelete(feedback.id)}
-                                      className="p-1 text-gray-400 hover:text-red-600 rounded-full hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                      className="p-1 text-neutral-400 hover:text-red-600 dark:text-neutral-300 dark:hover:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                                     >
                                       <TrashIcon className="h-5 w-5" />
                                     </Button>
                                   </div>
                                 </div>
 
-                                <p className="text-sm text-gray-600">{feedback.description}</p>
+                                <p className="text-sm text-neutral-600 dark:text-neutral-300">{feedback.description}</p>
 
                                 <div className="flex items-center space-x-2">
                                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(feedback.type)}`}>

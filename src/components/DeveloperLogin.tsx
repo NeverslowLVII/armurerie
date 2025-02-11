@@ -3,11 +3,12 @@ import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
+import { DialogTitle } from '@/components/ui/dialog';
 
 interface Props {
-  open: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
+  readonly open: boolean;
+  readonly onClose: () => void;
+  readonly onSuccess: () => void;
 }
 
 const modalVariants = {
@@ -98,7 +99,7 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
             animate="visible"
             exit="exit"
           >
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity backdrop-blur-sm" />
+            <div className="fixed inset-0 bg-neutral-500 bg-opacity-75 dark:bg-neutral-900 dark:bg-opacity-75 transition-opacity backdrop-blur-sm" />
           </motion.div>
 
           <motion.div
@@ -106,44 +107,46 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+            className="relative bg-white dark:bg-neutral-800 rounded-lg shadow-xl w-full max-w-md p-6"
           >
             <div className="mb-4">
-              <Dialog.Title className="text-xl font-semibold text-gray-900">
+              <DialogTitle className="text-xl font-semibold text-neutral-900 dark:text-white">
                 Connexion Développeur
-              </Dialog.Title>
+              </DialogTitle>
             </div>
 
             {error && (
-              <div className="mb-4 p-2 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm rounded">
+              <div className="mb-4 p-2 bg-red-100 dark:bg-red-900 border-l-4 border-red-500 dark:border-red-700 text-red-700 dark:text-red-100 text-sm rounded">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="username" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                   Nom d'utilisateur
                 </label>
                 <Input
+                  id="username"
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white rounded-md"
                   required
                   disabled={isSubmitting}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                   Mot de passe
                 </label>
                 <Input
+                  id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                  className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 dark:bg-neutral-700 dark:border-neutral-600 dark:text-white rounded-md"
                   required
                   disabled={isSubmitting}
                 />
@@ -153,7 +156,7 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
                 <Button
                   type="button"
                   onClick={onClose}
-                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="inline-flex justify-center px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded-md hover:bg-neutral-50 dark:hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   disabled={isSubmitting}
                 >
                   Annuler
@@ -162,8 +165,8 @@ export default function DeveloperLogin({ open, onClose, onSuccess }: Props) {
                   type="submit"
                   className={`inline-flex justify-center px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md ${
                     isSubmitting
-                      ? 'bg-red-400'
-                      : 'bg-red-600 hover:bg-red-700'
+                      ? 'bg-red-400 dark:bg-red-500'
+                      : 'bg-red-600 dark:bg-red-700 hover:bg-red-700 dark:hover:bg-red-800'
                   } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500`}
                   disabled={isSubmitting}
                 >

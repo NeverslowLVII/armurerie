@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog } from '@headlessui/react';
+import { Dialog, DialogContent, DialogTitle, DialogPortal, DialogOverlay } from '@/components/ui/dialog';
 import { Weapon, updateWeapon } from '../services/api';
 import { useData } from '../context/DataContext';
 import { Input } from "@/components/ui/input";
@@ -7,18 +7,18 @@ import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
 
 interface EditWeaponFormProps {
-    isOpen: boolean;
-    onClose: () => void;
-    weapon: Weapon | null;
-    onWeaponUpdated: () => void;
+    readonly isOpen: boolean;
+    readonly onClose: () => void;
+    readonly weapon: Weapon | null;
+    readonly onWeaponUpdated: () => void;
 }
 
 export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdated }: EditWeaponFormProps) {
     const { baseWeapons } = useData();
-    const [employe, setEmploye] = useState(weapon?.employee?.name || '');
-    const [detenteur, setDetenteur] = useState(weapon?.detenteur || '');
-    const [nomArme, setNomArme] = useState(weapon?.nom_arme || '');
-    const [serigraphie, setSerigraphie] = useState(weapon?.serigraphie || '');
+    const [employe, setEmploye] = useState(weapon?.employee?.name ?? '');
+    const [detenteur, setDetenteur] = useState(weapon?.detenteur ?? '');
+    const [nomArme, setNomArme] = useState(weapon?.nom_arme ?? '');
+    const [serigraphie, setSerigraphie] = useState(weapon?.serigraphie ?? '');
     const [prix, setPrix] = useState(weapon ? (weapon.prix / 100).toString() : '');
     const [selectedBaseWeapon, setSelectedBaseWeapon] = useState(baseWeapons.find(w => w.nom === weapon?.nom_arme) || null);
     const [horodatage, setHorodatage] = useState(weapon ? new Date(weapon.horodateur).toISOString().slice(0, 16) : '');
@@ -86,66 +86,68 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
     };
 
     return (
-        <Dialog open={isOpen} onClose={onClose} className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="fixed inset-0 bg-black opacity-30" />
-
-                <div className="relative bg-white rounded-lg p-8 max-w-md w-full mx-4">
-                    <Dialog.Title className="text-lg font-medium mb-4">
-                        Modifier l'arme
-                    </Dialog.Title>
-
+        <Dialog open={isOpen}>
+            <DialogPortal>
+                <DialogOverlay />
+                <DialogContent className="max-w-md">
+                    <DialogTitle className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
+                        {weapon ? 'Modifier une arme' : 'Créer une nouvelle arme'}
+                    </DialogTitle>
+                    
                     {error && (
-                        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded">
                             {error}
                         </div>
                     )}
 
                     {success && (
-                        <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                        <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded">
                             Mise à jour réussie !
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} className="mt-4 space-y-4">
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="datetime" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                                 Date et heure
                             </label>
                             <Input
+                                id="datetime"
                                 type="datetime-local"
                                 value={horodatage}
                                 onChange={(e) => setHorodatage(e.target.value)}
-                                className="border p-2 rounded w-full"
+                                className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 required
                                 disabled={isLoading}
                             />
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="employee" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                                 Employé
                             </label>
                             <Input
+                                id="employee"
                                 type="text"
                                 value={employe}
                                 readOnly
-                                className="border p-2 rounded w-full bg-gray-100"
+                                className="border p-2 rounded w-full bg-neutral-100 dark:bg-neutral-600 dark:border-neutral-500"
                                 disabled={isLoading}
                             />
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="baseWeapon" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                                 Arme de base
                             </label>
                             <SelectNative
-                                value={selectedBaseWeapon?.id || ''}
+                                id="baseWeapon"
+                                value={selectedBaseWeapon?.id ?? ''}
                                 onChange={(e) => {
                                     const baseWeapon = baseWeapons.find(w => w.id === parseInt(e.target.value));
                                     handleBaseWeaponSelect(baseWeapon || null);
                                 }}
-                                className="border p-2 rounded w-full"
+                                className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 disabled={isLoading}
                             >
                                 <option value="">Sélectionner une arme de base</option>
@@ -161,28 +163,30 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="holder" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                                 Détenteur
                             </label>
                             <Input
+                                id="holder"
                                 type="text"
                                 value={detenteur}
                                 onChange={(e) => setDetenteur(e.target.value)}
-                                className="border p-2 rounded w-full"
+                                className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 required
                                 disabled={isLoading}
                             />
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="weaponName" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                                 Nom de l'arme
                             </label>
                             <Input
+                                id="weaponName"
                                 type="text"
                                 value={nomArme}
                                 onChange={(e) => setNomArme(e.target.value)}
-                                className="border p-2 rounded w-full"
+                                className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 required
                                 readOnly={!!selectedBaseWeapon}
                                 disabled={isLoading}
@@ -190,28 +194,30 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="serigraphy" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                                 Sérigraphie
                             </label>
                             <Input
+                                id="serigraphy"
                                 type="text"
                                 value={serigraphie}
                                 onChange={(e) => setSerigraphie(e.target.value)}
-                                className="border p-2 rounded w-full"
+                                className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 required
                                 disabled={isLoading}
                             />
                         </div>
 
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label htmlFor="price" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
                                 Prix (en dollars)
                             </label>
                             <Input
+                                id="price"
                                 type="number"
                                 value={prix}
                                 onChange={(e) => setPrix(e.target.value)}
-                                className="border p-2 rounded w-full"
+                                className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 required
                                 min="0"
                                 step="0.01"
@@ -223,7 +229,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <Button
                                 type="button"
                                 onClick={onClose}
-                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
+                                className="bg-neutral-500 dark:bg-neutral-700 text-white px-4 py-2 rounded hover:bg-neutral-600 dark:hover:bg-neutral-800 mr-2"
                                 disabled={isLoading}
                             >
                                 Annuler
@@ -231,7 +237,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             <Button
                                 type="submit"
                                 className={`${
-                                    isLoading ? 'bg-red-300' : 'bg-red-500 hover:bg-red-600'
+                                    isLoading ? 'bg-red-300 dark:bg-red-400' : 'bg-red-500 dark:bg-red-700 hover:bg-red-600 dark:hover:bg-red-800'
                                 } text-white px-4 py-2 rounded flex items-center`}
                                 disabled={isLoading}
                             >
@@ -247,8 +253,8 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                             </Button>
                         </div>
                     </form>
-                </div>
-            </div>
+                </DialogContent>
+            </DialogPortal>
         </Dialog>
     );
 }

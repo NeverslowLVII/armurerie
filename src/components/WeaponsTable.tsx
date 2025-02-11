@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { deleteWeapon, Weapon } from '../services/api';
-import EmployeeColorManager from './EmployeeManager';
+import EmployeeManager from './EmployeeManager';
 import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
 import { LoginDialog } from './LoginDialog';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, LockClosedIcon, LockOpenIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import BaseWeaponsManager from './BaseWeaponsManager';
+import { BaseWeaponsManager } from './BaseWeaponsManager';
 import { useData } from '../context/DataContext';
 import { hasPermission, getRoleName } from '@/utils/roles';
 import { Role } from '@/services/api';
@@ -134,7 +134,7 @@ export default function WeaponsTable() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 dark:border-neutral-300"></div>
       </div>
     );
   }
@@ -156,8 +156,8 @@ export default function WeaponsTable() {
         transition={{ duration: 0.5 }}
       >
         <div className="sm:flex-auto">
-          <h1 className="text-2xl font-semibold text-gray-900">Registre des armes</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-white">Registre des armes</h1>
+          <p className="mt-2 text-sm text-neutral-700 dark:text-neutral-300">
             Liste des armes enregistrées dans le système.
           </p>
         </div>
@@ -165,7 +165,7 @@ export default function WeaponsTable() {
           <Button
             type="button"
             onClick={() => isPatronLoggedIn ? handleLogout() : setIsLoginOpen(true)}
-            className="block rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors duration-200"
+            className="block rounded-md bg-white dark:bg-neutral-800 px-3 py-2 text-sm font-semibold text-neutral-900 dark:text-white shadow-sm ring-1 ring-inset ring-neutral-300 dark:ring-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors duration-200"
           >
             {isPatronLoggedIn ? (
               <>
@@ -184,8 +184,8 @@ export default function WeaponsTable() {
             onClick={handleManageEmployees}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
               isPatronLoggedIn && hasPermission(Role.PATRON, 'canManageEmployees')
-                ? 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
-                : 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
+                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white ring-neutral-300 dark:ring-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700'
+                : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300 ring-neutral-200 dark:ring-neutral-500 cursor-not-allowed'
             }`}
             disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canManageEmployees')}
           >
@@ -197,8 +197,8 @@ export default function WeaponsTable() {
             onClick={() => isPatronLoggedIn ? setIsBaseWeaponsOpen(true) : setIsLoginOpen(true)}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
               isPatronLoggedIn && hasPermission(Role.PATRON, 'canManageBaseWeapons')
-                ? 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
-                : 'bg-gray-100 text-gray-400 ring-gray-200 cursor-not-allowed'
+                ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white ring-neutral-300 dark:ring-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700'
+                : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300 ring-neutral-200 dark:ring-neutral-500 cursor-not-allowed'
             }`}
             disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canManageBaseWeapons')}
           >
@@ -208,7 +208,7 @@ export default function WeaponsTable() {
           <Button
             type="button"
             onClick={() => setIsAddFormOpen(true)}
-            className="block rounded-md bg-gradient-to-r from-red-600 to-orange-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:from-red-500 hover:to-orange-500 transition-all duration-200"
+            className="block rounded-md bg-gradient-to-r from-red-600 to-orange-600 dark:from-red-700 dark:to-orange-700 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:from-red-500 hover:to-orange-500 dark:hover:from-red-600 dark:hover:to-orange-600 transition-all duration-200"
           >
             Ajouter une arme
           </Button>
@@ -223,11 +223,11 @@ export default function WeaponsTable() {
       >
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <MagnifyingGlassIcon className="h-5 w-5 text-neutral-400" aria-hidden="true" />
           </div>
           <Input
             type="text"
-            className="block w-full rounded-lg border-0 py-2 pl-10 pr-3 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 transition-all duration-200"
+            className="block w-full rounded-lg border-0 py-2 pl-10 pr-3 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white ring-1 ring-inset ring-neutral-300 dark:ring-neutral-600 placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:ring-2 focus:ring-inset focus:ring-red-600 sm:text-sm sm:leading-6 transition-all duration-200"
             placeholder="Rechercher une arme, un détenteur, un employé..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -243,26 +243,26 @@ export default function WeaponsTable() {
       >
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle">
-            <div className="overflow-hidden shadow-lg ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white/80 backdrop-blur-sm">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50/50">
+            <div className="overflow-hidden shadow-lg ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white dark:bg-neutral-800">
+              <table className="min-w-full divide-y divide-neutral-300 dark:divide-neutral-700">
+                <thead className="bg-neutral-50 dark:bg-neutral-900">
                   <tr>
-                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200 sm:pl-6">
                       Date et heure
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
                       Employé
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
                       Détenteur
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
                       Nom de l'arme
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
                       Sérigraphie
                     </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
                       Prix
                     </th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -270,7 +270,7 @@ export default function WeaponsTable() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white/50">
+                <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700 bg-white dark:bg-neutral-800">
                   <AnimatePresence>
                     {currentItems.map((weapon) => (
                       <motion.tr
@@ -279,17 +279,16 @@ export default function WeaponsTable() {
                         initial="hidden"
                         animate="show"
                         exit="hidden"
-                        whileHover={{ backgroundColor: "rgba(249, 250, 251, 0.5)" }}
-                        className="transition-colors duration-200"
+                        className="hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors duration-200"
                       >
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-neutral-900 dark:text-neutral-200 sm:pl-6">
                           {new Date(weapon.horodateur).toLocaleString()}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm">
                           <motion.span
                             whileHover={{ scale: 1.05 }}
                             className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                              weapon.employee.color ? 'text-white' : 'text-gray-900 bg-gray-100'
+                              weapon.employee.color ? 'text-white' : 'text-neutral-900 bg-neutral-100'
                             }`}
                             style={weapon.employee.color ? { backgroundColor: weapon.employee.color } : {}}
                           >
@@ -299,10 +298,10 @@ export default function WeaponsTable() {
                             )}
                           </motion.span>
                         </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.detenteur}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.nom_arme}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">{weapon.serigraphie}</td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">{weapon.detenteur}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">{weapon.nom_arme}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">{weapon.serigraphie}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">
                           {(weapon.prix / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
@@ -341,7 +340,7 @@ export default function WeaponsTable() {
         transition={{ delay: 0.5 }}
       >
         <div className="flex items-center">
-          <span className="text-sm text-gray-700">
+          <span className="text-sm text-neutral-700 dark:text-neutral-300">
             Affichage de {indexOfFirstItem + 1} à {Math.min(indexOfLastItem, sortedAndFilteredWeapons.length)} sur {sortedAndFilteredWeapons.length} entrées
           </span>
         </div>
@@ -351,8 +350,8 @@ export default function WeaponsTable() {
             disabled={currentPage === 1}
             className={`px-3 py-1 rounded-md ${
               currentPage === 1
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+                ? 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300 cursor-not-allowed'
+                : 'bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 border dark:border-neutral-600'
             }`}
           >
             Précédent
@@ -363,8 +362,8 @@ export default function WeaponsTable() {
               onClick={() => paginate(index + 1)}
               className={`px-3 py-1 rounded-md ${
                 currentPage === index + 1
-                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50 border'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600 dark:bg-gradient-to-r dark:from-red-700 dark:to-orange-700 text-white'
+                  : 'bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 border dark:border-neutral-600'
               }`}
             >
               {index + 1}
@@ -375,8 +374,8 @@ export default function WeaponsTable() {
             disabled={currentPage === Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)}
             className={`px-3 py-1 rounded-md ${
               currentPage === Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+                ? 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300 cursor-not-allowed'
+                : 'bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 border dark:border-neutral-600'
             }`}
           >
             Suivant
@@ -391,12 +390,11 @@ export default function WeaponsTable() {
         error={loginError}
       />
 
-      <EmployeeColorManager
+      <EmployeeManager
         open={isColorManagerOpen}
         onClose={() => setIsColorManagerOpen(false)}
         employees={employees}
         onUpdate={async () => {
-          // Attendre que les deux mises à jour soient terminées
           await Promise.all([
             refreshEmployees(),
             refreshWeapons()

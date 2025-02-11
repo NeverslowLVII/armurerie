@@ -17,18 +17,18 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8">
+    <div className="container mx-auto py-10 bg-white dark:bg-neutral-900">
+      <h1 className="text-3xl font-bold mb-8 text-neutral-900 dark:text-white">
         Bienvenue, {session.user.name}
       </h1>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Profil</CardTitle>
+            <CardTitle className="text-neutral-900 dark:text-white">Profil</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-2 text-neutral-700 dark:text-neutral-300">
               <p>
                 <span className="font-semibold">Nom :</span> {session.user.name}
               </p>
@@ -44,14 +44,14 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Documents</CardTitle>
+            <CardTitle className="text-neutral-900 dark:text-white">Documents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-2 text-neutral-700 dark:text-neutral-300">
               <p>
                 <a
                   href="/api/contract"
-                  className="text-blue-500 hover:underline"
+                  className="text-blue-500 hover:underline dark:text-blue-400 dark:hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -65,14 +65,14 @@ export default async function DashboardPage() {
         {session.user.role === 'PATRON' && (
           <Card>
             <CardHeader>
-              <CardTitle>Administration</CardTitle>
+              <CardTitle className="text-neutral-900 dark:text-white">Administration</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-2 text-neutral-700 dark:text-neutral-300">
                 <p>
                   <a
                     href="/admin/employees"
-                    className="text-blue-500 hover:underline"
+                    className="text-blue-500 hover:underline dark:text-blue-400 dark:hover:underline"
                   >
                     Gérer les employés
                   </a>
@@ -84,4 +84,4 @@ export default async function DashboardPage() {
       </div>
     </div>
   );
-} 
+}

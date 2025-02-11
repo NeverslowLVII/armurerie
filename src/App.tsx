@@ -40,7 +40,7 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <DataProvider>
-        <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+        <div className="min-h-screen bg-white dark:bg-neutral-900 transition-colors duration-300">
           <Navbar currentPage={currentPage} onPageChange={setCurrentPage} />
 
           <main className="pt-32">
@@ -54,6 +54,7 @@ const App: React.FC = () => {
                     animate="animate"
                     exit="exit"
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="bg-white dark:bg-neutral-800 shadow-lg dark:shadow-neutral-700 rounded-lg p-6"
                   >
                     <WeaponsTable />
                   </motion.div>
@@ -65,6 +66,7 @@ const App: React.FC = () => {
                     animate="animate"
                     exit="exit"
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="bg-white dark:bg-neutral-800 shadow-lg dark:shadow-neutral-700 rounded-lg p-6"
                   >
                     <Statistics />
                   </motion.div>
@@ -77,7 +79,7 @@ const App: React.FC = () => {
           <div className="fixed bottom-4 right-4">
             <Button
               onClick={() => setIsFeedbackOpen(true)}
-              className="rounded-full bg-indigo-600 p-4 text-white shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="rounded-full bg-indigo-600 dark:bg-indigo-500 text-white shadow-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-neutral-900"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -85,7 +87,7 @@ const App: React.FC = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="h-6 w-6"
+                className="h-6 w-6 dark:text-white"
               >
                 <path
                   strokeLinecap="round"
@@ -99,7 +101,7 @@ const App: React.FC = () => {
           <FeedbackManager 
             open={isFeedbackOpen} 
             onClose={() => setIsFeedbackOpen(false)} 
-            employeeId={currentEmployeeId || 0}
+            employeeId={currentEmployeeId ?? 0}
           />
         </div>
       </DataProvider>

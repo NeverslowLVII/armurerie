@@ -16,6 +16,7 @@ import { Role } from '@/services/api';
 import { LoginDialog } from './LoginDialog';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
+
 interface WeaponStats {
     totalWeapons: number;
     totalValue: number;
@@ -122,10 +123,41 @@ const chartVariants = {
     }
 };
 
+// Determine dark mode based on the user's system preferences
+const isDarkMode = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+const tooltipContentStyle = isDarkMode
+  ? {
+      backgroundColor: 'rgba(55, 65, 81, 0.8)',
+      backdropFilter: 'blur(8px)',
+      borderRadius: '8px',
+      border: '1px solid #374151'
+    }
+  : {
+      backgroundColor: 'rgba(243, 244, 246, 0.8)',
+      backdropFilter: 'blur(8px)',
+      borderRadius: '8px',
+      border: '1px solid #d1d5db'
+    };
+
+const tooltipContentStyleEmployees = isDarkMode
+  ? {
+      backgroundColor: 'rgba(31, 41, 55, 0.8)',
+      backdropFilter: 'blur(8px)',
+      borderRadius: '8px',
+      border: '1px solid #374151'
+    }
+  : {
+      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+      backdropFilter: 'blur(8px)',
+      borderRadius: '8px',
+      border: '1px solid #E5E7EB'
+    };
+
 const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
     <motion.div
         variants={cardVariants}
-        className="relative overflow-hidden bg-gray-100 backdrop-blur-xl rounded-lg p-3 shadow-lg border border-gray-300/50 hover:shadow-xl transition-shadow duration-300"
+        className="relative overflow-hidden bg-neutral-100 dark:bg-neutral-800 backdrop-blur-xl rounded-lg p-3 shadow-lg border border-neutral-300/50 dark:border-neutral-700 hover:shadow-xl transition-shadow duration-300"
         whileHover={{ y: -2, transition: { duration: 0.2 } }}
     >
         <div className="relative flex items-center">
@@ -133,7 +165,7 @@ const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
                 <Icon className="h-4 w-4 text-white" />
             </div>
             <div className="ml-3 flex-1 min-w-0">
-                <p className="text-xs font-medium text-gray-600 truncate">{title}</p>
+                <p className="text-xs font-medium text-neutral-600 dark:text-neutral-300 truncate">{title}</p>
                 <p className="text-lg font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent mt-0.5 truncate">
                     {value}
                 </p>
@@ -383,17 +415,17 @@ export default function Statistics() {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow">
-                <LockClosedIcon className="w-12 h-12 text-gray-400 mb-4" />
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">Accès Restreint</h2>
-                <p className="text-gray-600 mb-4 text-center">
+            <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white dark:bg-neutral-900 rounded-lg shadow">
+                <LockClosedIcon className="w-12 h-12 text-neutral-400 dark:text-neutral-300 mb-4" />
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Accès Restreint</h2>
+                <p className="text-neutral-600 dark:text-neutral-300 mb-4 text-center">
                     Cette section est réservée au patron.
                     <br />
                     Veuillez vous connecter pour accéder aux statistiques.
                 </p>
                 <Button
                     onClick={() => setIsLoginDialogOpen(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-red-400"
                 >
                     Se connecter
                 </Button>
@@ -435,7 +467,7 @@ export default function Statistics() {
                     <h1 className="text-xl font-semibold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
                         Statistiques
                     </h1>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
                         Analyse détaillée du registre des armes
                     </p>
                 </div>
@@ -448,7 +480,7 @@ export default function Statistics() {
                                 className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200
                                     ${dateRange.startDate.getTime() === new Date(new Date().setDate(new Date().getDate() - preset.days)).getTime()
                                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900 bg-gray-100/80 backdrop-blur-sm'}`}
+                                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100/80 dark:bg-neutral-800/80 backdrop-blur-sm'}`}
                             >
                                 {preset.label}
                             </Button>
@@ -465,9 +497,9 @@ export default function Statistics() {
                                     startDate: newStartDate
                                 }));
                             }}
-                            className="px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                            className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 dark:bg-neutral-700 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
                         />
-                        <span className="text-gray-600 text-sm">à</span>
+                        <span className="text-neutral-600 dark:text-neutral-300 text-sm">à</span>
                         <Input
                             type="date"
                             value={dateRange.endDate.toISOString().split('T')[0]}
@@ -478,7 +510,7 @@ export default function Statistics() {
                                     endDate: newEndDate
                                 }));
                             }}
-                            className="px-2 py-1 text-sm border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                            className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 dark:bg-neutral-700 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
                         />
                     </div>
                 </div>
@@ -498,7 +530,7 @@ export default function Statistics() {
                             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
                                 activeTab === tab
                                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900 bg-gray-100/80 backdrop-blur-sm'
+                                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100/80 dark:bg-neutral-800/80 backdrop-blur-sm'
                             }`}
                         >
                             {tab === 'overview' ? 'Vue d\'ensemble' : 
@@ -580,9 +612,9 @@ export default function Statistics() {
                         {/* Daily Trends */}
                         <motion.div 
                             variants={chartVariants}
-                            className="bg-gray-100/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-gray-300"
+                            className="bg-neutral-100/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-300"
                         >
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">Ventes quotidiennes</h3>
+                            <h3 className="text-lg font-medium text-neutral-900 mb-4">Ventes quotidiennes</h3>
                             <div className="h-80">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={weaponStats.dailyStats}>
@@ -619,9 +651,9 @@ export default function Statistics() {
                         {/* Weapon Types Distribution */}
                         <motion.div 
                             variants={chartVariants}
-                            className="bg-gray-100/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-gray-300"
+                            className="bg-neutral-100/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-300"
                         >
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">Types d'armes vendues</h3>
+                            <h3 className="text-lg font-medium text-neutral-900 mb-4">Types d'armes vendues</h3>
                             <div className="h-80">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -682,16 +714,16 @@ export default function Statistics() {
                                 <motion.div
                                     key={employee.name}
                                     variants={cardVariants}
-                                    className="bg-gray-100/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-gray-300"
+                                    className="bg-neutral-100/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-neutral-300"
                                 >
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-lg font-medium text-gray-900">{employee.name}</h3>
-                                            <span className="text-sm text-gray-600">{employee.sales} ventes</span>
+                                            <h3 className="text-lg font-medium text-neutral-900">{employee.name}</h3>
+                                            <span className="text-sm text-neutral-600">{employee.sales} ventes</span>
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Bénéfice</span>
+                                                <span className="text-neutral-600">Bénéfice</span>
                                                 <span className="font-bold text-lg bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
                                                     {new Intl.NumberFormat('fr-FR', { 
                                                         style: 'currency', 
@@ -700,7 +732,7 @@ export default function Statistics() {
                                                 </span>
                                             </div>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Commission ({getCommissionRate(employee.role as Role) * 100}%)</span>
+                                                <span className="text-neutral-600">Commission ({getCommissionRate(employee.role as Role) * 100}%)</span>
                                                 <span className="font-bold text-lg text-green-500">
                                                     {new Intl.NumberFormat('fr-FR', { 
                                                         style: 'currency', 
@@ -717,9 +749,9 @@ export default function Statistics() {
                         {/* Employee Performance */}
                         <motion.div 
                             variants={chartVariants}
-                            className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-gray-100"
+                            className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-100"
                         >
-                            <h3 className="text-lg font-medium text-gray-900 mb-4">Ventes par employé</h3>
+                            <h3 className="text-lg font-medium text-neutral-900 mb-4">Ventes par employé</h3>
                             <div className="h-80">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={employeeStats.employeePerformance}>

@@ -31,7 +31,7 @@ export default async function EmployeesAdminPage() {
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Gestion des Employés</h1>
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">Gestion des Employés</h1>
         <CreateEmployeeDialog />
       </div>
 
@@ -39,15 +39,15 @@ export default async function EmployeesAdminPage() {
         {employees.map((employee: Employee) => (
           <div
             key={employee.id}
-            className="flex items-center justify-between p-4 bg-white rounded-lg shadow"
+            className="flex items-center justify-between p-4 bg-white dark:bg-neutral-800 rounded-lg shadow"
           >
             <div>
-              <h3 className="font-semibold">{employee.name}</h3>
-              <p className="text-sm text-gray-500">{employee.email}</p>
-              <p className="text-sm">
+              <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">{employee.name}</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">{employee.email}</p>
+              <p className="text-sm text-neutral-700 dark:text-neutral-300">
                 <span
                   className="inline-block w-3 h-3 rounded-full mr-2"
-                  style={{ backgroundColor: employee.color || '#ccc' }}
+                  style={{ backgroundColor: employee.color ?? '#ccc' }}
                 />
                 {employee.role}
               </p>
@@ -75,4 +75,4 @@ export default async function EmployeesAdminPage() {
       </div>
     </div>
   );
-} 
+}

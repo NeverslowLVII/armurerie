@@ -51,7 +51,7 @@ export default function SignInForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4 bg-white dark:bg-neutral-900 p-4 rounded-lg">
       <div className="space-y-2">
         <Input
           id="email"
@@ -60,6 +60,7 @@ export default function SignInForm() {
           placeholder="nom@exemple.com"
           required
           disabled={isLoading}
+          className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
         />
       </div>
       <div className="space-y-2">
@@ -70,11 +71,16 @@ export default function SignInForm() {
           placeholder="••••••••"
           required
           disabled={isLoading}
+          className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
         />
       </div>
-      <Button className="w-full" type="submit" disabled={isLoading}>
+      <Button
+        className="w-full dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+        type="submit"
+        disabled={isLoading}
+      >
         {isLoading ? 'Connexion...' : 'Se connecter'}
       </Button>
     </form>
   );
-} 
+}

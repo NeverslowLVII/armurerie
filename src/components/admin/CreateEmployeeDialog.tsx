@@ -55,7 +55,7 @@ export function CreateEmployeeDialog() {
     } catch (error) {
       toast({
         title: 'Erreur',
-        description: 'Impossible de créer l\'employé',
+        description: "Impossible de créer l'employé",
         variant: 'destructive',
       });
     } finally {
@@ -68,18 +68,19 @@ export function CreateEmployeeDialog() {
       <DialogTrigger asChild>
         <Button>Ajouter un employé</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
         <form onSubmit={onSubmit}>
           <DialogHeader>
-            <DialogTitle>Créer un compte employé</DialogTitle>
-            <DialogDescription>
-              Créez un nouveau compte pour un employé. Un email avec ses
-              identifiants lui sera envoyé.
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">
+              Créer un compte employé
+            </DialogTitle>
+            <DialogDescription className="text-neutral-700 dark:text-neutral-300">
+              Créez un nouveau compte pour un employé. Un email avec ses identifiants lui sera envoyé.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Nom</Label>
+              <Label htmlFor="name" className="dark:text-neutral-200">Nom</Label>
               <Input
                 id="name"
                 name="name"
@@ -89,7 +90,7 @@ export function CreateEmployeeDialog() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="dark:text-neutral-200">Email</Label>
               <Input
                 id="email"
                 name="email"
@@ -100,7 +101,7 @@ export function CreateEmployeeDialog() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password" className="dark:text-neutral-200">Mot de passe</Label>
               <Input
                 id="password"
                 name="password"
@@ -110,7 +111,7 @@ export function CreateEmployeeDialog() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="color">Couleur</Label>
+              <Label htmlFor="color" className="dark:text-neutral-200">Couleur</Label>
               <Input
                 id="color"
                 name="color"
@@ -119,7 +120,7 @@ export function CreateEmployeeDialog() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="contractUrl">URL du contrat</Label>
+              <Label htmlFor="contractUrl" className="dark:text-neutral-200">URL du contrat</Label>
               <Input
                 id="contractUrl"
                 name="contractUrl"
@@ -138,4 +139,4 @@ export function CreateEmployeeDialog() {
       </DialogContent>
     </Dialog>
   );
-} 
+}
