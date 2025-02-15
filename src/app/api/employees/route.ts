@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Role } from '@/services/api'
-import { isValidRole } from '@/utils/roles'
+import bcrypt from 'bcryptjs'
 
 export async function GET() {
   try {
@@ -19,29 +18,26 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    
-    // Validate role
-    if (body.role && !isValidRole(body.role)) {
-      return NextResponse.json(
-        { error: 'Invalid role. Must be EMPLOYEE, CO_PATRON, or PATRON' },
-        { status: 400 }
-      )
+    const data = await request.json()
+    if (!data.name || !data.email || !data.password) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    const hashedPassword = await bcrypt.hash(data.password, 10)
+
     const employee = await prisma.employee.create({
-      data: {
-        name: body.name,
-        color: body.color,
-        role: (body.role || Role.EMPLOYEE) as Role,
-      },
-      include: {
-        weapons: true,
-      },
+      data: ({
+        name: data.name,
+        email: data.email,
+        password: hashedPassword,
+        color: data.color,
+        role: data.role || 'EMPLOYEE'
+      } as any)
     })
-    return NextResponse.json(employee)
+
+    return NextResponse.json({ success: true, employee })
   } catch (error) {
-    console.error('Error creating employee:', error)
-    return NextResponse.json({ error: 'Error creating employee' }, { status: 500 })
+    console.error('Create employee error:', error)
+    return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 })
   }
 } 

@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       data: {
         nom: body.nom,
         prix_defaut: body.prix_defaut,
+        cout_production_defaut: body.cout_production_defaut || 0
       },
     })
     return NextResponse.json(baseWeapon)

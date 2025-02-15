@@ -123,41 +123,10 @@ const chartVariants = {
     }
 };
 
-// Determine dark mode based on the user's system preferences
-const isDarkMode = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-const tooltipContentStyle = isDarkMode
-  ? {
-      backgroundColor: 'rgba(55, 65, 81, 0.8)',
-      backdropFilter: 'blur(8px)',
-      borderRadius: '8px',
-      border: '1px solid #374151'
-    }
-  : {
-      backgroundColor: 'rgba(243, 244, 246, 0.8)',
-      backdropFilter: 'blur(8px)',
-      borderRadius: '8px',
-      border: '1px solid #d1d5db'
-    };
-
-const tooltipContentStyleEmployees = isDarkMode
-  ? {
-      backgroundColor: 'rgba(31, 41, 55, 0.8)',
-      backdropFilter: 'blur(8px)',
-      borderRadius: '8px',
-      border: '1px solid #374151'
-    }
-  : {
-      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-      backdropFilter: 'blur(8px)',
-      borderRadius: '8px',
-      border: '1px solid #E5E7EB'
-    };
-
 const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
     <motion.div
         variants={cardVariants}
-        className="relative overflow-hidden bg-neutral-100 dark:bg-neutral-800 backdrop-blur-xl rounded-lg p-3 shadow-lg border border-neutral-300/50 dark:border-neutral-700 hover:shadow-xl transition-shadow duration-300"
+        className="relative overflow-hidden bg-white dark:bg-neutral-800 backdrop-blur-xl rounded-lg p-3 shadow-lg border border-neutral-200 dark:border-neutral-700 hover:shadow-xl transition-shadow duration-300"
         whileHover={{ y: -2, transition: { duration: 0.2 } }}
     >
         <div className="relative flex items-center">
@@ -358,10 +327,8 @@ export default function Statistics() {
                     return sum + (weapon.prix - productionCost);
                 }, 0);
 
-                const taxes = Math.round(totalProfit * 0.10); // 10% d'impôts
-                const profitAfterTaxes = totalProfit - taxes;
                 const commissionRate = getCommissionRate(emp.role);
-                const commission = Math.round(profitAfterTaxes * commissionRate); // Commission calculée sur le bénéfice après impôts
+                const commission = Math.round(totalProfit * commissionRate); // Commission calculée sur le bénéfice brut
                 
                 acc.employeePerformance.push({
                     name: emp.name,
@@ -480,7 +447,7 @@ export default function Statistics() {
                                 className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200
                                     ${dateRange.startDate.getTime() === new Date(new Date().setDate(new Date().getDate() - preset.days)).getTime()
                                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100/80 dark:bg-neutral-800/80 backdrop-blur-sm'}`}
+                                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'}`}
                             >
                                 {preset.label}
                             </Button>
@@ -497,7 +464,7 @@ export default function Statistics() {
                                     startDate: newStartDate
                                 }));
                             }}
-                            className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 dark:bg-neutral-700 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
+                            className="px-2 py-1 text-sm border border-neutral-200 dark:border-neutral-700 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
                         />
                         <span className="text-neutral-600 dark:text-neutral-300 text-sm">à</span>
                         <Input
@@ -510,7 +477,7 @@ export default function Statistics() {
                                     endDate: newEndDate
                                 }));
                             }}
-                            className="px-2 py-1 text-sm border border-neutral-300 dark:border-neutral-600 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 dark:bg-neutral-700 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
+                            className="px-2 py-1 text-sm border border-neutral-200 dark:border-neutral-700 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
                         />
                     </div>
                 </div>
@@ -530,7 +497,7 @@ export default function Statistics() {
                             className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
                                 activeTab === tab
                                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-neutral-100/80 dark:bg-neutral-800/80 backdrop-blur-sm'
+                                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
                             }`}
                         >
                             {tab === 'overview' ? 'Vue d\'ensemble' : 
@@ -612,9 +579,9 @@ export default function Statistics() {
                         {/* Daily Trends */}
                         <motion.div 
                             variants={chartVariants}
-                            className="bg-neutral-100/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-300"
+                            className="bg-white dark:bg-neutral-800 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700"
                         >
-                            <h3 className="text-lg font-medium text-neutral-900 mb-4">Ventes quotidiennes</h3>
+                            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-4">Ventes quotidiennes</h3>
                             <div className="h-80">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <AreaChart data={weaponStats.dailyStats}>
@@ -624,15 +591,16 @@ export default function Statistics() {
                                                 <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
                                             </linearGradient>
                                         </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" />
-                                        <XAxis dataKey="day" stroke="#4b5563" />
-                                        <YAxis stroke="#4b5563" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#d1d5db" className="dark:stroke-neutral-600" />
+                                        <XAxis dataKey="day" stroke="#4b5563" className="dark:text-neutral-300" />
+                                        <YAxis stroke="#4b5563" className="dark:text-neutral-300" />
                                         <Tooltip 
                                             contentStyle={{ 
-                                                backgroundColor: 'rgba(243, 244, 246, 0.8)',
+                                                backgroundColor: 'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
                                                 backdropFilter: 'blur(8px)',
                                                 borderRadius: '8px',
-                                                border: '1px solid #d1d5db'
+                                                border: 'var(--tooltip-border, 1px solid #d1d5db)',
+                                                color: 'var(--tooltip-color, #1f2937)',
                                             }}
                                         />
                                         <Area
@@ -651,9 +619,9 @@ export default function Statistics() {
                         {/* Weapon Types Distribution */}
                         <motion.div 
                             variants={chartVariants}
-                            className="bg-neutral-100/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-300"
+                            className="bg-white dark:bg-neutral-800 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700"
                         >
-                            <h3 className="text-lg font-medium text-neutral-900 mb-4">Types d'armes vendues</h3>
+                            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-4">Types d'armes vendues</h3>
                             <div className="h-80">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -670,20 +638,21 @@ export default function Statistics() {
                                                 <Cell 
                                                     key={`cell-${index}`} 
                                                     fill={index < 3 
-                                                        ? `hsl(${0 + (index * 16)}, 85%, 55%)` // Tons chauds pour le top 3
-                                                        : `hsl(${90 + (index * 12)}, 60%, ${65 - (index * 2)}%)`} // Tons plus froids pour le reste
+                                                        ? `hsl(${0 + (index * 16)}, 85%, 55%)` 
+                                                        : `hsl(${90 + (index * 12)}, 60%, ${65 - (index * 2)}%)`} 
                                                 />
                                             ))}
                                         </Pie>
                                         <Tooltip 
                                             contentStyle={{ 
-                                                backgroundColor: 'rgba(243, 244, 246, 0.8)',
+                                                backgroundColor: 'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
                                                 backdropFilter: 'blur(8px)',
                                                 borderRadius: '8px',
-                                                border: '1px solid #d1d5db'
+                                                border: 'var(--tooltip-border, 1px solid #d1d5db)',
+                                                color: 'var(--tooltip-color, #1f2937)',
                                             }}
                                         />
-                                        <Legend />
+                                        <Legend className="dark:text-neutral-300" />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </div>
@@ -714,16 +683,16 @@ export default function Statistics() {
                                 <motion.div
                                     key={employee.name}
                                     variants={cardVariants}
-                                    className="bg-neutral-100/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-neutral-300"
+                                    className="bg-white dark:bg-neutral-800 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-neutral-200 dark:border-neutral-700"
                                 >
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center">
-                                            <h3 className="text-lg font-medium text-neutral-900">{employee.name}</h3>
-                                            <span className="text-sm text-neutral-600">{employee.sales} ventes</span>
+                                            <h3 className="text-lg font-medium text-neutral-900 dark:text-white">{employee.name}</h3>
+                                            <span className="text-sm text-neutral-600 dark:text-neutral-400">{employee.sales} ventes</span>
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-neutral-600">Bénéfice</span>
+                                                <span className="text-neutral-600 dark:text-neutral-400">Bénéfice</span>
                                                 <span className="font-bold text-lg bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
                                                     {new Intl.NumberFormat('fr-FR', { 
                                                         style: 'currency', 
@@ -732,8 +701,8 @@ export default function Statistics() {
                                                 </span>
                                             </div>
                                             <div className="flex justify-between items-center">
-                                                <span className="text-neutral-600">Commission ({getCommissionRate(employee.role as Role) * 100}%)</span>
-                                                <span className="font-bold text-lg text-green-500">
+                                                <span className="text-neutral-600 dark:text-neutral-400">Commission ({getCommissionRate(employee.role as Role) * 100}%)</span>
+                                                <span className="font-bold text-lg text-green-500 dark:text-green-400">
                                                     {new Intl.NumberFormat('fr-FR', { 
                                                         style: 'currency', 
                                                         currency: 'USD' 
@@ -749,9 +718,9 @@ export default function Statistics() {
                         {/* Employee Performance */}
                         <motion.div 
                             variants={chartVariants}
-                            className="bg-white/80 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-100"
+                            className="bg-white dark:bg-neutral-800 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700"
                         >
-                            <h3 className="text-lg font-medium text-neutral-900 mb-4">Ventes par employé</h3>
+                            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-4">Ventes par employé</h3>
                             <div className="h-80">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={employeeStats.employeePerformance}>
@@ -761,18 +730,19 @@ export default function Statistics() {
                                                 <stop offset="100%" stopColor="#F97316" />
                                             </linearGradient>
                                         </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                                        <XAxis dataKey="name" stroke="#6B7280" />
-                                        <YAxis stroke="#6B7280" />
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" className="dark:stroke-neutral-600" />
+                                        <XAxis dataKey="name" stroke="#6B7280" className="dark:text-neutral-300" />
+                                        <YAxis stroke="#6B7280" className="dark:text-neutral-300" />
                                         <Tooltip 
                                             contentStyle={{ 
-                                                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                                                backgroundColor: 'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
                                                 backdropFilter: 'blur(8px)',
                                                 borderRadius: '8px',
-                                                border: '1px solid #E5E7EB'
+                                                border: 'var(--tooltip-border, 1px solid #E5E7EB)',
+                                                color: 'var(--tooltip-color, #1f2937)'
                                             }}
                                         />
-                                        <Legend />
+                                        <Legend className="dark:text-neutral-300" />
                                         <Bar
                                             dataKey="count"
                                             name="Nombre d'armes vendues"

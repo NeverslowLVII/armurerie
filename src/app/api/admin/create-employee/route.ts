@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { Role } from '@prisma/client';
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     // Vérifier si l'email existe déjà
     const existingEmployee = await prisma.employee.findUnique({
-      where: { email },
+      where: { email } as any,
     });
 
     if (existingEmployee) {
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         color,
         contractUrl,
         role: Role.EMPLOYEE,
-      },
+      } as any,
     });
 
     return NextResponse.json({
@@ -58,9 +58,9 @@ export async function POST(request: Request) {
       employee: {
         id: employee.id,
         name: employee.name,
-        email: employee.email,
+        email: (employee as any).email,
         role: employee.role,
-        contractUrl: employee.contractUrl,
+        contractUrl: (employee as any).contractUrl,
       },
     });
   } catch (error) {

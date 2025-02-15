@@ -100,7 +100,7 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
       animate={isVisible ? "visible" : "hidden"}
       onAnimationComplete={() => setIsHeaderFullyVisible(isVisible)}
       style={{ opacity, scale: smoothScale, willChange: "transform, opacity" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'py-4 px-4' : 'py-6'}`}
+      className={`fixed top-0 left-0 right-0 transition-all duration-300 ${isScrolled ? 'py-4 px-4' : 'py-6'}`}
     >
       <div className="relative">
         {/* Animated morphing blob background */}

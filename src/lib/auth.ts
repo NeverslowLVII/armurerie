@@ -17,25 +17,21 @@ export const authOptions: NextAuthOptions = {
         }
 
         const employee = await prisma.employee.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email } as any,
         });
 
         if (!employee) {
           throw new Error('Invalid credentials');
         }
 
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          employee.password
-        );
-
+        const isValidPassword = await bcrypt.compare(credentials.password, (employee as any).password);
         if (!isValidPassword) {
           throw new Error('Invalid credentials');
         }
 
         return {
           id: employee.id.toString(),
-          email: employee.email,
+          email: (employee as any).email,
           name: employee.name,
           role: employee.role,
         };
@@ -64,5 +60,5 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || 'default-secret',
 }; 

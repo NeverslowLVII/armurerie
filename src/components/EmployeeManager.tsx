@@ -7,6 +7,8 @@ import { PencilIcon, CheckIcon, XMarkIcon, PlusIcon, TrashIcon } from '@heroicon
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
+import { Role } from '@prisma/client';
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -96,11 +98,13 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
   const dispatch = useAppDispatch();
   const [editingEmployee, setEditingEmployee] = useState<string | null>(null);
   const [tempColor, setTempColor] = useState('#000000');
-  const [tempRole, setTempRole] = useState('');
+  const [tempRole, setTempRole] = useState<Role>(Role.EMPLOYEE);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newEmployeeName, setNewEmployeeName] = useState('');
+  const [newEmployeeEmail, setNewEmployeeEmail] = useState('');
+  const [newEmployeePassword, setNewEmployeePassword] = useState('');
 
   const handleEmployeeUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +129,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
       // Reset form
       setNewEmployeeName('');
       setTempColor('#000000');
-      setTempRole('');
+      setTempRole(Role.EMPLOYEE);
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       setError('Erreur lors de la mise à jour de l\'employé');
@@ -144,7 +148,7 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
       setTimeout(() => {
         setTempColor(employee.color || '#000000');
         setTimeout(() => {
-          setTempRole(employee.role || '');
+          setTempRole(employee.role as Role);
         }, 100);
       }, 100);
     }, 100);
@@ -157,15 +161,19 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
     try {
       await dispatch(updateEmployee({ 
         data: { 
-          name: newEmployeeName, 
+          name: newEmployeeName,
+          email: newEmployeeEmail,
+          password: newEmployeePassword, 
           color: tempColor,
           role: tempRole,
         }
       }));
       await onUpdate();
       setNewEmployeeName('');
+      setNewEmployeeEmail('');
+      setNewEmployeePassword('');
       setTempColor('#000000');
-      setTempRole('');
+      setTempRole(Role.EMPLOYEE);
       setSuccess('Employé ajouté avec succès !');
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
@@ -179,8 +187,10 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
   const handleCancel = () => {
     setEditingEmployee(null);
     setNewEmployeeName('');
+    setNewEmployeeEmail('');
+    setNewEmployeePassword('');
     setTempColor('#000000');
-    setTempRole('');
+    setTempRole(Role.EMPLOYEE);
   };
 
   const handleDeleteEmployee = async (employee: any) => {
@@ -296,6 +306,38 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                       </motion.div>
                     </div>
 
+                    {!editingEmployee && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                            Email
+                          </label>
+                          <Input
+                            type="email"
+                            value={newEmployeeEmail}
+                            onChange={(e) => setNewEmployeeEmail(e.target.value)}
+                            className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 dark:border-neutral-600 rounded-md dark:bg-neutral-700 dark:text-white"
+                            required
+                            disabled={isSubmitting}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                            Mot de passe
+                          </label>
+                          <Input
+                            type="password"
+                            value={newEmployeePassword}
+                            onChange={(e) => setNewEmployeePassword(e.target.value)}
+                            className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 dark:border-neutral-600 rounded-md dark:bg-neutral-700 dark:text-white"
+                            required
+                            disabled={isSubmitting}
+                          />
+                        </div>
+                      </>
+                    )}
+
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                         Rôle
@@ -308,15 +350,14 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                       >
                         <SelectNative
                           value={tempRole}
-                          onChange={(e) => setTempRole(e.target.value)}
-                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 dark:border-neutral-600 rounded-md dark:bg-neutral-700 dark:text-white"
+                          onChange={(e) => setTempRole(e.target.value as Role)}
+                          className="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-neutral-300 rounded-md dark:bg-neutral-800 dark:border-neutral-600 dark:text-white"
                           required
                           disabled={isSubmitting}
                         >
-                          <option value="">Sélectionner un rôle</option>
-                          <option value="EMPLOYEE">Employé</option>
-                          <option value="CO_PATRON">Co-Patron</option>
-                          <option value="PATRON">Patron</option>
+                          <option value={Role.EMPLOYEE}>Employé</option>
+                          <option value={Role.CO_PATRON}>Co-Patron</option>
+                          <option value={Role.PATRON}>Patron</option>
                         </SelectNative>
                       </motion.div>
                     </div>
@@ -476,13 +517,12 @@ export default function EmployeeManager({ open, onClose, employees, onUpdate }: 
                                     </label>
                                     <SelectNative
                                       value={tempRole}
-                                      onChange={(e) => setTempRole(e.target.value)}
+                                      onChange={(e) => setTempRole(e.target.value as Role)}
                                       className="w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 dark:bg-neutral-700 dark:text-white"
                                     >
-                                      <option value="">Sélectionner un rôle</option>
-                                      <option value="EMPLOYEE">Employé</option>
-                                      <option value="CO_PATRON">Co-Patron</option>
-                                      <option value="PATRON">Patron</option>
+                                      <option value={Role.EMPLOYEE}>Employé</option>
+                                      <option value={Role.CO_PATRON}>Co-Patron</option>
+                                      <option value={Role.PATRON}>Patron</option>
                                     </SelectNative>
                                   </div>
                                   <div>

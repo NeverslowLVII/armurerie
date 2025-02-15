@@ -76,48 +76,6 @@ const successVariants = {
     }
 };
 
-const modalVariants = {
-    hidden: { 
-        opacity: 0,
-        scale: 0.95,
-        y: 20
-    },
-    visible: { 
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        transition: {
-            type: "spring",
-            duration: 0.3,
-            bounce: 0.25
-        }
-    },
-    exit: {
-        opacity: 0,
-        scale: 0.95,
-        y: 20,
-        transition: {
-            duration: 0.2
-        }
-    }
-};
-
-const overlayVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-        opacity: 1,
-        transition: {
-            duration: 0.2
-        }
-    },
-    exit: {
-        opacity: 0,
-        transition: {
-            duration: 0.2
-        }
-    }
-};
-
 const textVariants = {
     initial: { 
         opacity: 0,

@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const employee = await prisma.employee.findUnique({
       where: { id: parseInt(session.user.id) },
-      select: { contractUrl: true },
+      select: ({ contractUrl: true } as any),
     });
 
     if (!employee || !employee.contractUrl) {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Rediriger vers l'URL du contrat
-    return NextResponse.redirect(employee.contractUrl);
+    return NextResponse.redirect(employee.contractUrl as any);
   } catch (error) {
     console.error('Get contract error:', error);
     return NextResponse.json(

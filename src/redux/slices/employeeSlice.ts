@@ -1,10 +1,14 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { Role } from '@prisma/client';
 
-interface Employee {
+export interface Employee {
   id: number;
   name: string;
-  color: string;
-  role?: string;
+  color: string | null;
+  role: Role;
+  email: string;
+  password?: string;
+  contractUrl?: string | null;
 }
 
 interface EmployeeState {
@@ -115,9 +119,17 @@ const employeeSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch employees';
       })
       // Update employee
+      .addCase(updateEmployee.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateEmployee.fulfilled, (state, action) => {
-        const employee = action.payload;
-        state.employees[employee.name] = employee;
+        state.loading = false;
+        state.employees[action.payload.id] = action.payload;
+      })
+      .addCase(updateEmployee.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update employee';
       })
       // Merge employees
       .addCase(mergeEmployees.fulfilled, (state, action) => {
@@ -128,13 +140,17 @@ const employeeSlice = createSlice({
         state.employees[targetEmployee.name] = targetEmployee;
       })
       // Delete employee
+      .addCase(deleteEmployee.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteEmployee.fulfilled, (state, action) => {
-        const employeeToDelete = Object.entries(state.employees).find(
-          ([_, employee]) => employee.id === action.payload
-        );
-        if (employeeToDelete) {
-          delete state.employees[employeeToDelete[0]];
-        }
+        state.loading = false;
+        delete state.employees[action.payload];
+      })
+      .addCase(deleteEmployee.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to delete employee';
       });
   },
 });
