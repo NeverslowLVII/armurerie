@@ -204,9 +204,17 @@ export default function Statistics() {
         }
     }, [dateRange, isAuthenticated]);
 
-    const handleLogin = async (password: string) => {
+    const handleLogin = async (user: {
+        id: number;
+        email?: string;
+        username?: string;
+        name: string;
+        role: string;
+        color?: string;
+        contractUrl?: string;
+    }) => {
         setError(null);
-        if (password === 'patron123') {
+        if (user.role === 'PATRON' || user.role === 'CO_PATRON') {
             setIsAuthenticated(true);
             if (typeof window !== 'undefined') {
                 localStorage.setItem('patronAuth', 'true');
@@ -214,7 +222,7 @@ export default function Statistics() {
             setIsLoginDialogOpen(false);
             await fetchData();
         } else {
-            setError("Mot de passe incorrect.");
+            setError("Accès non autorisé - Seuls les patrons peuvent accéder aux statistiques");
         }
     };
 
@@ -408,8 +416,7 @@ export default function Statistics() {
                 <LoginDialog
                     isOpen={isLoginDialogOpen}
                     onClose={() => setIsLoginDialogOpen(false)}
-                    onLogin={handleLogin}
-                    error={error}
+                    onSuccess={handleLogin}
                 />
             </div>
         );
@@ -432,7 +439,12 @@ export default function Statistics() {
     }
 
     return (
-        <div className="px-2 sm:px-4">
+        <div className="container mx-auto px-4 py-8">
+            <LoginDialog
+                isOpen={isLoginDialogOpen}
+                onClose={() => setIsLoginDialogOpen(false)}
+                onSuccess={handleLogin}
+            />
             <motion.div 
                 className="sm:flex sm:items-center mb-4"
                 initial={{ opacity: 0, y: -20 }}

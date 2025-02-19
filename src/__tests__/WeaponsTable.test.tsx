@@ -2,7 +2,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import WeaponsTable from '@/components/WeaponsTable';
 import { useData } from '@/context/DataContext';
-import { Weapon, BaseWeapon, Employee, Role, deleteWeapon } from '@/services/api';
+import { Weapon, Employee, Role, deleteWeapon } from '@/services/api';
 import { waitFor } from '@testing-library/react';
 
 // Mock framer-motion

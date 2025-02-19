@@ -45,16 +45,24 @@ export default function WeaponsTable() {
   const [itemsPerPage] = useState(10);
   const [loginError, setLoginError] = useState<string | null>(null);
   
-  const handleLogin = async (password: string) => {
+  const handleLogin = async (user: {
+    id: number;
+    email?: string;
+    username?: string;
+    name: string;
+    role: string;
+    color?: string;
+    contractUrl?: string;
+  }) => {
     setLoginError(null);
-    if (password === 'patron123') {
+    if (user.role === 'PATRON' || user.role === 'CO_PATRON') {
       setIsPatronLoggedIn(true);
       if (typeof window !== 'undefined') {
         localStorage.setItem('patronAuth', 'true');
       }
       setIsLoginOpen(false);
     } else {
-      setLoginError("Mot de passe incorrect.");
+      setLoginError("Accès non autorisé - Seuls les patrons peuvent effectuer cette action");
     }
   };
 
@@ -390,8 +398,7 @@ export default function WeaponsTable() {
       <LoginDialog
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
-        onLogin={handleLogin}
-        error={loginError}
+        onSuccess={handleLogin}
       />
 
       <EmployeeManager

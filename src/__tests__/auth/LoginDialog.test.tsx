@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 
 // Mock UI components
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children, open, onOpenChange }: { children: ReactNode; open: boolean; onOpenChange: (open: boolean) => void }) => (
+  Dialog: ({ children, open }: { children: ReactNode; open: boolean }) => (
     open ? <div role="dialog">{children}</div> : null
   ),
   DialogContent: ({ children, className }: { children: ReactNode; className?: string }) => (

@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Statistics from '@/components/Statistics';
 import { getWeapons, getEmployees } from '@/services/api';
-import { formatCurrency, formatDate, formatPercentage } from '../utils/format';
+import { formatCurrency } from '../utils/format';
 
 // Mock the API functions
 jest.mock('@/services/api', () => ({

@@ -9,8 +9,9 @@ axios.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
 
 export enum Role {
   EMPLOYEE = "EMPLOYEE",
-  CO_PATRON = "CO_PATRON",
-  PATRON = "PATRON"
+  DEVELOPER = "DEVELOPER",
+  PATRON = "PATRON",
+  CO_PATRON = "CO_PATRON"
 }
 
 export interface Employee {

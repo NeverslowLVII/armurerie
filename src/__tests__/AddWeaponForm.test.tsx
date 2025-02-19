@@ -6,7 +6,7 @@ import { createWeapon, Employee, Role } from '@/services/api';
 
 // Mock UI components
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children, open, onOpenChange }: any) => (
+  Dialog: ({ children, open }: any) => (
     open ? <div role="dialog">{children}</div> : null
   ),
   DialogContent: ({ children }: any) => <div>{children}</div>,

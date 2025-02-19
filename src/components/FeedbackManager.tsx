@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import DeveloperLogin from './DeveloperLogin';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
+import { LoginDialog } from './LoginDialog';
+import { Role } from '@/services/api';
 
 interface Props {
   open: boolean;
@@ -110,30 +111,43 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isDeveloper, setIsDeveloper] = useState(false);
-  const [showDeveloperLogin, setShowDeveloperLogin] = useState(false);
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   useEffect(() => {
     const checkDeveloperStatus = async () => {
       try {
-        const response = await fetch('/api/auth/developer');
+        const response = await fetch('/api/auth');
         if (response.ok) {
-          setIsDeveloper(true);
+          const data = await response.json();
+          setIsDeveloper(data.user?.role === Role.DEVELOPER);
         }
       } catch (error) {
         console.error('Error checking developer status:', error);
       }
     };
 
-    checkDeveloperStatus();
-  }, []);
+    if (open) {
+      checkDeveloperStatus();
+    }
+  }, [open]);
 
-  const handleDeveloperLogin = () => {
-    setShowDeveloperLogin(true);
-  };
-
-  const handleDeveloperLoginSuccess = () => {
-    setIsDeveloper(true);
-    fetchFeedbacks();
+  const handleLogin = async (user: {
+    id: number;
+    email?: string;
+    username?: string;
+    name: string;
+    role: Role;
+    color?: string;
+    contractUrl?: string;
+  }) => {
+    if (user.role === Role.DEVELOPER) {
+      setIsDeveloper(true);
+      setIsLoginDialogOpen(false);
+      fetchFeedbacks();
+    } else {
+      setError("Accès non autorisé - Seuls les développeurs peuvent accéder à cette section");
+      setIsLoginDialogOpen(false);
+    }
   };
 
   const fetchFeedbacks = async () => {
@@ -290,7 +304,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                   <div className="flex items-center space-x-4">
                     {!isDeveloper && (
                       <Button
-                        onClick={handleDeveloperLogin}
+                        onClick={() => setIsLoginDialogOpen(true)}
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         Connexion développeur
@@ -516,10 +530,10 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
         </Dialog>
       </AnimatePresence>
 
-      <DeveloperLogin
-        open={showDeveloperLogin}
-        onClose={() => setShowDeveloperLogin(false)}
-        onSuccess={handleDeveloperLoginSuccess}
+      <LoginDialog
+        isOpen={isLoginDialogOpen}
+        onClose={() => setIsLoginDialogOpen(false)}
+        onSuccess={handleLogin}
       />
     </>
   );
