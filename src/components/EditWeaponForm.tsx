@@ -86,10 +86,13 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
     };
 
     return (
-        <Dialog open={isOpen}>
+        <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogPortal>
                 <DialogOverlay />
-                <DialogContent className="max-w-md">
+                <DialogContent
+                    className="sm:max-w-[425px]"
+                    data-testid="edit-weapon-form"
+                >
                     <DialogTitle className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
                         {weapon ? 'Modifier une arme' : 'Créer une nouvelle arme'}
                     </DialogTitle>

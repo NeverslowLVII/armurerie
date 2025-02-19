@@ -134,7 +134,7 @@ export default function WeaponsTable() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 dark:border-neutral-300"></div>
+        <div data-testid="loading-spinner" className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 dark:border-neutral-300"></div>
       </div>
     );
   }
@@ -310,15 +310,19 @@ export default function WeaponsTable() {
                               onClick={() => handleEdit(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
                               disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canEditWeapons')}
+                              title="Modifier l'arme"
                             >
-                              <PencilIcon className="h-5 w-5" />
+                              <span className="sr-only">Modifier l'arme</span>
+                              <PencilIcon className="h-5 w-5" aria-hidden="true" />
                             </Button>
                             <Button
                               onClick={() => handleDelete(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
                               disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canDeleteWeapons')}
+                              title="Supprimer l'arme"
                             >
-                              <TrashIcon className="h-5 w-5" />
+                              <span className="sr-only">Supprimer l'arme</span>
+                              <TrashIcon className="h-5 w-5" aria-hidden="true" />
                             </Button>
                           </div>
                         </td>

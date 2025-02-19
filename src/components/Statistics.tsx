@@ -179,9 +179,11 @@ export default function Statistics() {
         employeePerformance: []
     });
     const [activeTab, setActiveTab] = useState<TabType>('overview');
-    const [dateRange, setDateRange] = useState<DateRange>({
-        startDate: new Date(new Date().setDate(new Date().getDate() - 30)),
-        endDate: new Date()
+    const [dateRange, setDateRange] = useState<DateRange>(() => {
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(endDate.getDate() - 30);
+        return { startDate, endDate };
     });
 
     // Check authentication on mount
@@ -380,6 +382,13 @@ export default function Statistics() {
         });
     };
 
+    const formatDateForInput = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white dark:bg-neutral-900 rounded-lg shadow">
@@ -453,32 +462,35 @@ export default function Statistics() {
                             </Button>
                         ))}
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Input
-                            type="date"
-                            value={dateRange.startDate.toISOString().split('T')[0]}
-                            onChange={(e) => {
-                                const newStartDate = new Date(e.target.value);
-                                setDateRange(prev => ({
+                    <div className="flex gap-2">
+                        <div>
+                            <label htmlFor="start-date" className="sr-only">Date de début</label>
+                            <Input
+                                id="start-date"
+                                type="date"
+                                value={formatDateForInput(dateRange.startDate)}
+                                onChange={(e) => setDateRange(prev => ({
                                     ...prev,
-                                    startDate: newStartDate
-                                }));
-                            }}
-                            className="px-2 py-1 text-sm border border-neutral-200 dark:border-neutral-700 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
-                        />
-                        <span className="text-neutral-600 dark:text-neutral-300 text-sm">à</span>
-                        <Input
-                            type="date"
-                            value={dateRange.endDate.toISOString().split('T')[0]}
-                            onChange={(e) => {
-                                const newEndDate = new Date(e.target.value);
-                                setDateRange(prev => ({
+                                    startDate: new Date(e.target.value)
+                                }))}
+                                className="px-2 py-1 text-sm border border-neutral-200 dark:border-neutral-700 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
+                                aria-label="Date de début"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="end-date" className="sr-only">Date de fin</label>
+                            <Input
+                                id="end-date"
+                                type="date"
+                                value={formatDateForInput(dateRange.endDate)}
+                                onChange={(e) => setDateRange(prev => ({
                                     ...prev,
-                                    endDate: newEndDate
-                                }));
-                            }}
-                            className="px-2 py-1 text-sm border border-neutral-200 dark:border-neutral-700 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
-                        />
+                                    endDate: new Date(e.target.value)
+                                }))}
+                                className="px-2 py-1 text-sm border border-neutral-200 dark:border-neutral-700 rounded shadow-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white dark:focus:ring-red-400 dark:focus:border-red-400"
+                                aria-label="Date de fin"
+                            />
+                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -489,21 +501,49 @@ export default function Statistics() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
             >
-                <nav className="flex gap-2">
-                    {(['overview', 'weapons', 'employees'] as TabType[]).map((tab) => (
-                        <Button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
-                                activeTab === tab
-                                    ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                    : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
-                            }`}
-                        >
-                            {tab === 'overview' ? 'Vue d\'ensemble' : 
-                             tab === 'weapons' ? 'Armes' : 'Employés'}
-                        </Button>
-                    ))}
+                <nav className="flex gap-2" role="tablist" aria-label="Sections des statistiques">
+                    <button
+                        role="tab"
+                        aria-selected={activeTab === 'overview'}
+                        aria-controls="overview-panel"
+                        id="overview-tab"
+                        onClick={() => setActiveTab('overview')}
+                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
+                            activeTab === 'overview'
+                                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
+                                : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
+                        }`}
+                    >
+                        Vue d'ensemble
+                    </button>
+                    <button
+                        role="tab"
+                        aria-selected={activeTab === 'weapons'}
+                        aria-controls="weapons-panel"
+                        id="weapons-tab"
+                        onClick={() => setActiveTab('weapons')}
+                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
+                            activeTab === 'weapons'
+                                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
+                                : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
+                        }`}
+                    >
+                        Armes
+                    </button>
+                    <button
+                        role="tab"
+                        aria-selected={activeTab === 'employees'}
+                        aria-controls="employees-panel"
+                        id="employees-tab"
+                        onClick={() => setActiveTab('employees')}
+                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
+                            activeTab === 'employees'
+                                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
+                                : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
+                        }`}
+                    >
+                        Employés
+                    </button>
                 </nav>
             </motion.div>
 
@@ -511,6 +551,9 @@ export default function Statistics() {
                 {activeTab === 'overview' && (
                     <motion.div
                         key="overview"
+                        role="tabpanel"
+                        aria-labelledby="overview-tab"
+                        id="overview-panel"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
@@ -562,6 +605,9 @@ export default function Statistics() {
                 {activeTab === 'weapons' && (
                     <motion.div
                         key="weapons"
+                        role="tabpanel"
+                        aria-labelledby="weapons-tab"
+                        id="weapons-panel"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
@@ -663,6 +709,9 @@ export default function Statistics() {
                 {activeTab === 'employees' && (
                     <motion.div
                         key="employees"
+                        role="tabpanel"
+                        aria-labelledby="employees-tab"
+                        id="employees-panel"
                         initial="hidden"
                         animate="visible"
                         exit="hidden"
