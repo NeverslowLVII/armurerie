@@ -24,7 +24,7 @@ export async function GET(
     const weapon = await prisma.weapon.findUnique({
       where: { id },
       include: {
-        employee: true,
+        user: true,
         base_weapon: true
       }
     })
@@ -88,9 +88,9 @@ export async function PUT(
           ...(data.detenteur && { detenteur: data.detenteur }),
           ...(data.serigraphie && { serigraphie: data.serigraphie }),
           ...(data.prix && { prix: data.prix }),
-          ...(data.employe_id && { 
-            employee: {
-              connect: { id: parseInt(data.employe_id) }
+          ...(data.user_id && { 
+            user: {
+              connect: { id: parseInt(data.user_id) }
             }
           }),
           base_weapon: {
@@ -98,7 +98,7 @@ export async function PUT(
           }
         },
         include: {
-          employee: true,
+          user: true,
           base_weapon: true
         }
       })

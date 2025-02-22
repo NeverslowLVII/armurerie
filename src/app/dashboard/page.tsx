@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
-  title: 'Tableau de bord - Armurie',
+  title: 'Tableau de bord - Armurerie',
   description: 'Votre espace personnel',
 };
 

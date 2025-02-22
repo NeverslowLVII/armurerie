@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { Role } from '@prisma/client';
+import { Role } from '@/services/api';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== 'PATRON') {
       return NextResponse.json(
-        { error: 'Unauthorized - Only PATRON can create employee accounts' },
+        { error: 'Unauthorized - Only PATRON can create user accounts' },
         { status: 403 }
       );
     }
@@ -27,11 +27,11 @@ export async function POST(request: Request) {
     }
 
     // Vérifier si l'email existe déjà
-    const existingEmployee = await prisma.employee.findUnique({
+    const existingUser = await prisma.user.findUnique({
       where: { email } as any,
     });
 
-    if (existingEmployee) {
+    if (existingUser) {
       return NextResponse.json(
         { error: 'Email already exists' },
         { status: 400 }
@@ -41,8 +41,8 @@ export async function POST(request: Request) {
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Créer l'employé
-    const employee = await prisma.employee.create({
+    // Créer l'utilisateur
+    const user = await prisma.user.create({
       data: {
         name,
         email,
@@ -55,18 +55,18 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      employee: {
-        id: employee.id,
-        name: employee.name,
-        email: (employee as any).email,
-        role: employee.role,
-        contractUrl: (employee as any).contractUrl,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: (user as any).email,
+        role: user.role,
+        contractUrl: (user as any).contractUrl,
       },
     });
   } catch (error) {
-    console.error('Create employee error:', error);
+    console.error('Create user error:', error);
     return NextResponse.json(
-      { error: 'Failed to create employee account' },
+      { error: 'Failed to create user account' },
       { status: 500 }
     );
   }

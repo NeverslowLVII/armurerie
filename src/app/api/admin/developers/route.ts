@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { Role } from '@/services/api';
 
 export async function GET() {
   try {
@@ -15,7 +16,10 @@ export async function GET() {
       );
     }
 
-    const developers = await prisma.developer.findMany({
+    const developers = await prisma.user.findMany({
+      where: {
+        role: Role.DEVELOPER
+      },
       select: {
         id: true,
         username: true,
@@ -55,7 +59,7 @@ export async function POST(request: Request) {
     }
 
     // Check if username already exists
-    const existingDeveloper = await prisma.developer.findUnique({
+    const existingDeveloper = await prisma.user.findUnique({
       where: { username },
     });
 
@@ -70,11 +74,13 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create developer
-    const developer = await prisma.developer.create({
+    const developer = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
         name,
+        role: Role.DEVELOPER,
+        email: `${username}@armurerie.dev`, // Generate a default email for developers
       },
       select: {
         id: true,

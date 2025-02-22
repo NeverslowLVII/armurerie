@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useMemo } from 'react';
 
 interface Employee {
   id: number;
@@ -35,13 +35,6 @@ interface EmployeeContextType {
   mergeEmployees: (names: string[], targetName: string) => Promise<void>;
   getEmployee: (name: string) => Promise<Employee | undefined>;
 }
-
-const initialState: EmployeeState = {
-  employees: new Map(),
-  isLoading: false,
-  error: null,
-  initialized: false,
-};
 
 const EmployeeContext = createContext<EmployeeContextType | undefined>(undefined);
 
@@ -83,87 +76,70 @@ function employeeReducer(state: EmployeeState, action: EmployeeAction): Employee
 }
 
 export function EmployeeProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(employeeReducer, initialState);
-  const storageKey = 'employeeColors';
-  const currentVersion = 1;
+  const [state, dispatch] = useReducer(employeeReducer, {
+    employees: new Map(),
+    isLoading: false,
+    error: null,
+    initialized: false,
+  });
 
-  // Storage utilities
-  const storage = {
-    isAvailable: false,
-    
+  const storage = useMemo(() => ({
     init() {
-      if (typeof window === 'undefined') {
-        this.isAvailable = false;
-        return;
-      }
-
-      try {
-        const testKey = '__storage_test__';
-        localStorage.setItem(testKey, testKey);
-        localStorage.removeItem(testKey);
-        this.isAvailable = true;
-      } catch (e) {
-        this.isAvailable = false;
-        console.warn('localStorage is not available:', e);
+      if (typeof window === 'undefined') return;
+      const version = localStorage.getItem('employeeStorageVersion');
+      if (!version) {
+        localStorage.setItem('employeeStorageVersion', '1');
       }
     },
 
     validateEmployee(emp: unknown): emp is Employee {
-      if (!emp || typeof emp !== 'object') return false;
-      const employee = emp as Record<string, unknown>;
-      return (
-        typeof employee.name === 'string' &&
-        typeof employee.color === 'string' &&
-        employee.color.match(/^#[0-9A-Fa-f]{6}$/) !== null &&
-        typeof employee.id === 'number' &&
-        (employee.role === undefined || typeof employee.role === 'string')
-      );
+      return typeof emp === 'object' && emp !== null &&
+        'id' in emp && typeof (emp as any).id === 'number' &&
+        'name' in emp && typeof (emp as any).name === 'string' &&
+        'color' in emp && typeof (emp as any).color === 'string';
     },
 
     validateStorageData(data: unknown): data is StorageData {
-      if (!data || typeof data !== 'object') return false;
-      const storageData = data as StorageData;
-      if (storageData.version !== currentVersion) return false;
-      if (!storageData.employees || typeof storageData.employees !== 'object') return false;
-      return Object.values(storageData.employees).every(emp => this.validateEmployee(emp));
+      return typeof data === 'object' && data !== null &&
+        'version' in data && (data as any).version === 1 &&
+        'employees' in data && typeof (data as any).employees === 'object';
     },
 
     save(employees: Map<string, Employee>) {
-      if (!this.isAvailable) return;
+      if (typeof window === 'undefined') return;
       try {
         const data: StorageData = {
-          version: currentVersion,
-          employees: Object.fromEntries(employees),
+          version: 1,
+          employees: Object.fromEntries(employees)
         };
-        localStorage.setItem(storageKey, JSON.stringify(data));
+        localStorage.setItem('employees', JSON.stringify(data));
       } catch (error) {
-        console.error('Failed to save to localStorage:', error);
+        console.error('Error saving employees to localStorage:', error);
       }
     },
 
     load(): Map<string, Employee> {
-      if (!this.isAvailable) return new Map();
+      if (typeof window === 'undefined') return new Map();
       try {
-        const data = localStorage.getItem(storageKey);
-        if (!data) return new Map();
+        const data = JSON.parse(localStorage.getItem('employees') || '{}');
+        if (!this.validateStorageData(data)) return new Map();
         
-        const parsed = JSON.parse(data);
-        if (!this.validateStorageData(parsed)) {
-          localStorage.removeItem(storageKey);
-          return new Map();
-        }
-        
-        return new Map(Object.entries(parsed.employees));
+        const employees = new Map<string, Employee>();
+        Object.entries(data.employees).forEach(([name, emp]) => {
+          if (this.validateEmployee(emp)) {
+            employees.set(name, emp);
+          }
+        });
+        return employees;
       } catch (error) {
-        console.error('Failed to load from localStorage:', error);
+        console.error('Error loading employees from localStorage:', error);
         return new Map();
       }
-    },
-  };
+    }
+  }), []);
 
-  // Initialize storage and load data
-  useEffect(() => {
-    async function initialize() {
+  const initialize = useCallback(async () => {
+    if (!state.initialized) {
       storage.init();
       dispatch({ type: 'SET_LOADING', payload: true });
       
@@ -189,9 +165,11 @@ export function EmployeeProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'SET_INITIALIZED', payload: true });
       }
     }
+  }, [state.initialized, storage]);
 
+  useEffect(() => {
     initialize();
-  }, []);
+  }, [initialize]);
 
   // API methods
   const setEmployeeColor = async (name: string, color: string) => {

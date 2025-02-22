@@ -13,8 +13,8 @@ interface AddWeaponFormProps {
 }
 
 export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWeaponFormProps) {
-    const { employees, baseWeapons } = useData();
-    const [selectedEmployee, setSelectedEmployee] = useState<typeof employees[0] | null>(null);
+    const { users, baseWeapons } = useData();
+    const [selectedUser, setSelectedUser] = useState<typeof users[0] | null>(null);
     const [selectedBaseWeapon, setSelectedBaseWeapon] = useState<typeof baseWeapons[0] | null>(null);
     const [detenteur, setDetenteur] = useState('');
     const [serigraphie, setSerigraphie] = useState('');
@@ -24,7 +24,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
     const [success, setSuccess] = useState(false);
 
     const resetForm = () => {
-        setSelectedEmployee(null);
+        setSelectedUser(null);
         setSelectedBaseWeapon(null);
         setDetenteur('');
         setSerigraphie('');
@@ -36,7 +36,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedEmployee || !selectedBaseWeapon) return;
+        if (!selectedUser || !selectedBaseWeapon) return;
 
         setIsLoading(true);
         setError(null);
@@ -44,7 +44,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
 
         try {
             await createWeapon({
-                employe_id: selectedEmployee.id,
+                user_id: selectedUser.id,
                 detenteur,
                 nom_arme: selectedBaseWeapon.nom,
                 serigraphie,
@@ -96,24 +96,24 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label htmlFor="employee" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                            Employé
+                        <label htmlFor="user" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                            Utilisateur
                         </label>
                         <SelectNative
-                            id="employee"
-                            value={selectedEmployee?.id ?? ''}
+                            id="user"
+                            value={selectedUser?.id ?? ''}
                             onChange={(e) => {
-                                const employee = employees.find(emp => emp.id === parseInt(e.target.value));
-                                setSelectedEmployee(employee || null);
+                                const user = users.find(u => u.id === parseInt(e.target.value));
+                                setSelectedUser(user || null);
                             }}
                             className="border p-2 rounded w-full dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
                             required
                             disabled={isLoading}
                         >
-                            <option value="">Sélectionner un employé</option>
-                            {employees.map((employee) => (
-                                <option key={employee.id} value={employee.id}>
-                                    {employee.name}
+                            <option value="">Sélectionner un utilisateur</option>
+                            {users.map((user) => (
+                                <option key={user.id} value={user.id}>
+                                    {user.name}
                                 </option>
                             ))}
                         </SelectNative>

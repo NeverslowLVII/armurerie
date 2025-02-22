@@ -15,7 +15,7 @@ interface EditWeaponFormProps {
 
 export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdated }: EditWeaponFormProps) {
     const { baseWeapons } = useData();
-    const [employe, setEmploye] = useState(weapon?.employee?.name ?? '');
+    const [user, setUser] = useState(weapon?.user?.name ?? '');
     const [detenteur, setDetenteur] = useState(weapon?.detenteur ?? '');
     const [nomArme, setNomArme] = useState(weapon?.nom_arme ?? '');
     const [serigraphie, setSerigraphie] = useState(weapon?.serigraphie ?? '');
@@ -28,7 +28,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
 
     useEffect(() => {
         if (weapon) {
-            setEmploye(weapon.employee.name);
+            setUser(weapon.user.name);
             setDetenteur(weapon.detenteur);
             setNomArme(weapon.nom_arme);
             setSerigraphie(weapon.serigraphie);
@@ -57,7 +57,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
 
             await updateWeapon(weapon.id, {
                 horodateur: new Date(horodatage).toISOString(),
-                employe_id: weapon.employe_id,
+                user_id: weapon.user_id,
                 detenteur,
                 nom_arme: selectedBaseWeapon ? selectedBaseWeapon.nom : nomArme,
                 serigraphie,
@@ -126,13 +126,13 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                         </div>
 
                         <div className="mb-4">
-                            <label htmlFor="employee" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                                Employé
+                            <label htmlFor="user" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                Utilisateur
                             </label>
                             <Input
-                                id="employee"
+                                id="user"
                                 type="text"
-                                value={employe}
+                                value={user}
                                 readOnly
                                 className="border p-2 rounded w-full bg-neutral-100 dark:bg-neutral-600 dark:border-neutral-500"
                                 disabled={isLoading}
@@ -182,7 +182,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
 
                         <div className="mb-4">
                             <label htmlFor="weaponName" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                                Nom de l'arme
+                                Nom de l&apos;arme
                             </label>
                             <Input
                                 id="weaponName"

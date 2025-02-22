@@ -4,18 +4,22 @@ import {
   useScroll,
   useTransform,
   useSpring,
-  type Variants
+  type Variants,
+  AnimatePresence
 } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useTheme } from 'next-themes';
 import {
   SunIcon,
   MoonIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowRightOnRectangleIcon,
+  ChartBarIcon,
+  RocketLaunchIcon
 } from '@heroicons/react/24/outline';
+import { signOut } from 'next-auth/react';
 import Tilt from 'react-parallax-tilt';
-import Ripples from 'react-ripples';
 
 interface NavbarProps {
   readonly currentPage: 'weapons' | 'statistics';
@@ -27,16 +31,20 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHeaderFullyVisible, setIsHeaderFullyVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const lastScrollTime = useRef(Date.now());
+  const scrollVelocity = useRef(0);
+  const ticking = useRef(false);
 
   const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 50], [1, 1]);
+  const opacity = useTransform(scrollY, [0, 50], [1, 0.98]);
 
-  const rawBlur = useTransform(scrollY, [0, 50], [8, 12]);
-  const smoothBlur = useSpring(rawBlur, { stiffness: 150, damping: 20 });
+  const rawBlur = useTransform(scrollY, [0, 50], [12, 16]);
+  const smoothBlur = useSpring(rawBlur, { stiffness: 300, damping: 15 });
   const smoothBackdrop = useTransform(smoothBlur, (value) => `blur(${value}px)`);
 
   const rawScale = useTransform(scrollY, [0, 50], [1, 0.98]);
-  const smoothScale = useSpring(rawScale, { stiffness: 150, damping: 20 });
+  const smoothScale = useSpring(rawScale, { stiffness: 300, damping: 15 });
 
   const { resolvedTheme, setTheme } = useTheme();
   const toggleTheme = () => {
@@ -44,53 +52,90 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
   };
 
   useEffect(() => {
-    let lastScrollY = window.scrollY;
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 20);
-      if (currentScrollY < lastScrollY) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY) {
-        setIsVisible(false);
+      if (!ticking.current) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const currentTime = Date.now();
+          const timeDiff = currentTime - lastScrollTime.current;
+          
+          // Calculer la vélocité du scroll (pixels/ms)
+          scrollVelocity.current = Math.abs(currentScrollY - lastScrollY.current) / timeDiff;
+          
+          // Seuil de vélocité pour une réaction plus rapide
+          const isQuickScroll = scrollVelocity.current > 0.5;
+          
+          if (currentScrollY < 50) {
+            setIsVisible(true);
+            setIsScrolled(false);
+          } else {
+            setIsScrolled(true);
+            if (currentScrollY < lastScrollY.current) {
+              // Scroll vers le haut - réaction immédiate
+              setIsVisible(true);
+            } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+              // Scroll vers le bas - cacher seulement si le scroll est rapide
+              if (isQuickScroll) {
+                setIsVisible(false);
+              }
+            }
+          }
+
+          lastScrollY.current = currentScrollY;
+          lastScrollTime.current = currentTime;
+          ticking.current = false;
+        });
+
+        ticking.current = true;
       }
-      lastScrollY = currentScrollY;
     };
-    window.addEventListener('scroll', handleScroll);
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navVariants: Variants = {
-    hidden: { y: -100 },
+    hidden: { 
+      y: -100, 
+      opacity: 0,
+      transition: {
+        duration: 0.15,
+        ease: [0.4, 0, 0.2, 1]
+      }
+    },
     visible: {
       y: 0,
-      transition: { type: 'spring', stiffness: 100, damping: 20, mass: 1 }
+      opacity: 1,
+      transition: {
+        duration: 0.15,
+        ease: [0.4, 0, 0.2, 1]
+      }
     }
   };
 
   const linkVariants: Variants = {
     initial: { scale: 1 },
-    hover: { scale: 1.1, transition: { type: 'spring', stiffness: 400, damping: 10 } },
+    hover: { scale: 1.05, transition: { type: 'spring', stiffness: 400, damping: 10 } },
     tap: { scale: 0.95 }
   };
 
-  const blobVariants: Variants = {
-    animate: {
-      d: [
-        "M0 100 C 50 150, 150 50, 300 100 C 450 150, 550 50, 600 100 L600 0 L0 0 Z",
-        "M0 100 C 50 50, 150 150, 300 100 C 450 50, 550 150, 600 100 L600 0 L0 0 Z"
-      ],
-      transition: {
-        duration: 10,
-        ease: "easeInOut",
-        repeat: Infinity,
-        repeatType: "mirror" as const
-      }
+  const mobileMenuVariants: Variants = {
+    hidden: { opacity: 0, y: -20, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { 
+        type: 'spring', 
+        stiffness: 300, 
+        damping: 30,
+        staggerChildren: 0.1 
+      } 
     }
   };
 
-  const mobileMenuVariants: Variants = {
-    hidden: { opacity: 0, y: -50 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 30 } }
+  const handleSignOut = async () => {
+    await signOut({ redirect: true, callbackUrl: '/auth/signin' });
   };
 
   return (
@@ -100,159 +145,210 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
       animate={isVisible ? "visible" : "hidden"}
       onAnimationComplete={() => setIsHeaderFullyVisible(isVisible)}
       style={{ opacity, scale: smoothScale, willChange: "transform, opacity" }}
-      className={`fixed top-0 left-0 right-0 transition-all duration-300 ${isScrolled ? 'py-4 px-4' : 'py-6'}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-150 ${isScrolled ? 'py-2' : 'py-4'}`}
     >
-      <div className="relative">
-        {/* Animated morphing blob background */}
-        <motion.svg
-          viewBox="0 0 600 100"
-          className="absolute top-0 left-0 w-full h-full"
-          style={{ pointerEvents: "none", willChange: "transform" }}
-        >
-          <motion.path
-            variants={blobVariants}
-            animate="animate"
-            fill="url(#gradient)"
-          />
-          <defs>
-            <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#ff5858" />
-              <stop offset="100%" stopColor="#f09819" />
-            </linearGradient>
-          </defs>
-        </motion.svg>
+      <motion.nav
+        style={{ backdropFilter: smoothBackdrop, willChange: "backdrop-filter" }}
+        className="relative mx-auto max-w-7xl px-6 bg-white/80 dark:bg-neutral-900/80 rounded-2xl border border-white/20 dark:border-neutral-800/50 shadow-lg shadow-black/5 dark:shadow-white/5"
+      >
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center">
+            <Tilt 
+              tiltMaxAngleX={10} 
+              tiltMaxAngleY={10}
+              scale={1.05}
+              transitionSpeed={2500}
+              className="relative"
+            >
+              <motion.div
+                className="flex-shrink-0 relative"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <h1 className="text-3xl font-black bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-transparent drop-shadow-sm">
+                  Armurerie
+                </h1>
+                <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+              </motion.div>
+            </Tilt>
 
-        <motion.nav
-          style={{ backdropFilter: smoothBackdrop, willChange: "backdrop-filter" }}
-          className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 bg-white dark:bg-neutral-800 rounded-2xl border border-white/20 dark:border-neutral-700 shadow-lg"
-        >
-          <div className="flex h-16 items-center justify-between">
-            {/* Brand section with 3D tilt effect */}
-            <div className="flex items-center">
-              <Tilt tiltMaxAngleX={10} tiltMaxAngleY={10}>
+            {/* Desktop Navigation Links */}
+            <div className="hidden md:flex ml-12 items-center space-x-8">
+              {[
+                { id: 'weapons', label: 'Armes', icon: RocketLaunchIcon },
+                { id: 'statistics', label: 'Statistiques', icon: ChartBarIcon }
+              ].map(({ id, label, icon: Icon }) => (
                 <motion.div
-                  className="flex-shrink-0"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  key={id}
+                  variants={linkVariants}
+                  initial="initial"
+                  whileHover="hover"
+                  whileTap="tap"
+                  className="relative"
                 >
-                  <h1 className="text-3xl font-extrabold bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
-                    Armurerie
-                  </h1>
-                </motion.div>
-              </Tilt>
-
-              {/* Desktop Navigation Links */}
-              <div className="hidden md:flex ml-10 items-center space-x-8">
-                {(['weapons', 'statistics'] as const).map((page) => (
                   <motion.div
-                    key={page}
-                    variants={linkVariants}
-                    initial="initial"
-                    whileHover="hover"
-                    whileTap="tap"
-                    className="relative"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="relative overflow-hidden rounded-lg"
                   >
-                    <Ripples
-                      during={1200}
-                      color="rgba(255, 0, 0, 0.2)"
-                      placeholder={null}
-                      onPointerEnterCapture={() => { }}
-                      onPointerLeaveCapture={() => { }}
-                    >
-                      <Button
-                        onClick={() => {
-                          onPageChange(page);
-                          if (mobileMenuOpen) setMobileMenuOpen(false);
-                        }}
-                        className={`relative px-3 py-2 text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileHover={{ opacity: 0.1 }}
+                      className={`absolute inset-0 ${
+                        resolvedTheme === 'dark' 
+                          ? 'bg-red-500' 
+                          : 'bg-red-200'
+                      }`}
+                    />
+                    <Button
+                      onClick={() => {
+                        onPageChange(id as 'weapons' | 'statistics');
+                        if (mobileMenuOpen) setMobileMenuOpen(false);
+                      }}
+                      variant="ghost"
+                      className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg flex items-center gap-2
+                        ${currentPage === id
+                          ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+                          : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
                         }`}
-                      >
-                        {page === 'weapons' ? 'Armes' : 'Statistiques'}
-                      </Button>
-                    </Ripples>
-                    {currentPage === page && isHeaderFullyVisible && (
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Button>
+                  </motion.div>
+                  <AnimatePresence>
+                    {currentPage === id && isHeaderFullyVisible && (
                       <motion.div
                         layoutId="navbar-indicator"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500"
+                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                       />
                     )}
-                  </motion.div>
-                ))}
-
-                {/* Theme Toggle Button */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={toggleTheme}
-                  className="p-2 rounded-md focus:outline-none hover:bg-neutral-100 dark:hover:bg-neutral-700"
-                >
-                  {resolvedTheme === 'dark' ? (
-                    <SunIcon className="h-6 w-6 text-yellow-500" />
-                  ) : (
-                    <MoonIcon className="h-6 w-6 text-blue-500" />
-                  )}
-                </motion.button>
-              </div>
-            </div>
-
-            {/* Mobile Menu Toggle Button */}
-            <div className="md:hidden flex items-center">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-md focus:outline-none hover:bg-neutral-100 dark:hover:bg-neutral-700"
-              >
-                {mobileMenuOpen ? (
-                  <XMarkIcon className="h-6 w-6 text-neutral-900 dark:text-white" />
-                ) : (
-                  <Bars3Icon className="h-6 w-6 text-neutral-900 dark:text-white" />
-                )}
-              </motion.button>
+                  </AnimatePresence>
+                </motion.div>
+              ))}
             </div>
           </div>
 
-          {/* Mobile Menu Items */}
-          {mobileMenuOpen && (
-            <motion.div
-              className="md:hidden mt-4 flex flex-col space-y-4"
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={mobileMenuVariants}
+          {/* Right side buttons */}
+          <div className="hidden md:flex items-center space-x-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={toggleTheme}
+              className="p-2 rounded-lg transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
-              {(['weapons', 'statistics'] as const).map((page) => (
-                <motion.div key={page} variants={linkVariants} whileHover="hover" whileTap="tap">
-                  <Button
-                    onClick={() => {
-                      onPageChange(page);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2 text-sm font-medium transition-colors ${
-                      currentPage === page
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {page === 'weapons' ? 'Armes' : 'Statistiques'}
-                  </Button>
-                </motion.div>
-              ))}
-              <motion.div whileHover="hover" whileTap="tap">
+              {resolvedTheme === 'dark' ? (
+                <SunIcon className="h-5 w-5 text-amber-500" />
+              ) : (
+                <MoonIcon className="h-5 w-5 text-blue-500" />
+              )}
+            </motion.button>
+
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleSignOut}
+                className="rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors duration-200"
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+              </Button>
+            </motion.div>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            >
+              {mobileMenuOpen ? (
+                <XMarkIcon className="h-6 w-6 text-neutral-900 dark:text-white" />
+              ) : (
+                <Bars3Icon className="h-6 w-6 text-neutral-900 dark:text-white" />
+              )}
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            className="md:hidden py-4 space-y-2"
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={mobileMenuVariants}
+          >
+            {[
+              { id: 'weapons', label: 'Armes', icon: RocketLaunchIcon },
+              { id: 'statistics', label: 'Statistiques', icon: ChartBarIcon }
+            ].map(({ id, label, icon: Icon }) => (
+              <motion.div
+                key={id}
+                variants={linkVariants}
+                whileHover="hover"
+                whileTap="tap"
+                className="w-full"
+              >
                 <Button
-                  onClick={toggleTheme}
-                  className="w-full text-left px-4 py-2 text-sm font-medium transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                  onClick={() => {
+                    onPageChange(id as 'weapons' | 'statistics');
+                    setMobileMenuOpen(false);
+                  }}
+                  variant="ghost"
+                  className={`w-full justify-start gap-2 ${
+                    currentPage === id
+                      ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+                      : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                  }`}
                 >
-                  {resolvedTheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  <Icon className="h-4 w-4" />
+                  {label}
                 </Button>
               </motion.div>
+            ))}
+            <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
+              <Button
+                onClick={toggleTheme}
+                variant="ghost"
+                className="w-full justify-start gap-2"
+              >
+                {resolvedTheme === 'dark' ? (
+                  <>
+                    <SunIcon className="h-4 w-4 text-amber-500" />
+                    Mode clair
+                  </>
+                ) : (
+                  <>
+                    <MoonIcon className="h-4 w-4 text-blue-500" />
+                    Mode sombre
+                  </>
+                )}
+              </Button>
             </motion.div>
-          )}
-        </motion.nav>
-      </div>
+            <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
+              <Button
+                onClick={handleSignOut}
+                variant="ghost"
+                className="w-full justify-start gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+              >
+                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                Déconnexion
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </motion.nav>
     </motion.header>
   );
 }

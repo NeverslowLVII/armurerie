@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getWeapons, getEmployees } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -13,9 +13,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { getCommissionRate } from '@/utils/roles';
 import { Role } from '@/services/api';
-import { LoginDialog } from './LoginDialog';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
 
 interface WeaponStats {
     totalWeapons: number;
@@ -49,8 +49,8 @@ interface BaseWeapon {
 interface Weapon {
     id: number;
     horodateur: string;
-    employe_id: number;
-    employee: { name: string };
+    user_id: number;
+    user: { name: string };
     detenteur: string;
     nom_arme: string;
     serigraphie: string;
@@ -151,8 +151,7 @@ const PERIOD_PRESETS = [
 ];
 
 export default function Statistics() {
-    const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const { data: session } = useSession();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [weaponStats, setWeaponStats] = useState<WeaponStats>({
@@ -186,54 +185,19 @@ export default function Statistics() {
         return { startDate, endDate };
     });
 
-    // Check authentication on mount
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const patronAuth = localStorage.getItem('patronAuth');
-            if (patronAuth === 'true') {
-                setIsAuthenticated(true);
-                fetchData();
-            }
-        }
-    }, []);
-
-    // Fetch data when date range changes and user is authenticated
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchData();
-        }
-    }, [dateRange, isAuthenticated]);
-
-    const handleLogin = async (user: {
-        id: number;
-        email?: string;
-        username?: string;
-        name: string;
-        role: string;
-        color?: string;
-        contractUrl?: string;
-    }) => {
-        setError(null);
-        if (user.role === 'PATRON' || user.role === 'CO_PATRON') {
-            setIsAuthenticated(true);
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('patronAuth', 'true');
-            }
-            setIsLoginDialogOpen(false);
-            await fetchData();
-        } else {
-            setError("Accès non autorisé - Seuls les patrons peuvent accéder aux statistiques");
-        }
-    };
-
-    const filterDataByDateRange = (data: Weapon[]) => {
+    const filterDataByDateRange = useCallback((data: Weapon[]) => {
+        const start = new Date(dateRange.startDate);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(dateRange.endDate);
+        end.setHours(23, 59, 59, 999);
+        
         return data.filter(weapon => {
             const date = new Date(weapon.horodateur);
-            return date >= dateRange.startDate && date <= dateRange.endDate;
+            return date >= start && date <= end;
         });
-    };
+    }, [dateRange.startDate, dateRange.endDate]);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             console.log('Starting data fetch...');
             setLoading(true);
@@ -309,7 +273,7 @@ export default function Statistics() {
             const totalTaxes = Math.round(totalProfit * 0.10); // 10% d'impôts
             const profitAfterTaxes = totalProfit - totalTaxes;
 
-            setWeaponStats({
+            const newWeaponStats = {
                 totalWeapons: filteredWeapons.length,
                 totalValue,
                 totalCostProduction,
@@ -323,14 +287,16 @@ export default function Statistics() {
                 weaponTypes,
                 dailyStats,
                 profitByType
-            });
+            };
+
+            setWeaponStats(newWeaponStats);
 
             // Calculer les statistiques des employés
             const employeeStats = employeesData.reduce<{
                 employeePerformance: { name: string; count: number }[];
                 employeeProfits: { name: string; profit: number; sales: number; commission: number; role: string }[];
             }>((acc, emp) => {
-                const empWeapons = filteredWeapons.filter(w => w.employee.name === emp.name);
+                const empWeapons = filteredWeapons.filter(w => w.user.name === emp.name);
                 
                 const totalProfit = empWeapons.reduce((sum, weapon) => {
                     const productionCost = weapon.base_weapon?.cout_production_defaut || 0;
@@ -338,7 +304,7 @@ export default function Statistics() {
                 }, 0);
 
                 const commissionRate = getCommissionRate(emp.role);
-                const commission = Math.round(totalProfit * commissionRate); // Commission calculée sur le bénéfice brut
+                const commission = Math.round(totalProfit * commissionRate);
                 
                 acc.employeePerformance.push({
                     name: emp.name,
@@ -373,12 +339,18 @@ export default function Statistics() {
             console.log('Setting final stats:', { weaponStats, employeeStats });
             setLoading(false);
             setError(null);
-        } catch (err) {
-            console.error('Error fetching statistics:', err);
+        } catch (error) {
+            console.error('Error fetching statistics:', error);
             setError('Erreur lors du chargement des statistiques');
             setLoading(false);
         }
-    };
+    }, [filterDataByDateRange, setWeaponStats, setEmployeeStats, setLoading, setError]);
+
+    useEffect(() => {
+        if (session?.user.role === Role.PATRON || session?.user.role === Role.CO_PATRON) {
+            fetchData();
+        }
+    }, [dateRange.startDate, dateRange.endDate, session?.user.role, fetchData]);
 
     const handlePresetClick = (days: number) => {
         const endDate = new Date();
@@ -397,31 +369,6 @@ export default function Statistics() {
         return `${year}-${month}-${day}`;
     };
 
-    if (!isAuthenticated) {
-        return (
-            <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white dark:bg-neutral-900 rounded-lg shadow">
-                <LockClosedIcon className="w-12 h-12 text-neutral-400 dark:text-neutral-300 mb-4" />
-                <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Accès Restreint</h2>
-                <p className="text-neutral-600 dark:text-neutral-300 mb-4 text-center">
-                    Cette section est réservée au patron.
-                    <br />
-                    Veuillez vous connecter pour accéder aux statistiques.
-                </p>
-                <Button
-                    onClick={() => setIsLoginDialogOpen(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-red-400"
-                >
-                    Se connecter
-                </Button>
-                <LoginDialog
-                    isOpen={isLoginDialogOpen}
-                    onClose={() => setIsLoginDialogOpen(false)}
-                    onSuccess={handleLogin}
-                />
-            </div>
-        );
-    }
-
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -438,13 +385,20 @@ export default function Statistics() {
         );
     }
 
+    if (!session || (session.user.role !== Role.PATRON && session.user.role !== Role.CO_PATRON)) {
+        return (
+            <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white dark:bg-neutral-900 rounded-lg shadow">
+                <LockClosedIcon className="w-12 h-12 text-neutral-400 dark:text-neutral-300 mb-4" />
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Accès Restreint</h2>
+                <p className="text-neutral-600 dark:text-neutral-300 mb-4 text-center">
+                    Cette section est réservée au patron.
+                </p>
+            </div>
+        );
+    }
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <LoginDialog
-                isOpen={isLoginDialogOpen}
-                onClose={() => setIsLoginDialogOpen(false)}
-                onSuccess={handleLogin}
-            />
             <motion.div 
                 className="sm:flex sm:items-center mb-4"
                 initial={{ opacity: 0, y: -20 }}
@@ -526,7 +480,7 @@ export default function Statistics() {
                                 : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
                         }`}
                     >
-                        Vue d'ensemble
+                        Vue d&apos;ensemble
                     </button>
                     <button
                         role="tab"
@@ -581,7 +535,7 @@ export default function Statistics() {
                         className="grid grid-cols-2 lg:grid-cols-5 gap-3"
                     >
                         <StatCard
-                            title="Chiffre d'affaires total"
+                            title="Chiffre d&apos;affaires total"
                             value={new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'USD' }).format(weaponStats.totalValue / 100)}
                             icon={CurrencyDollarIcon}
                         />
@@ -664,7 +618,7 @@ export default function Statistics() {
                                         <Area
                                             type="monotone"
                                             dataKey="count"
-                                            name="Nombre d'armes"
+                                            name="Nombre d&apos;armes"
                                             stroke="#ef4444"
                                             fillOpacity={1}
                                             fill="url(#colorCount)"
@@ -679,7 +633,7 @@ export default function Statistics() {
                             variants={chartVariants}
                             className="bg-white dark:bg-neutral-800 backdrop-blur-sm p-6 rounded-xl shadow-lg border border-neutral-200 dark:border-neutral-700"
                         >
-                            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-4">Types d'armes vendues</h3>
+                            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-4">Types d&apos;armes vendues</h3>
                             <div className="h-80">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
@@ -806,7 +760,7 @@ export default function Statistics() {
                                         <Legend className="dark:text-neutral-300" />
                                         <Bar
                                             dataKey="count"
-                                            name="Nombre d'armes vendues"
+                                            name="Nombre d&apos;armes vendues"
                                             fill="url(#barGradient)"
                                             radius={[4, 4, 0, 0]}
                                         />

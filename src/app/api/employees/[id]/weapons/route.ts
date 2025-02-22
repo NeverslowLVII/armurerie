@@ -3,42 +3,42 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    // Parse employee ID
-    const employeeId = parseInt(params.id)
-    if (isNaN(employeeId)) {
-      console.error('Invalid employee ID:', params.id)
+    // Parse user ID
+    const userId = parseInt(params.id)
+    if (isNaN(userId)) {
+      console.error('Invalid user ID:', params.id)
       return NextResponse.json(
-        { error: 'Invalid employee ID', employe_id: params.id },
+        { error: 'Invalid user ID', user_id: params.id },
         { status: 400 }
       )
     }
 
-    // Validate employee exists
-    const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+    // Validate user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
     })
-    if (!employee) {
-      console.error('Employee not found:', employeeId)
+    if (!user) {
+      console.error('User not found:', userId)
       return NextResponse.json(
-        { error: 'Employee not found', employe_id: employeeId },
+        { error: 'User not found', user_id: userId },
         { status: 404 }
       )
     }
 
-    // Get weapons for employee
+    // Get weapons for user
     const weapons = await prisma.weapon.findMany({
-      where: { employe_id: employeeId },
+      where: { user_id: userId },
       include: {
-        employee: true,
+        user: true,
         base_weapon: true
       }
     })
 
     return NextResponse.json(weapons)
   } catch (error) {
-    console.error('Get employee weapons error:', error)
+    console.error('Get user weapons error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch employee weapons' },
+      { error: 'Failed to fetch user weapons' },
       { status: 500 }
     )
   }

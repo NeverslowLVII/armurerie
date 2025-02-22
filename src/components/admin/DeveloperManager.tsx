@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { Input } from "@/components/ui/input";
@@ -49,13 +49,7 @@ export default function DeveloperManager({ open, onClose }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (open) {
-      fetchDevelopers();
-    }
-  }, [open]);
-
-  const fetchDevelopers = async () => {
+  const fetchDevelopers = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/developers');
       if (!response.ok) throw new Error('Failed to fetch developers');
@@ -68,7 +62,13 @@ export default function DeveloperManager({ open, onClose }: Props) {
         variant: "destructive",
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (open) {
+      fetchDevelopers();
+    }
+  }, [open, fetchDevelopers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,7 +196,7 @@ export default function DeveloperManager({ open, onClose }: Props) {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    Nom d'utilisateur
+                    Nom d&apos;utilisateur
                   </label>
                   <Input
                     type="text"

@@ -1,41 +1,16 @@
-import { Metadata } from 'next';
-import SignInForm from '@/components/auth/SignInForm';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Connexion Employé - Armurie',
-  description: 'Connectez-vous à votre espace employé',
-};
+import { Suspense } from 'react';
+import SignInPage from '@/components/auth/SignInPage';
 
-export default function SignInPage() {
+export default function Page() {
   return (
-    <div className="container relative h-screen flex-col items-center justify-center grid bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
-      <div className="relative hidden h-full flex-col bg-muted dark:bg-neutral-800 p-10 text-white lg:flex dark:border-r dark:border-neutral-700">
-        <div className="absolute inset-0 bg-zinc-900 dark:bg-zinc-700" />
-        <div className="relative z-20 flex items-center text-lg font-medium text-white dark:text-neutral-200">
-          Armurerie
-        </div>
-        <div className="relative z-20 mt-auto">
-          <blockquote className="space-y-2">
-            <p className="text-lg text-white dark:text-neutral-300">
-              "La meilleure armurie de tout le royaume."
-            </p>
-            <footer className="text-sm text-white dark:text-neutral-400">Sora</footer>
-          </blockquote>
-        </div>
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
       </div>
-      <div className="lg:p-8">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-          <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white">
-              Connexion Employé
-            </h1>
-            <p className="text-sm text-muted-foreground dark:text-neutral-300">
-              Entrez vos identifiants pour accéder à votre espace
-            </p>
-          </div>
-          <SignInForm />
-        </div>
-      </div>
-    </div>
+    }>
+      <SignInPage />
+    </Suspense>
   );
 }

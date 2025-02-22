@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 
-export function CreateEmployeeDialog() {
+export function CreateUserDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -36,7 +36,7 @@ export function CreateEmployeeDialog() {
     };
 
     try {
-      const response = await fetch('/api/admin/create-employee', {
+      const response = await fetch('/api/admin/create-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,19 +45,19 @@ export function CreateEmployeeDialog() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create employee');
+        throw new Error('Failed to create user');
       }
 
       toast({
         title: 'Succès',
-        description: 'Employé créé avec succès',
+        description: 'Utilisateur créé avec succès',
       });
       setIsOpen(false);
       router.refresh();
     } catch (error) {
       toast({
         title: 'Erreur',
-        description: "Impossible de créer l'employé",
+        description: "Impossible de créer l'utilisateur",
         variant: 'destructive',
       });
     } finally {
@@ -68,16 +68,16 @@ export function CreateEmployeeDialog() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>Ajouter un employé</Button>
+        <Button>Ajouter un utilisateur</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle className="text-neutral-900 dark:text-neutral-100">
-              Créer un compte employé
+              Créer un compte utilisateur
             </DialogTitle>
             <DialogDescription className="text-neutral-700 dark:text-neutral-300">
-              Créez un nouveau compte pour un employé. Un email avec ses identifiants lui sera envoyé.
+              Créez un nouveau compte pour un utilisateur. Un email avec ses identifiants lui sera envoyé.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -141,4 +141,4 @@ export function CreateEmployeeDialog() {
       </DialogContent>
     </Dialog>
   );
-}
+} 

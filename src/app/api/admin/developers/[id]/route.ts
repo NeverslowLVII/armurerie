@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { Role } from '@/services/api';
 
 export async function PUT(
   request: Request,
@@ -30,9 +31,10 @@ export async function PUT(
     }
 
     // Check if username already exists for a different developer
-    const existingDeveloper = await prisma.developer.findFirst({
+    const existingDeveloper = await prisma.user.findFirst({
       where: {
         username,
+        role: Role.DEVELOPER,
         NOT: {
           id,
         },
@@ -57,7 +59,7 @@ export async function PUT(
       updateData.password = await bcrypt.hash(password, 10);
     }
 
-    const developer = await prisma.developer.update({
+    const developer = await prisma.user.update({
       where: { id },
       data: updateData,
       select: {
@@ -94,11 +96,11 @@ export async function DELETE(
     const id = parseInt(params.id);
 
     // Check if developer exists
-    const developer = await prisma.developer.findUnique({
+    const developer = await prisma.user.findUnique({
       where: { id },
     });
 
-    if (!developer) {
+    if (!developer || developer.role !== Role.DEVELOPER) {
       return NextResponse.json(
         { error: 'Developer not found' },
         { status: 404 }
@@ -106,7 +108,7 @@ export async function DELETE(
     }
 
     // Delete developer
-    await prisma.developer.delete({
+    await prisma.user.delete({
       where: { id },
     });
 

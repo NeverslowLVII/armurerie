@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const weapons = await prisma.weapon.findMany({
       include: {
-        employee: true,
+        user: true,
         base_weapon: true
       }
     })
@@ -21,7 +21,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   let data: any;
-  let employeeId: number;
+  let userId: number;
   let baseWeapon: { prix_defaut: number } | null;
   let createWeaponData: any;
   
@@ -30,9 +30,9 @@ export async function POST(request: NextRequest) {
     console.log('Creating weapon with data:', JSON.stringify(data, null, 2))
 
     // Validate required fields
-    if (!data.employe_id || !data.nom_arme || !data.serigraphie) {
+    if (!data.user_id || !data.nom_arme || !data.serigraphie) {
       const missing = [];
-      if (!data.employe_id) missing.push('employe_id');
+      if (!data.user_id) missing.push('user_id');
       if (!data.nom_arme) missing.push('nom_arme');
       if (!data.serigraphie) missing.push('serigraphie');
       
@@ -43,24 +43,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Parse employee ID
-    employeeId = parseInt(data.employe_id)
-    if (isNaN(employeeId)) {
-      console.error('Invalid employee ID:', data.employe_id)
+    // Parse user ID
+    userId = parseInt(data.user_id)
+    if (isNaN(userId)) {
+      console.error('Invalid user ID:', data.user_id)
       return NextResponse.json(
-        { error: 'Invalid employee ID', employe_id: data.employe_id },
+        { error: 'Invalid user ID', user_id: data.user_id },
         { status: 400 }
       )
     }
 
-    // Validate employee exists
-    const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+    // Validate user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
     })
-    if (!employee) {
-      console.error('Employee not found:', employeeId)
+    if (!user) {
+      console.error('User not found:', userId)
       return NextResponse.json(
-        { error: 'Employee not found', employe_id: employeeId },
+        { error: 'User not found', user_id: userId },
         { status: 404 }
       )
     }
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     createWeaponData = {
       horodateur: data.horodateur ? new Date(data.horodateur) : new Date(),
-      employe_id: employeeId,
+      user_id: userId,
       detenteur: data.detenteur || '',
       nom_arme: data.nom_arme,
       serigraphie: data.serigraphie,
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     const weapon = await prisma.weapon.create({
       data: createWeaponData,
       include: {
-        employee: true,
+        user: true,
         base_weapon: true
       }
     })
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
           const weapon = await prisma.weapon.create({
             data: createWeaponData,
             include: {
-              employee: true,
+              user: true,
               base_weapon: true
             }
           });

@@ -1,16 +1,17 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getWeapons, getEmployees, getBaseWeapons, Weapon, Employee, BaseWeapon } from '../services/api';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { getWeapons, getUsers, getBaseWeapons, Weapon, User, BaseWeapon } from '../services/api';
+import { useSession } from 'next-auth/react';
 
 interface DataContextType {
   weapons: Weapon[];
-  employees: Employee[];
+  users: User[];
   baseWeapons: BaseWeapon[];
   loading: boolean;
   error: string | null;
   refreshWeapons: () => Promise<void>;
-  refreshEmployees: () => Promise<void>;
+  refreshUsers: () => Promise<void>;
   refreshBaseWeapons: () => Promise<void>;
   refreshAll: () => Promise<void>;
 }
@@ -18,71 +19,78 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({ children }: { children: ReactNode }) {
+  const { status } = useSession();
   const [weapons, setWeapons] = useState<Weapon[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [baseWeapons, setBaseWeapons] = useState<BaseWeapon[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshWeapons = async () => {
+  const refreshWeapons = useCallback(async () => {
     try {
       const data = await getWeapons();
       setWeapons(data);
-      setError(null);
-    } catch (err) {
-      setError('Erreur lors du chargement des armes');
-      console.error('Error fetching weapons:', err);
+    } catch (error) {
+      console.error('Error fetching weapons:', error);
+      setError('Error fetching weapons');
     }
-  };
+  }, []);
 
-  const refreshEmployees = async () => {
+  const refreshUsers = useCallback(async () => {
     try {
-      const data = await getEmployees();
-      setEmployees(data);
-      setError(null);
-    } catch (err) {
-      setError('Erreur lors du chargement des employés');
-      console.error('Error fetching employees:', err);
+      const data = await getUsers();
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      setError('Error fetching users');
     }
-  };
+  }, []);
 
-  const refreshBaseWeapons = async () => {
+  const refreshBaseWeapons = useCallback(async () => {
     try {
       const data = await getBaseWeapons();
       setBaseWeapons(data);
-      setError(null);
-    } catch (err) {
-      setError('Erreur lors du chargement des armes de base');
-      console.error('Error fetching base weapons:', err);
+    } catch (error) {
+      console.error('Error fetching base weapons:', error);
+      setError('Error fetching base weapons');
     }
-  };
+  }, []);
 
-  const refreshAll = async () => {
+  const refreshAll = useCallback(async () => {
+    if (status !== 'authenticated') {
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError(null);
     try {
       await Promise.all([
         refreshWeapons(),
-        refreshEmployees(),
+        refreshUsers(),
         refreshBaseWeapons()
       ]);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      setError('Error refreshing data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [refreshWeapons, refreshUsers, refreshBaseWeapons, status]);
 
   useEffect(() => {
     refreshAll();
-  }, []);
+  }, [refreshAll, status]);
 
   return (
     <DataContext.Provider value={{
       weapons,
-      employees,
+      users,
       baseWeapons,
       loading,
       error,
       refreshWeapons,
-      refreshEmployees,
+      refreshUsers,
       refreshBaseWeapons,
       refreshAll
     }}>

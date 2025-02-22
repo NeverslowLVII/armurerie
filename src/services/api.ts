@@ -1,47 +1,51 @@
 import axios from 'axios';
 
-// Configuration globale d'axios
-const baseURL = process.env.NODE_ENV === 'test' ? 'http://localhost:3000/api' : (process.env.API_BASE_URL || 'http://localhost:3000/api');
+const baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
 axios.defaults.baseURL = baseURL;
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-axios.defaults.headers.common['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS';
-axios.defaults.headers.common['Access-Control-Allow-Headers'] = '*';
 
-export enum Role {
-  EMPLOYEE = "EMPLOYEE",
-  DEVELOPER = "DEVELOPER",
-  PATRON = "PATRON",
-  CO_PATRON = "CO_PATRON"
-}
+// Import the Role enum directly from Prisma
+import { Role } from '@prisma/client';
+export { Role };
 
-export interface Employee {
+export interface User {
   id: number;
   name: string;
+  email: string;
+  username?: string;
   color: string | null;
   role: Role;
+  contractUrl?: string;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface EmployeeCreate {
+export interface UserCreate {
   name: string;
+  email: string;
+  password: string;
+  username?: string;
   color?: string;
   role?: Role;
+  contractUrl?: string;
 }
 
 export interface Weapon {
   id: number;
   horodateur: string;
-  employe_id: number;
+  user_id: number;
   detenteur: string;
   nom_arme: string;
   serigraphie: string;
   prix: number;
   cout_production: number;
-  employee: Employee;
+  user: User;
+  base_weapon?: BaseWeapon;
 }
 
 export interface WeaponCreate {
   horodateur: string;
-  employe_id: number;
+  user_id: number;
   detenteur: string;
   nom_arme: string;
   serigraphie: string;
@@ -50,46 +54,46 @@ export interface WeaponCreate {
 }
 
 export interface BaseWeapon {
-    id: number;
-    nom: string;
-    prix_defaut: number;
-    cout_production_defaut: number;
+  id: number;
+  nom: string;
+  prix_defaut: number;
+  cout_production_defaut: number;
 }
 
 export interface BaseWeaponCreate {
-    nom: string;
-    prix_defaut: number;
-    cout_production_defaut: number;
+  nom: string;
+  prix_defaut: number;
+  cout_production_defaut: number;
 }
 
-// Employee endpoints
-export const getEmployees = async (): Promise<Employee[]> => {
+// User endpoints
+export const getUsers = async (): Promise<User[]> => {
   const response = await axios.get('/employees');
   return response.data;
 };
 
-export const getEmployee = async (id: number): Promise<Employee> => {
+export const getUser = async (id: number): Promise<User> => {
   const response = await axios.get(`/employees/${id}`);
   return response.data;
 };
 
-export const createEmployee = async (employee: EmployeeCreate): Promise<Employee> => {
-  const response = await axios.post('/employees', employee);
+export const createUser = async (user: UserCreate): Promise<User> => {
+  const response = await axios.post('/employees', user);
   return response.data;
 };
 
-export const updateEmployee = async (id: number, employee: EmployeeCreate): Promise<Employee> => {
-  const response = await axios.put(`/employees/${id}`, employee);
+export const updateUser = async (id: number, user: UserCreate): Promise<User> => {
+  const response = await axios.put(`/employees/${id}`, user);
   return response.data;
 };
 
-export const deleteEmployee = async (id: number): Promise<void> => {
+export const deleteUser = async (id: number): Promise<void> => {
   await axios.delete(`/employees/${id}`);
 };
 
-export const mergeEmployees = async (employeeIds: number[], targetId: number): Promise<Employee> => {
+export const mergeUsers = async (userIds: number[], targetId: number): Promise<User> => {
   const response = await axios.post('/employees/merge', {
-    employee_ids: employeeIds,
+    user_ids: userIds,
     target_id: targetId
   });
   return response.data;
@@ -161,16 +165,16 @@ export const deleteWeapon = async (id: number): Promise<void> => {
   }
 };
 
-export const getEmployeeWeapons = async (employeeId: number): Promise<Weapon[]> => {
-  const response = await axios.get(`/employees/${employeeId}/weapons`);
+export const getUserWeapons = async (userId: number): Promise<Weapon[]> => {
+  const response = await axios.get(`/employees/${userId}/weapons`);
   return response.data;
 };
 
-export const reassignWeapons = async (fromEmployeeId: number, toEmployeeId: number): Promise<string> => {
+export const reassignWeapons = async (fromUserId: number, toUserId: number): Promise<string> => {
   const response = await axios.post('/employees/reassign-weapons', null, {
     params: {
-      from_employee_id: fromEmployeeId,
-      to_employee_id: toEmployeeId
+      from_user_id: fromUserId,
+      to_user_id: toUserId
     }
   });
   return response.data.message;
@@ -178,23 +182,23 @@ export const reassignWeapons = async (fromEmployeeId: number, toEmployeeId: numb
 
 // Base Weapons
 export const getBaseWeapons = async (): Promise<BaseWeapon[]> => {
-    const response = await axios.get('/base-weapons');
-    return response.data;
+  const response = await axios.get('/base-weapons');
+  return response.data;
 };
 
 export const getBaseWeapon = async (id: number): Promise<BaseWeapon> => {
-    const response = await axios.get(`/base-weapons/${id}`);
-    return response.data;
+  const response = await axios.get(`/base-weapons/${id}`);
+  return response.data;
 };
 
 export const createBaseWeapon = async (baseWeapon: BaseWeaponCreate): Promise<BaseWeapon> => {
-    const response = await axios.post('/base-weapons', baseWeapon);
-    return response.data;
+  const response = await axios.post('/base-weapons', baseWeapon);
+  return response.data;
 };
 
 export const updateBaseWeapon = async (id: number, baseWeapon: BaseWeaponCreate): Promise<BaseWeapon> => {
-    const response = await axios.put(`/base-weapons/${id}`, baseWeapon);
-    return response.data;
+  const response = await axios.put(`/base-weapons/${id}`, baseWeapon);
+  return response.data;
 };
 
 export const deleteBaseWeapon = async (id: number): Promise<void> => {
@@ -222,5 +226,16 @@ export const deleteBaseWeapon = async (id: number): Promise<void> => {
     return Promise.reject(error);
   }
 };
+
+// For backward compatibility
+export type Employee = User;
+export type EmployeeCreate = UserCreate;
+export const getEmployees = getUsers;
+export const getEmployee = getUser;
+export const createEmployee = createUser;
+export const updateEmployee = updateUser;
+export const deleteEmployee = deleteUser;
+export const mergeEmployees = mergeUsers;
+export const getEmployeeWeapons = getUserWeapons;
 
 export default axios; 

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +5,54 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  email       String     @unique
+  username    String?    @unique
+  password    String
+  name        String
+  role        Role       @default(EMPLOYEE)
+  color       String?
+  contractUrl String?
+  lastLogin   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  feedback    Feedback[]
+  weapons     Weapon[]
+}
+
+model BaseWeapon {
+  id                     Int      @id @default(autoincrement())
+  nom                    String   @unique
+  prix_defaut            Int
+  cout_production_defaut Int      @default(0)
+  weapons                Weapon[]
+}
+
+model Weapon {
+  id          Int        @id @default(autoincrement())
+  horodateur  DateTime
+  user_id     Int
+  detenteur   String
+  nom_arme    String
+  serigraphie String     @unique
+  prix        Int
+  base_weapon BaseWeapon @relation(fields: [nom_arme], references: [nom])
+  user        User       @relation(fields: [user_id], references: [id])
+}
+
+model Feedback {
+  id          Int            @id @default(autoincrement())
+  type        FeedbackType
+  title       String
+  description String
+  status      FeedbackStatus @default(OPEN)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  user_id     Int?
+  user        User?          @relation(fields: [user_id], references: [id])
 }
 
 enum Role {
@@ -28,51 +73,3 @@ enum FeedbackStatus {
   RESOLVED
   REJECTED
 }
-
-model User {
-  id              Int         @id @default(autoincrement())
-  email           String      @unique
-  username        String?     @unique
-  password        String
-  name            String
-  role            Role        @default(EMPLOYEE)
-  color           String?
-  contractUrl     String?
-  lastLogin       DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  weapons         Weapon[]
-  feedback        Feedback[]
-}
-
-model BaseWeapon {
-  id                    Int      @id @default(autoincrement())
-  nom                   String   @unique
-  prix_defaut          Int
-  cout_production_defaut Int     @default(0)
-  weapons              Weapon[]
-}
-
-model Weapon {
-  id          Int         @id @default(autoincrement())
-  horodateur  DateTime
-  user_id     Int
-  user        User        @relation(fields: [user_id], references: [id])
-  detenteur   String
-  nom_arme    String
-  serigraphie String      @unique
-  prix        Int
-  base_weapon BaseWeapon? @relation(fields: [nom_arme], references: [nom])
-}
-
-model Feedback {
-  id          Int             @id @default(autoincrement())
-  type        FeedbackType
-  title       String
-  description String
-  status      FeedbackStatus  @default(OPEN)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  user_id     Int?
-  user        User?           @relation(fields: [user_id], references: [id])
-} 

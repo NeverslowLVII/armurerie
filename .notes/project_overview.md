@@ -1,4 +1,4 @@
-# Aperçu du Projet Armurie
+# Aperçu du Projet Armurerie
 
 ## Objectif
 

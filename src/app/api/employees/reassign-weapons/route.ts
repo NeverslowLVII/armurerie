@@ -3,48 +3,48 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
-    // Get employee IDs from query parameters
+    // Get user IDs from query parameters
     const searchParams = request.nextUrl.searchParams
-    const fromEmployeeId = parseInt(searchParams.get('from_employee_id') || '')
-    const toEmployeeId = parseInt(searchParams.get('to_employee_id') || '')
+    const fromUserId = parseInt(searchParams.get('from_user_id') || '')
+    const toUserId = parseInt(searchParams.get('to_user_id') || '')
 
-    // Validate employee IDs
-    if (isNaN(fromEmployeeId) || isNaN(toEmployeeId)) {
-      console.error('Invalid employee IDs:', { fromEmployeeId, toEmployeeId })
+    // Validate user IDs
+    if (isNaN(fromUserId) || isNaN(toUserId)) {
+      console.error('Invalid user IDs:', { fromUserId, toUserId })
       return NextResponse.json(
-        { error: 'Invalid employee IDs', fromEmployeeId, toEmployeeId },
+        { error: 'Invalid user IDs', fromUserId, toUserId },
         { status: 400 }
       )
     }
 
-    // Validate both employees exist
-    const [fromEmployee, toEmployee] = await Promise.all([
-      prisma.employee.findUnique({ where: { id: fromEmployeeId } }),
-      prisma.employee.findUnique({ where: { id: toEmployeeId } })
+    // Validate both users exist
+    const [fromUser, toUser] = await Promise.all([
+      prisma.user.findUnique({ where: { id: fromUserId } }),
+      prisma.user.findUnique({ where: { id: toUserId } })
     ])
 
-    if (!fromEmployee || !toEmployee) {
-      console.error('One or both employees not found:', { fromEmployeeId, toEmployeeId })
+    if (!fromUser || !toUser) {
+      console.error('One or both users not found:', { fromUserId, toUserId })
       return NextResponse.json(
         { 
-          error: 'One or both employees not found',
-          fromEmployee: fromEmployee ? 'found' : 'not found',
-          toEmployee: toEmployee ? 'found' : 'not found'
+          error: 'One or both users not found',
+          fromUser: fromUser ? 'found' : 'not found',
+          toUser: toUser ? 'found' : 'not found'
         },
         { status: 404 }
       )
     }
 
-    // Update all weapons from the source employee to the target employee
+    // Update all weapons from the source user to the target user
     const result = await prisma.weapon.updateMany({
-      where: { employe_id: fromEmployeeId },
-      data: { employe_id: toEmployeeId }
+      where: { user_id: fromUserId },
+      data: { user_id: toUserId }
     })
 
     console.log('Weapons reassigned successfully:', result)
     return NextResponse.json({
       success: true,
-      message: `${result.count} weapons reassigned from employee ${fromEmployeeId} to ${toEmployeeId}`,
+      message: `${result.count} weapons reassigned from user ${fromUserId} to ${toUserId}`,
       count: result.count
     })
   } catch (error) {

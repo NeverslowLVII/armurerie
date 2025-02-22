@@ -1,29 +1,16 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-key';
-
-async function isDeveloper() {
-  const devToken = cookies().get('dev_token')?.value;
-  if (!devToken) return false;
-  
-  try {
-    const decoded = jwt.verify(devToken, JWT_SECRET) as { type: string };
-    return decoded.type === 'developer';
-  } catch {
-    return false;
-  }
-}
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { Role } from '@/services/api';
 
 export async function POST(request: Request) {
   try {
-    const { type, title, description, status, employeeId } = await request.json();
-    const isDev = await isDeveloper();
+    const { type, title, description, status, userId } = await request.json();
+    const session = await getServerSession(authOptions);
 
     // Only developers can set status, others default to OPEN
-    const finalStatus = isDev ? status : 'OPEN';
+    const finalStatus = session?.user.role === Role.DEVELOPER ? status : 'OPEN';
 
     const feedback = await prisma.feedback.create({
       data: {
@@ -31,11 +18,11 @@ export async function POST(request: Request) {
         title,
         description,
         status: finalStatus,
-        ...(employeeId ? { submittedBy: employeeId } : {}),
+        ...(userId ? { user_id: userId } : {}),
       },
-      ...(employeeId ? {
+      ...(userId ? {
         include: {
-          employee: true,
+          user: true,
         },
       } : {}),
     });
@@ -62,17 +49,17 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
-    const isDev = await isDeveloper();
-    if (!isDev) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== Role.DEVELOPER) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - Only developers can view all feedback' },
         { status: 401 }
       );
     }
 
     const feedback = await prisma.feedback.findMany({
       include: {
-        employee: true,
+        user: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -91,10 +78,10 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const isDev = await isDeveloper();
-    if (!isDev) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== Role.DEVELOPER) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - Only developers can update feedback' },
         { status: 401 }
       );
     }
@@ -105,7 +92,7 @@ export async function PATCH(request: Request) {
       where: { id },
       data: { status },
       include: {
-        employee: true,
+        user: true,
       },
     });
 
@@ -121,10 +108,10 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const isDev = await isDeveloper();
-    if (!isDev) {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user.role !== Role.DEVELOPER) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Unauthorized - Only developers can delete feedback' },
         { status: 401 }
       );
     }

@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
-import { LoginDialog } from './LoginDialog';
 import { Role } from '@/services/api';
+import { useSession } from 'next-auth/react';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  employeeId?: number | undefined;
+  userId?: number | undefined;
 }
 
 const modalVariants = {
@@ -94,13 +94,14 @@ interface Feedback {
   description: string;
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED';
   createdAt: string;
-  employee: {
+  user: {
     name: string;
     color: string;
   };
 }
 
-export default function FeedbackManager({ open, onClose, employeeId }: Props) {
+export default function FeedbackManager({ open, onClose, userId }: Props) {
+  const { data: session } = useSession();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -110,47 +111,10 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isDeveloper, setIsDeveloper] = useState(false);
-  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
-  useEffect(() => {
-    const checkDeveloperStatus = async () => {
-      try {
-        const response = await fetch('/api/auth');
-        if (response.ok) {
-          const data = await response.json();
-          setIsDeveloper(data.user?.role === Role.DEVELOPER);
-        }
-      } catch (error) {
-        console.error('Error checking developer status:', error);
-      }
-    };
+  const isDeveloper = session?.user.role === Role.DEVELOPER;
 
-    if (open) {
-      checkDeveloperStatus();
-    }
-  }, [open]);
-
-  const handleLogin = async (user: {
-    id: number;
-    email?: string;
-    username?: string;
-    name: string;
-    role: Role;
-    color?: string;
-    contractUrl?: string;
-  }) => {
-    if (user.role === Role.DEVELOPER) {
-      setIsDeveloper(true);
-      setIsLoginDialogOpen(false);
-      fetchFeedbacks();
-    } else {
-      setError("Accès non autorisé - Seuls les développeurs peuvent accéder à cette section");
-      setIsLoginDialogOpen(false);
-    }
-  };
-
-  const fetchFeedbacks = async () => {
+  const fetchFeedbacks = useCallback(async () => {
     if (!isDeveloper) return;
 
     try {
@@ -162,13 +126,13 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
       console.error('Error fetching feedbacks:', error);
       setError('Erreur lors du chargement des retours');
     }
-  };
+  }, [isDeveloper]);
 
   useEffect(() => {
     if (open) {
       fetchFeedbacks();
     }
-  }, [open, isDeveloper]);
+  }, [open, fetchFeedbacks]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,7 +150,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
           description,
           type,
           status: isDeveloper ? status : 'OPEN',
-          employeeId: employeeId || null,
+          userId: userId || null,
         }),
       });
 
@@ -302,14 +266,6 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                     {isDeveloper ? 'Gestionnaire de retours' : 'Soumettre un retour'}
                   </Dialog.Title>
                   <div className="flex items-center space-x-4">
-                    {!isDeveloper && (
-                      <Button
-                        onClick={() => setIsLoginDialogOpen(true)}
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      >
-                        Connexion développeur
-                      </Button>
-                    )}
                     {isDeveloper && (
                       <div className="relative">
                         <Input
@@ -483,7 +439,7 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
                                   <div className="flex flex-col">
                                     <span className="text-lg font-medium text-red-600 dark:text-red-400">{feedback.title}</span>
                                     <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                                      {feedback.employee ? `Par ${feedback.employee.name}` : 'Anonyme'} - {new Date(feedback.createdAt).toLocaleDateString()}
+                                      {feedback.user ? `Par ${feedback.user.name}` : 'Anonyme'} - {new Date(feedback.createdAt).toLocaleDateString()}
                                     </span>
                                   </div>
                                   <div className="flex items-center space-x-2">
@@ -529,12 +485,6 @@ export default function FeedbackManager({ open, onClose, employeeId }: Props) {
           </div>
         </Dialog>
       </AnimatePresence>
-
-      <LoginDialog
-        isOpen={isLoginDialogOpen}
-        onClose={() => setIsLoginDialogOpen(false)}
-        onSuccess={handleLogin}
-      />
     </>
   );
 } 

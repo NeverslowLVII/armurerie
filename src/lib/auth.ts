@@ -1,31 +1,12 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from './prisma';
+import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { Role } from '@prisma/client';
 
-// Extend the built-in session types
 declare module 'next-auth' {
-  interface User {
-    id: string;
-    email: string | null;
-    username: string | null;
-    name: string;
-    role: Role;
-    color: string | null;
-    contractUrl: string | null;
-  }
-
   interface Session {
-    user: {
-      id: string;
-      email: string | null;
-      username: string | null;
-      name: string;
-      role: Role;
-      color: string | null;
-      contractUrl: string | null;
-    };
+    user: User;
   }
 }
 
@@ -33,9 +14,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     role: Role;
-    username: string | null;
-    color: string | null;
-    contractUrl: string | null;
   }
 }
 
@@ -44,67 +22,77 @@ if (!process.env.NEXTAUTH_SECRET) {
 }
 
 export const authOptions: NextAuthOptions = {
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
+  },
+  debug: false,
+  session: {
+    strategy: 'jwt',
+    maxAge: 24 * 60 * 60, // 24 heures
+    updateAge: 60 * 60, // Mise à jour toutes les heures
+  },
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: 'credentials',
       credentials: {
         identifier: { label: 'Email ou nom d\'utilisateur', type: 'text' },
         password: { label: 'Mot de passe', type: 'password' }
       },
       async authorize(credentials) {
         if (!credentials?.identifier || !credentials?.password) {
-          throw new Error('Missing credentials');
+          return null;
         }
 
-        const foundUser = await prisma.user.findFirst({
-          where: {
-            OR: [
-              { email: credentials.identifier },
-              { username: credentials.identifier }
-            ]
-          },
-        });
+        try {
+          const user = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { email: credentials.identifier },
+                { username: credentials.identifier }
+              ]
+            }
+          });
 
-        if (!foundUser) {
-          throw new Error('Invalid credentials');
+          if (!user || !user.password) {
+            console.log('User not found or no password');
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+
+          if (!isPasswordValid) {
+            console.log('Invalid password');
+            return null;
+          }
+
+          // Mettre à jour la date de dernière connexion
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLogin: new Date() }
+          });
+
+          return {
+            id: user.id.toString(),
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            username: user.username ?? undefined,
+            color: user.color ?? undefined,
+            contractUrl: user.contractUrl ?? undefined,
+          };
+        } catch (error) {
+          console.error('Auth error:', error);
+          return null;
         }
-
-        const isValidPassword = await bcrypt.compare(
-          credentials.password,
-          foundUser.password
-        );
-
-        if (!isValidPassword) {
-          throw new Error('Invalid credentials');
-        }
-
-        // Update last login
-        await prisma.user.update({
-          where: { id: foundUser.id },
-          data: { lastLogin: new Date() },
-        });
-
-        // Convert to NextAuth User format
-        return {
-          id: foundUser.id.toString(),
-          email: foundUser.email,
-          username: foundUser.username,
-          name: foundUser.name,
-          role: foundUser.role,
-          color: foundUser.color,
-          contractUrl: foundUser.contractUrl,
-        };
-      },
-    }),
+      }
+    })
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.username = user.username;
-        token.color = user.color;
-        token.contractUrl = user.contractUrl;
       }
       return token;
     },
@@ -112,19 +100,24 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id;
         session.user.role = token.role;
-        session.user.username = token.username;
-        session.user.color = token.color;
-        session.user.contractUrl = token.contractUrl;
       }
       return session;
-    },
-  },
-  pages: {
-    signIn: '/login',
-  },
-  session: {
-    strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours
+    }
   },
   secret: process.env.NEXTAUTH_SECRET,
+  jwt: {
+    secret: process.env.NEXTAUTH_SECRET,
+    maxAge: 24 * 60 * 60 // 24 heures
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
+  }
 }; 

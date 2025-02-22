@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { deleteWeapon, Weapon } from '../services/api';
-import EmployeeManager from './EmployeeManager';
+import UserManager from './UserManager';
 import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
-import { LoginDialog } from './LoginDialog';
-import { MagnifyingGlassIcon, PencilIcon, TrashIcon, LockClosedIcon, LockOpenIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, PencilIcon, TrashIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { BaseWeaponsManager } from './BaseWeaponsManager';
 import { useData } from '../context/DataContext';
 import { hasPermission, getRoleName } from '@/utils/roles';
 import { Role } from '@/services/api';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
 
 const tableVariants = {
   hidden: { opacity: 0 },
@@ -29,64 +29,27 @@ const rowVariants = {
 };
 
 export default function WeaponsTable() {
-  const { weapons, employees, loading, error: apiError, refreshWeapons, refreshEmployees } = useData();
+  const { weapons, users, loading, error: apiError, refreshWeapons, refreshUsers } = useData();
+  const { data: session } = useSession();
   const [isColorManagerOpen, setIsColorManagerOpen] = useState(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [isEditFormOpen, setIsEditFormOpen] = useState(false);
   const [selectedWeapon, setSelectedWeapon] = useState<Weapon | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isPatronLoggedIn, setIsPatronLoggedIn] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('patronAuth') === 'true';
-  });
   const [isBaseWeaponsOpen, setIsBaseWeaponsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [loginError, setLoginError] = useState<string | null>(null);
-  
-  const handleLogin = async (user: {
-    id: number;
-    email?: string;
-    username?: string;
-    name: string;
-    role: string;
-    color?: string;
-    contractUrl?: string;
-  }) => {
-    setLoginError(null);
-    if (user.role === 'PATRON' || user.role === 'CO_PATRON') {
-      setIsPatronLoggedIn(true);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('patronAuth', 'true');
-      }
-      setIsLoginOpen(false);
-    } else {
-      setLoginError("Accès non autorisé - Seuls les patrons peuvent effectuer cette action");
-    }
-  };
 
-  const handleLogout = () => {
-    setIsPatronLoggedIn(false);
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('patronAuth');
-    }
-  };
+  const isAdmin = session?.user.role === Role.PATRON || session?.user.role === Role.CO_PATRON;
 
   const handleEdit = (weapon: Weapon) => {
-    if (!isPatronLoggedIn) {
-      setIsLoginOpen(true);
-      return;
-    }
+    if (!isAdmin) return;
     setSelectedWeapon(weapon);
     setIsEditFormOpen(true);
   };
 
   const handleDelete = async (weapon: Weapon) => {
-    if (!isPatronLoggedIn) {
-      setIsLoginOpen(true);
-      return;
-    }
+    if (!isAdmin) return;
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette arme ?')) {
       try {
         await deleteWeapon(weapon.id);
@@ -109,18 +72,15 @@ export default function WeaponsTable() {
     }
   };
 
-  const handleManageEmployees = () => {
-    if (!isPatronLoggedIn) {
-      setIsLoginOpen(true);
-      return;
-    }
+  const handleManageUsers = () => {
+    if (!isAdmin) return;
     setIsColorManagerOpen(true);
   };
 
   const filteredWeapons = weapons.filter(weapon => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      weapon.employee.name.toLowerCase().includes(searchLower) ||
+      weapon.user.name.toLowerCase().includes(searchLower) ||
       weapon.detenteur.toLowerCase().includes(searchLower) ||
       weapon.nom_arme.toLowerCase().includes(searchLower) ||
       weapon.serigraphie.toLowerCase().includes(searchLower)
@@ -172,43 +132,26 @@ export default function WeaponsTable() {
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex space-x-3">
           <Button
             type="button"
-            onClick={() => isPatronLoggedIn ? handleLogout() : setIsLoginOpen(true)}
-            className="block rounded-md bg-white dark:bg-neutral-800 px-3 py-2 text-sm font-semibold text-neutral-900 dark:text-white shadow-sm ring-1 ring-inset ring-neutral-300 dark:ring-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors duration-200"
-          >
-            {isPatronLoggedIn ? (
-              <>
-                <LockOpenIcon className="inline-block h-5 w-5 mr-1" />
-                Déconnexion
-              </>
-            ) : (
-              <>
-                <LockClosedIcon className="inline-block h-5 w-5 mr-1" />
-                Connexion Patron
-              </>
-            )}
-          </Button>
-          <Button
-            type="button"
-            onClick={handleManageEmployees}
+            onClick={handleManageUsers}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              isPatronLoggedIn && hasPermission(Role.PATRON, 'canManageEmployees')
+              isAdmin && hasPermission(Role.PATRON, 'canManageUsers')
                 ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white ring-neutral-300 dark:ring-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700'
                 : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300 ring-neutral-200 dark:ring-neutral-500 cursor-not-allowed'
             }`}
-            disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canManageEmployees')}
+            disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageUsers')}
           >
             <UserGroupIcon className="inline-block h-5 w-5 mr-1" />
-            Gérer les employés
+            Gérer les utilisateurs
           </Button>
           <Button
             type="button"
-            onClick={() => isPatronLoggedIn ? setIsBaseWeaponsOpen(true) : setIsLoginOpen(true)}
+            onClick={() => setIsBaseWeaponsOpen(true)}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              isPatronLoggedIn && hasPermission(Role.PATRON, 'canManageBaseWeapons')
+              isAdmin && hasPermission(Role.PATRON, 'canManageBaseWeapons')
                 ? 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white ring-neutral-300 dark:ring-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-700'
                 : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-400 dark:text-neutral-300 ring-neutral-200 dark:ring-neutral-500 cursor-not-allowed'
             }`}
-            disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canManageBaseWeapons')}
+            disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageBaseWeapons')}
           >
             <SparklesIcon className="inline-block h-5 w-5 mr-1" />
             Gérer les armes de base
@@ -265,7 +208,7 @@ export default function WeaponsTable() {
                       Détenteur
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
-                      Nom de l'arme
+                      Nom de l&apos;arme
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
                       Sérigraphie
@@ -296,13 +239,13 @@ export default function WeaponsTable() {
                           <motion.span
                             whileHover={{ scale: 1.05 }}
                             className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                              weapon.employee.color ? 'text-white' : 'text-neutral-900 bg-neutral-100'
+                              weapon.user.color ? 'text-white' : 'text-neutral-900 bg-neutral-100'
                             }`}
-                            style={weapon.employee.color ? { backgroundColor: weapon.employee.color } : {}}
+                            style={weapon.user.color ? { backgroundColor: weapon.user.color } : {}}
                           >
-                            {weapon.employee.name}
-                            {weapon.employee.role !== Role.EMPLOYEE && (
-                              <span className="ml-1 text-xs">({getRoleName(weapon.employee.role as Role)})</span>
+                            {weapon.user.name}
+                            {weapon.user.role !== Role.EMPLOYEE && (
+                              <span className="ml-1 text-xs">({getRoleName(weapon.user.role as Role)})</span>
                             )}
                           </motion.span>
                         </td>
@@ -316,20 +259,20 @@ export default function WeaponsTable() {
                           <div className="flex justify-end gap-2">
                             <Button
                               onClick={() => handleEdit(weapon)}
-                              className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
-                              disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canEditWeapons')}
-                              title="Modifier l'arme"
+                              className={`text-red-600 hover:text-red-900 ${!isAdmin && 'opacity-50 cursor-not-allowed'}`}
+                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canEditWeapons')}
+                              title="Modifier l&apos;arme"
                             >
-                              <span className="sr-only">Modifier l'arme</span>
+                              <span className="sr-only">Modifier l&apos;arme</span>
                               <PencilIcon className="h-5 w-5" aria-hidden="true" />
                             </Button>
                             <Button
                               onClick={() => handleDelete(weapon)}
-                              className={`text-red-600 hover:text-red-900 ${!isPatronLoggedIn && 'opacity-50 cursor-not-allowed'}`}
-                              disabled={!isPatronLoggedIn || !hasPermission(Role.PATRON, 'canDeleteWeapons')}
-                              title="Supprimer l'arme"
+                              className={`text-red-600 hover:text-red-900 ${!isAdmin && 'opacity-50 cursor-not-allowed'}`}
+                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canDeleteWeapons')}
+                              title="Supprimer l&apos;arme"
                             >
-                              <span className="sr-only">Supprimer l'arme</span>
+                              <span className="sr-only">Supprimer l&apos;arme</span>
                               <TrashIcon className="h-5 w-5" aria-hidden="true" />
                             </Button>
                           </div>
@@ -395,19 +338,13 @@ export default function WeaponsTable() {
         </div>
       </motion.div>
 
-      <LoginDialog
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSuccess={handleLogin}
-      />
-
-      <EmployeeManager
+      <UserManager
         open={isColorManagerOpen}
         onClose={() => setIsColorManagerOpen(false)}
-        employees={employees}
+        users={users}
         onUpdate={async () => {
           await Promise.all([
-            refreshEmployees(),
+            refreshUsers(),
             refreshWeapons()
           ]);
         }}

@@ -8,23 +8,23 @@ export async function GET(
 ) {
   try {
     const id = parseInt(params.id)
-    const employee = await prisma.employee.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id },
       include: { weapons: true }
     })
     
-    if (!employee) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Employee not found' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
 
-    return NextResponse.json(employee)
+    return NextResponse.json(user)
   } catch (error) {
-    console.error('Get employee error:', error)
+    console.error('Get user error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch employee' },
+      { error: 'Failed to fetch user' },
       { status: 500 }
     )
   }
@@ -48,9 +48,9 @@ export async function PUT(
 
     // Check if trying to demote last PATRON
     if (data.role && data.role !== 'PATRON') {
-      const currentEmployee = await prisma.employee.findUnique({ where: { id } })
-      if (currentEmployee?.role === 'PATRON') {
-        const patronCount = await prisma.employee.count({ where: { role: 'PATRON' } })
+      const currentUser = await prisma.user.findUnique({ where: { id } })
+      if (currentUser?.role === 'PATRON') {
+        const patronCount = await prisma.user.count({ where: { role: 'PATRON' } })
         if (patronCount <= 1) {
           return NextResponse.json(
             { error: 'Cannot demote the last PATRON' },
@@ -60,7 +60,7 @@ export async function PUT(
       }
     }
     
-    const employee = await prisma.employee.update({
+    const user = await prisma.user.update({
       where: { id },
       data: ({
         name: data.name,
@@ -70,11 +70,11 @@ export async function PUT(
       include: { weapons: true }
     })
 
-    return NextResponse.json(employee)
+    return NextResponse.json(user)
   } catch (error) {
-    console.error('Update employee error:', error)
+    console.error('Update user error:', error)
     return NextResponse.json(
-      { error: 'Failed to update employee' },
+      { error: 'Failed to update user' },
       { status: 500 }
     )
   }
@@ -85,57 +85,57 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Parse employee ID
-    const employeeId = parseInt(params.id)
-    if (isNaN(employeeId)) {
-      console.error('Invalid employee ID:', params.id)
+    // Parse user ID
+    const userId = parseInt(params.id)
+    if (isNaN(userId)) {
+      console.error('Invalid user ID:', params.id)
       return NextResponse.json(
-        { error: 'Invalid employee ID', employe_id: params.id },
+        { error: 'Invalid user ID', user_id: params.id },
         { status: 400 }
       )
     }
 
-    // Check if employee exists
-    const employee = await prisma.employee.findUnique({
-      where: { id: employeeId },
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
       include: { weapons: true }
     })
 
-    if (!employee) {
-      console.error('Employee not found:', employeeId)
+    if (!user) {
+      console.error('User not found:', userId)
       return NextResponse.json(
-        { error: 'Employee not found', employe_id: employeeId },
+        { error: 'User not found', user_id: userId },
         { status: 404 }
       )
     }
 
-    // Check if employee has weapons
-    if (employee.weapons.length > 0) {
-      console.error('Cannot delete employee with weapons:', employeeId)
+    // Check if user has weapons
+    if (user.weapons.length > 0) {
+      console.error('Cannot delete user with weapons:', userId)
       return NextResponse.json(
         { 
-          error: 'Cannot delete employee with weapons',
-          employe_id: employeeId,
-          weapon_count: employee.weapons.length
+          error: 'Cannot delete user with weapons',
+          user_id: userId,
+          weapon_count: user.weapons.length
         },
         { status: 400 }
       )
     }
 
-    // Delete employee
-    await prisma.employee.delete({
-      where: { id: employeeId }
+    // Delete user
+    await prisma.user.delete({
+      where: { id: userId }
     })
 
-    console.log('Employee deleted successfully:', employeeId)
+    console.log('User deleted successfully:', userId)
     return NextResponse.json({ 
       success: true,
-      message: `Employee ${employeeId} deleted successfully`
+      message: `User ${userId} deleted successfully`
     })
   } catch (error) {
-    console.error('Delete employee error:', error)
+    console.error('Delete user error:', error)
     return NextResponse.json(
-      { error: 'Failed to delete employee' },
+      { error: 'Failed to delete user' },
       { status: 500 }
     )
   }

@@ -116,9 +116,16 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
     const [success, setSuccess] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
+    const [containerHeight, setContainerHeight] = useState<number>(0);
 
     const listContainerRef = React.useRef<HTMLDivElement>(null);
     
+    useEffect(() => {
+        if (listContainerRef.current) {
+            setContainerHeight(listContainerRef.current.clientHeight);
+        }
+    }, []);
+
     const filteredWeapons = useMemo(() => {
         return baseWeapons
             .filter(weapon => 
@@ -133,10 +140,9 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
     }, [baseWeapons, searchQuery]);
 
     const itemsPerPage = useMemo(() => {
-        if (!listContainerRef.current) return 5;
-        const availableHeight = listContainerRef.current.clientHeight;
-        return Math.max(Math.floor(availableHeight / ROW_HEIGHT), 1);
-    }, [listContainerRef.current?.clientHeight]);
+        if (containerHeight === 0) return 5;
+        return Math.max(Math.floor(containerHeight / ROW_HEIGHT), 1);
+    }, [containerHeight]);
 
     const totalPages = Math.ceil(filteredWeapons.length / itemsPerPage);
     
@@ -246,7 +252,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                         <div className="p-3 border-b border-neutral-700">
                             <div className="flex justify-between items-center">
                                 <DialogTitle className="text-xl font-semibold text-neutral-100">
-                                    Gestionnaire d'armes de base
+                                    Gestionnaire d&apos;armes de base
                                 </DialogTitle>
                                 <div className="flex items-center space-x-4">
                                     <div className="relative">
@@ -300,7 +306,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                                     <form onSubmit={editingWeapon ? handleUpdateWeapon : handleAddWeapon} className="space-y-4">
                                         <div>
                                             <label className="block text-sm font-medium text-neutral-300 mb-1">
-                                                Nom de l'arme
+                                                Nom de l&apos;arme
                                             </label>
                                             <motion.div
                                                 initial="initial"
