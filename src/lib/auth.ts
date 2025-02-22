@@ -119,5 +119,6 @@ export const authOptions: NextAuthOptions = {
         secure: process.env.NODE_ENV === 'production'
       }
     }
-  }
+  },
+  trustHost: true
 }; 

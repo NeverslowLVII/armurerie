@@ -1,6 +1,24 @@
 import axios from 'axios';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Get the base URL dynamically
+const getBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    // Browser should use relative path
+    return '/api';
+  }
+  if (process.env.VERCEL_URL) {
+    // Reference for vercel.com
+    return `https://${process.env.VERCEL_URL}/api`;
+  }
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    // Custom API URL
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  // Fallback for local development
+  return 'http://localhost:3000/api';
+};
+
+const baseURL = getBaseUrl();
 axios.defaults.baseURL = baseURL;
 
 // Import the Role enum directly from Prisma
