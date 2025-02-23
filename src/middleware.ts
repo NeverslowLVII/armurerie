@@ -1,7 +1,24 @@
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
 import { Role } from '@prisma/client';
-import type { NextRequest } from 'next/server';
+
+// Define public routes that don't require authentication
+const publicRoutes = [
+  '/auth/signin',
+  '/auth/error',
+  '/api/auth/callback/credentials',
+  '/api/auth/csrf',
+  '/api/auth/session',
+  '/api/auth/providers',
+  '/api/auth/signin',
+  '/api/auth/signout',
+  '/favicon.ico',
+  '/_next',
+  '/images',
+  '/assets',
+  '/static',
+  '/vercel.svg'
+];
 
 export default withAuth(
   function middleware(req) {
@@ -9,26 +26,40 @@ export default withAuth(
     const path = req.nextUrl.pathname;
     const isApiRoute = path.startsWith('/api/');
 
-    // Si déjà authentifié et sur la page de connexion, rediriger vers /
+    // Check if the route is public
+    if (publicRoutes.some(route => path.startsWith(route))) {
+      return NextResponse.next();
+    }
+
+    // If already authenticated and on login page, redirect to /
     if (token && path.startsWith('/auth/signin')) {
       return NextResponse.redirect(new URL('/', req.url));
     }
 
-    // Public routes - no auth required
-    if (
-      path.startsWith('/auth') ||
-      path.startsWith('/api/auth')
-    ) {
-      return NextResponse.next();
-    }
-
     // API routes should return 401 instead of redirecting
     if (!token && isApiRoute) {
+      if (req.method === 'OPTIONS') {
+        return new NextResponse(null, {
+          status: 204,
+          headers: {
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Max-Age': '86400'
+          }
+        });
+      }
+
       return new NextResponse(
         JSON.stringify({ error: 'Authentication required' }),
         { 
           status: 401,
-          headers: { 'content-type': 'application/json' }
+          headers: { 
+            'content-type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+          }
         }
       );
     }
@@ -36,6 +67,7 @@ export default withAuth(
     // Protected routes - require auth
     if (!token) {
       const signInUrl = new URL('/auth/signin', req.url);
+      signInUrl.searchParams.set('callbackUrl', encodeURIComponent(req.url));
       return NextResponse.redirect(signInUrl);
     }
 
@@ -46,7 +78,12 @@ export default withAuth(
           JSON.stringify({ error: 'Access denied' }),
           { 
             status: 403,
-            headers: { 'content-type': 'application/json' }
+            headers: { 
+              'content-type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+            }
           }
         );
       }
@@ -60,14 +97,26 @@ export default withAuth(
           JSON.stringify({ error: 'Access denied' }),
           { 
             status: 403,
-            headers: { 'content-type': 'application/json' }
+            headers: { 
+              'content-type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+            }
           }
         );
       }
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    return NextResponse.next();
+    const response = NextResponse.next();
+    
+    // Add CORS headers to all responses
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    return response;
   },
   {
     callbacks: {
@@ -79,25 +128,9 @@ export default withAuth(
   }
 );
 
-export function middleware(request: NextRequest) {
-  // Only apply to /api routes
-  if (request.nextUrl.pathname.startsWith('/api')) {
-    const response = NextResponse.next()
-
-    // Add the CORS headers
-    response.headers.set('Access-Control-Allow-Origin', '*')
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.set('Access-Control-Max-Age', '86400')
-
-    return response
-  }
-
-  return NextResponse.next()
-}
-
+// Update matcher to exclude more static paths
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/).*)',
   ],
 }; 

@@ -344,7 +344,7 @@ export default function Statistics() {
             setError('Erreur lors du chargement des statistiques');
             setLoading(false);
         }
-    }, [filterDataByDateRange, setWeaponStats, setEmployeeStats, setLoading, setError]);
+    }, [filterDataByDateRange, weaponStats, setWeaponStats, setEmployeeStats, setLoading, setError]);
 
     useEffect(() => {
         if (session?.user.role === Role.PATRON || session?.user.role === Role.CO_PATRON) {

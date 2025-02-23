@@ -23,13 +23,23 @@ export default function SignInForm() {
     const password = formData.get('password') as string;
 
     try {
+      console.log('Attempting sign in with:', { identifier, callbackUrl });
+      
       const result = await signIn('credentials', {
         identifier,
         password,
         redirect: false,
+        callbackUrl: callbackUrl
       });
 
-      if (result?.error) {
+      console.log('Sign in result:', result);
+
+      if (!result) {
+        throw new Error('Received null result from signIn');
+      }
+
+      if (result.error) {
+        console.error('Sign in error:', result.error);
         toast({
           title: 'Erreur',
           description: 'Identifiants invalides',
@@ -38,12 +48,18 @@ export default function SignInForm() {
         return;
       }
 
-      router.push(callbackUrl);
+      if (result.url) {
+        router.push(result.url);
+      } else {
+        router.push(callbackUrl);
+      }
+      
       toast({
         title: 'Succès',
         description: 'Connexion réussie',
       });
     } catch (error) {
+      console.error('Sign in error:', error);
       toast({
         title: 'Erreur',
         description: 'Une erreur est survenue',

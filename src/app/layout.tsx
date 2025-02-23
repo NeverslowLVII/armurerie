@@ -9,6 +9,9 @@ const poppins = Poppins({ subsets: ['latin'], weight: ['400', '700'] })
 export const metadata: Metadata = {
   title: 'Armurerie',
   description: 'Gestion d\'armes',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 // Initialiser l'application au démarrage
