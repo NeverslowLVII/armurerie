@@ -8,6 +8,8 @@ import { forwardRef, useEffect } from "react";
 import { cn } from "../../lib/utils";
 import { Command, CommandGroup, CommandItem, CommandList } from "./command";
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from './loading';
+
 export interface Option {
   value: string;
   label: string;
@@ -27,8 +29,6 @@ interface MultipleSelectorProps {
   /** manually controlled options */
   options?: Option[];
   placeholder?: string;
-  /** Loading component. */
-  loadingIndicator?: React.ReactNode;
   /** Empty component. */
   emptyIndicator?: React.ReactNode;
   /** Debounce time for async search. Only work with `onSearch`. */
@@ -176,7 +176,6 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       delay,
       onSearch,
       onSearchSync,
-      loadingIndicator,
       emptyIndicator,
       maxSelected = Number.MAX_SAFE_INTEGER,
       onMaxSelected,
@@ -561,7 +560,9 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 }}
               >
                 {isLoading ? (
-                  <>{loadingIndicator}</>
+                  <div className="flex items-center justify-center py-2">
+                    <LoadingSpinner size="sm" text="Chargement..." />
+                  </div>
                 ) : (
                   <>
                     {EmptyItem()}

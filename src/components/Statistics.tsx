@@ -16,6 +16,7 @@ import { Role } from '@/services/api';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
+import { LoadingSpinner } from '@/components/ui/loading';
 
 interface WeaponStats {
     totalWeapons: number;
@@ -144,6 +145,7 @@ const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
 );
 
 const PERIOD_PRESETS = [
+    { label: 'Cette semaine', days: 0 },
     { label: '7 derniers jours', days: 7 },
     { label: '30 derniers jours', days: 30 },
     { label: '3 derniers mois', days: 90 },
@@ -152,7 +154,7 @@ const PERIOD_PRESETS = [
 
 export default function Statistics() {
     const { data: session } = useSession();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [weaponStats, setWeaponStats] = useState<WeaponStats>({
         totalWeapons: 0,
@@ -181,11 +183,16 @@ export default function Statistics() {
     const [dateRange, setDateRange] = useState<DateRange>(() => {
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(endDate.getDate() - 30);
+        // Trouver le lundi de la semaine en cours
+        const dayOfWeek = startDate.getDay(); // 0 = dimanche, 1 = lundi, etc.
+        const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Ajustement pour commencer le lundi
+        startDate.setDate(startDate.getDate() - diff);
         return { startDate, endDate };
     });
 
     const filterDataByDateRange = useCallback((data: Weapon[]) => {
+        if (!dateRange) return data;
+        
         const start = new Date(dateRange.startDate);
         start.setHours(0, 0, 0, 0);
         const end = new Date(dateRange.endDate);
@@ -195,11 +202,12 @@ export default function Statistics() {
             const date = new Date(weapon.horodateur);
             return date >= start && date <= end;
         });
-    }, [dateRange.startDate, dateRange.endDate]);
+    }, [dateRange]);
 
     const fetchData = useCallback(async () => {
+        if (!session?.user) return;
+        
         try {
-            console.log('Starting data fetch...');
             setLoading(true);
             setError(null);
             
@@ -208,10 +216,7 @@ export default function Statistics() {
                 getEmployees()
             ]);
             
-            console.log('Data received:', { weaponsCount: weaponsData.length, employeesCount: employeesData.length });
-            
             const filteredWeapons = filterDataByDateRange(weaponsData);
-            console.log('Filtered weapons:', filteredWeapons.length);
             
             // Normaliser et calculer les statistiques des armes
             const weaponTypeMap = new Map<string, number>();
@@ -273,7 +278,7 @@ export default function Statistics() {
             const totalTaxes = Math.round(totalProfit * 0.10); // 10% d'impôts
             const profitAfterTaxes = totalProfit - totalTaxes;
 
-            const newWeaponStats = {
+            setWeaponStats({
                 totalWeapons: filteredWeapons.length,
                 totalValue,
                 totalCostProduction,
@@ -287,9 +292,7 @@ export default function Statistics() {
                 weaponTypes,
                 dailyStats,
                 profitByType
-            };
-
-            setWeaponStats(newWeaponStats);
+            });
 
             // Calculer les statistiques des employés
             const employeeStats = employeesData.reduce<{
@@ -337,25 +340,37 @@ export default function Statistics() {
             });
 
             console.log('Setting final stats:', { weaponStats, employeeStats });
-            setLoading(false);
-            setError(null);
         } catch (error) {
             console.error('Error fetching statistics:', error);
             setError('Erreur lors du chargement des statistiques');
+        } finally {
             setLoading(false);
         }
-    }, [filterDataByDateRange, weaponStats, setWeaponStats, setEmployeeStats, setLoading, setError]);
+    }, [session?.user, filterDataByDateRange]);
 
     useEffect(() => {
-        if (session?.user.role === Role.PATRON || session?.user.role === Role.CO_PATRON) {
-            fetchData();
-        }
-    }, [dateRange.startDate, dateRange.endDate, session?.user.role, fetchData]);
+        if (!session?.user) return;
+        if (session.user.role !== Role.PATRON && 
+            session.user.role !== Role.CO_PATRON && 
+            session.user.role !== Role.DEVELOPER) return;
+        
+        fetchData();
+    }, [session?.user, fetchData]);
 
     const handlePresetClick = (days: number) => {
         const endDate = new Date();
         const startDate = new Date();
-        startDate.setDate(startDate.getDate() - days);
+        
+        if (days === 0) {
+            // Pour "Cette semaine", on commence au lundi de la semaine en cours
+            const dayOfWeek = startDate.getDay(); // 0 = dimanche, 1 = lundi, etc.
+            const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Ajustement pour commencer le lundi
+            startDate.setDate(startDate.getDate() - diff);
+        } else {
+            // Pour les autres presets, on recule de X jours
+            startDate.setDate(startDate.getDate() - days);
+        }
+        
         setDateRange({
             startDate,
             endDate
@@ -369,10 +384,41 @@ export default function Statistics() {
         return `${year}-${month}-${day}`;
     };
 
+    const isActivePeriod = (days: number) => {
+        const endDate = new Date();
+        const startDate = new Date();
+        
+        if (days === 0) {
+            // Pour "Cette semaine", on commence au lundi de la semaine en cours
+            const dayOfWeek = startDate.getDay(); // 0 = dimanche, 1 = lundi, etc.
+            const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Ajustement pour commencer le lundi
+            startDate.setDate(startDate.getDate() - diff);
+        } else {
+            // Pour les autres presets, on recule de X jours
+            startDate.setDate(startDate.getDate() - days);
+        }
+        
+        return dateRange.startDate.getTime() === startDate.getTime();
+    };
+
+    if (!session || (session.user.role !== Role.PATRON && 
+        session.user.role !== Role.CO_PATRON && 
+        session.user.role !== Role.DEVELOPER)) {
+        return (
+            <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white dark:bg-neutral-900 rounded-lg shadow">
+                <LockClosedIcon className="w-12 h-12 text-neutral-400 dark:text-neutral-300 mb-4" />
+                <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Accès Restreint</h2>
+                <p className="text-neutral-600 dark:text-neutral-300 mb-4 text-center">
+                    Cette section est réservée au patron et aux développeurs.
+                </p>
+            </div>
+        );
+    }
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+                <LoadingSpinner size="lg" text="Chargement des statistiques..." />
             </div>
         );
     }
@@ -381,18 +427,6 @@ export default function Statistics() {
         return (
             <div className="flex justify-center items-center h-64">
                 <div className="text-red-500">{error}</div>
-            </div>
-        );
-    }
-
-    if (!session || (session.user.role !== Role.PATRON && session.user.role !== Role.CO_PATRON)) {
-        return (
-            <div className="min-h-[400px] flex flex-col items-center justify-center p-6 bg-white dark:bg-neutral-900 rounded-lg shadow">
-                <LockClosedIcon className="w-12 h-12 text-neutral-400 dark:text-neutral-300 mb-4" />
-                <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Accès Restreint</h2>
-                <p className="text-neutral-600 dark:text-neutral-300 mb-4 text-center">
-                    Cette section est réservée au patron.
-                </p>
             </div>
         );
     }
@@ -420,7 +454,7 @@ export default function Statistics() {
                                 key={preset.days}
                                 onClick={() => handlePresetClick(preset.days)}
                                 className={`px-2 py-1 rounded text-xs font-medium transition-colors duration-200
-                                    ${dateRange.startDate.getTime() === new Date(new Date().setDate(new Date().getDate() - preset.days)).getTime()
+                                    ${isActivePeriod(preset.days)
                                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
                                     : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'}`}
                             >

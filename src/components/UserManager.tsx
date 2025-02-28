@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogPortal, DialogOverlay } from '@/components/ui/dialog';
 import { useAppDispatch } from '../redux/hooks';
-import { updateUser, deleteUser } from '../redux/slices/userSlice';
+import { updateUser } from '../redux/slices/userSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PencilIcon, XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
-import { Role } from '@/services/api';
+import { Role, User } from '@/services/api';
 
 interface Props {
-  open: boolean;
-  onClose: () => void;
-  users: Record<string, any>;
-  onUpdate: () => Promise<void>;
+    open: boolean;
+    onClose: () => void;
+    users: User[];
+    onUpdate: () => Promise<void>;
 }
 
 const listItemVariants = {
@@ -56,8 +56,10 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newUserName, setNewUserName] = useState('');
+  const [newUsername, setNewUsername] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
-  const [newUserPassword, setNewUserPassword] = useState('');
+  const [setupLink, setSetupLink] = useState<string | null>(null);
+  const [isSetupLinkDialogOpen, setIsSetupLinkDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleUserUpdate = async (e: React.FormEvent) => {
@@ -68,37 +70,84 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     setError(null);
     
     try {
+      const user = users.find(u => u.name === editingUser);
+      if (!user) return;
+
+      // Validation côté client
+      if (!newUserName.trim()) {
+        setError('Le nom ne peut pas être vide');
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!newUsername.trim()) {
+        setError('Le nom d\'utilisateur ne peut pas être vide');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Vérifier si le nom d'utilisateur est déjà utilisé par un autre utilisateur
+      const usernameExists = users.some(u => 
+        u.username === newUsername.trim() && u.id !== user.id
+      );
+      
+      if (usernameExists) {
+        setError('Ce nom d\'utilisateur est déjà utilisé par un autre utilisateur');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const updateData: Partial<User> = {
+        name: newUserName.trim(),
+        username: newUsername.trim(),
+        color: tempColor,
+        role: tempRole,
+        email: user.email // Conserver l'email existant
+      };
+
+      console.log('Updating user:', {
+        id: user.id,
+        currentUser: user,
+        updateData
+      });
+
       await dispatch(updateUser({ 
-        id: users[editingUser]?.id,
-        data: { 
-          name: newUserName, 
-          color: tempColor,
-          role: tempRole,
-          id: users[editingUser]?.id
-        }
+        id: user.id,
+        data: updateData
       }));
       await onUpdate();
       setSuccess('Informations mises à jour avec succès !');
       setEditingUser(null);
       // Reset form
       setNewUserName('');
+      setNewUsername('');
       setTempColor('#000000');
       setTempRole(Role.EMPLOYEE);
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      setError('Erreur lors de la mise à jour de l\'utilisateur');
-      console.error('Error updating user:', error);
+      console.error('Update error details:', {
+        error,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+        errorStack: error instanceof Error ? error.stack : undefined
+      });
+      
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Erreur lors de la mise à jour de l\'utilisateur');
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const startEditing = (name: string, user: any) => {
+  const startEditing = (name: string, user: User) => {
     setEditingUser(name);
     
-    // Animation séquentielle des champs sans réinitialisation
+    // Animation séquentielle des champs
     setTimeout(() => {
       setNewUserName(user.name);
+      setNewUsername(user.username || '');
       setTimeout(() => {
         setTempColor(user.color || '#000000');
         setTimeout(() => {
@@ -112,24 +161,37 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+    setSetupLink(null);
     try {
-      await dispatch(updateUser({ 
-        data: { 
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           name: newUserName,
+          username: newUsername,
           email: newUserEmail,
-          password: newUserPassword, 
           color: tempColor,
           role: tempRole,
-        }
-      }));
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'ajout de l\'utilisateur');
+      }
+
       await onUpdate();
       setNewUserName('');
+      setNewUsername('');
       setNewUserEmail('');
-      setNewUserPassword('');
       setTempColor('#000000');
       setTempRole(Role.EMPLOYEE);
       setSuccess('Utilisateur ajouté avec succès !');
-      setTimeout(() => setSuccess(null), 3000);
+      setSetupLink(data.setupLink);
+      setIsSetupLinkDialogOpen(true);
     } catch (error) {
       setError('Erreur lors de l\'ajout de l\'utilisateur');
       console.error('Error adding user:', error);
@@ -141,22 +203,37 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   const handleCancel = () => {
     setEditingUser(null);
     setNewUserName('');
+    setNewUsername('');
     setNewUserEmail('');
-    setNewUserPassword('');
     setTempColor('#000000');
     setTempRole(Role.EMPLOYEE);
+    setSetupLink(null);
   };
 
-  const handleDeleteUser = async (user: any) => {
+  const handleDeleteUser = async (user: User) => {
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`)) {
       return;
     }
-    
+
     setIsSubmitting(true);
     setError(null);
     
     try {
-      await dispatch(deleteUser(user.id));
+      const response = await fetch(`/api/employees/${user.id}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 400 && data.error === 'Cannot delete user with weapons') {
+          setError(`Impossible de supprimer ${user.name} car il possède encore ${data.weapon_count} arme(s). Veuillez d'abord transférer ou supprimer ses armes.`);
+        } else {
+          setError(data.error || 'Erreur lors de la suppression de l\'utilisateur');
+        }
+        return;
+      }
+
       await onUpdate();
       setSuccess('Utilisateur supprimé avec succès !');
       setTimeout(() => setSuccess(null), 3000);
@@ -168,8 +245,8 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     }
   };
 
-  const filteredUsers = Object.entries(users).filter(([name, user]) => 
-    name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -177,13 +254,16 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogPortal>
         <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
-        <DialogContent className="max-w-[95vw] xl:max-w-[90vw] 2xl:max-w-[85vw] h-[85vh] p-0 bg-neutral-900 border border-neutral-800 shadow-2xl">
+        <DialogContent className="max-w-[95vw] xl:max-w-[90vw] 2xl:max-w-[85vw] h-[85vh] p-0 bg-neutral-900 border border-neutral-800 shadow-2xl" aria-describedby="user-manager-description">
           <div className="flex flex-col h-full">
             <div className="p-3 border-b border-neutral-700">
               <div className="flex justify-between items-center">
                 <DialogTitle className="text-xl font-semibold text-neutral-100">
                   Gérer les utilisateurs
                 </DialogTitle>
+                <div className="sr-only" id="user-manager-description">
+                  Interface de gestion des utilisateurs permettant d&apos;ajouter, modifier et supprimer des utilisateurs
+                </div>
                 <div className="flex items-center space-x-4">
                   <div className="relative">
                     <Input
@@ -236,48 +316,52 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                   <form onSubmit={editingUser ? handleUserUpdate : handleAddUser} className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-neutral-300 mb-1">
-                        Nom de l&apos;utilisateur
+                        Nom complet
                       </label>
                       <Input
                         type="text"
                         value={newUserName}
                         onChange={(e) => setNewUserName(e.target.value)}
                         className="w-full bg-neutral-800 border-neutral-600 text-neutral-100 placeholder-neutral-400"
+                        placeholder="John Doe"
                         required
                         disabled={isSubmitting}
                       />
                     </div>
 
-                    {!editingUser && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-300 mb-1">
-                            Email
-                          </label>
-                          <Input
-                            type="email"
-                            value={newUserEmail}
-                            onChange={(e) => setNewUserEmail(e.target.value)}
-                            className="w-full bg-neutral-800 border-neutral-600 text-neutral-100 placeholder-neutral-400"
-                            required
-                            disabled={isSubmitting}
-                          />
-                        </div>
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-300 mb-1">
+                        Nom d&apos;utilisateur
+                      </label>
+                      <Input
+                        type="text"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        className="w-full bg-neutral-800 border-neutral-600 text-neutral-100 placeholder-neutral-400"
+                        placeholder="johndoe"
+                        required
+                        disabled={isSubmitting}
+                      />
+                      <p className="mt-1 text-xs text-neutral-500">
+                        Ce nom d&apos;utilisateur sera utilisé pour la connexion
+                      </p>
+                    </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-300 mb-1">
-                            Mot de passe
-                          </label>
-                          <Input
-                            type="password"
-                            value={newUserPassword}
-                            onChange={(e) => setNewUserPassword(e.target.value)}
-                            className="w-full bg-neutral-800 border-neutral-600 text-neutral-100 placeholder-neutral-400"
-                            required
-                            disabled={isSubmitting}
-                          />
-                        </div>
-                      </>
+                    {!editingUser && (
+                      <div>
+                        <label className="block text-sm font-medium text-neutral-300 mb-1">
+                          Email
+                        </label>
+                        <Input
+                          type="email"
+                          value={newUserEmail}
+                          onChange={(e) => setNewUserEmail(e.target.value)}
+                          className="w-full bg-neutral-800 border-neutral-600 text-neutral-100 placeholder-neutral-400"
+                          placeholder="john.doe@example.com"
+                          required
+                          disabled={isSubmitting}
+                        />
+                      </div>
                     )}
 
                     <div>
@@ -379,12 +463,12 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                 <div className="flex-1 overflow-y-auto">
                   <div className="divide-y divide-neutral-800">
                     <AnimatePresence mode="popLayout">
-                      {filteredUsers.map(([name, user]) => (
+                      {filteredUsers.map((user) => (
                         <motion.div
                           key={user.id}
                           variants={listItemVariants}
                           initial="hidden"
-                          animate={editingUser === name ? "editing" : "visible"}
+                          animate={editingUser === user.name ? "editing" : "visible"}
                           exit="exit"
                           className="px-4 py-3 hover:bg-neutral-800 transition-colors duration-150"
                         >
@@ -408,7 +492,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                             </motion.div>
                             <div className="flex items-center space-x-2">
                               <Button
-                                onClick={() => startEditing(name, user)}
+                                onClick={() => startEditing(user.name, user)}
                                 variant="ghost"
                                 className="text-red-400 hover:text-red-300 hover:bg-neutral-800"
                                 disabled={isSubmitting}
@@ -445,6 +529,58 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
           </div>
         </DialogContent>
       </DialogPortal>
+
+      {/* Dialog pour le lien de configuration */}
+      <Dialog open={isSetupLinkDialogOpen} onOpenChange={() => setIsSetupLinkDialogOpen(false)}>
+        <DialogPortal>
+          <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
+          <DialogContent className="max-w-lg p-6 bg-neutral-900 border border-neutral-800 shadow-2xl">
+            <div className="space-y-4">
+              <DialogTitle className="text-xl font-semibold text-neutral-100">
+                Lien de configuration
+              </DialogTitle>
+              <div className="space-y-4">
+                <div className="p-4 bg-neutral-800 rounded-lg border border-neutral-700">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      value={setupLink || ''}
+                      readOnly
+                      className="flex-1 bg-neutral-900 border-neutral-700 text-neutral-400 text-xs"
+                    />
+                    <Button
+                      onClick={() => {
+                        if (setupLink) {
+                          navigator.clipboard.writeText(setupLink);
+                          setSuccess('Lien copié !');
+                          setTimeout(() => setSuccess(null), 3000);
+                        }
+                      }}
+                      variant="outline"
+                      className="text-neutral-300 border-neutral-600 hover:bg-neutral-700"
+                    >
+                      Copier
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-xs text-neutral-500">
+                    Envoyez ce lien à l&apos;employé pour qu&apos;il puisse configurer son compte.
+                    Le lien est valable pendant 24 heures.
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => setIsSetupLinkDialogOpen(false)}
+                    variant="outline"
+                    className="text-neutral-300 border-neutral-600 hover:bg-neutral-800"
+                  >
+                    Fermer
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
     </Dialog>
   );
 }

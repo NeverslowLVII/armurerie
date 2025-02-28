@@ -1,59 +1,98 @@
-import { Role } from '@/services/api';
+import { Role } from '@prisma/client';
 
-export interface Permission {
-  canEditWeapons: boolean;
-  canDeleteWeapons: boolean;
-  canManageUsers: boolean;
-  canManageBaseWeapons: boolean;
-  commissionRate: number;
+export function isValidRole(role: string): role is Role {
+  return Object.values(Role).includes(role as Role);
 }
 
-export const RolePermissions: Record<Role, Permission> = {
-  [Role.EMPLOYEE]: {
-    canEditWeapons: false,
-    canDeleteWeapons: false,
-    canManageUsers: false,
-    canManageBaseWeapons: false,
-    commissionRate: 0.2, // 20%
-  },
-  [Role.CO_PATRON]: {
-    canEditWeapons: true,
-    canDeleteWeapons: true,
+interface RoleConfig {
+  commissionRate: number;
+  canManageUsers: boolean;
+  canManageWeapons: boolean;
+  canViewStatistics: boolean;
+  canManageFeedback: boolean;
+  canAccessAdminPanel: boolean;
+  isSystemAdmin: boolean;
+  canManageBaseWeapons: boolean;
+}
+
+type RoleConfigurations = {
+  [key in Role]: RoleConfig;
+};
+
+export const roleConfigurations: RoleConfigurations = {
+  [Role.DEVELOPER]: {
+    commissionRate: 0,
     canManageUsers: true,
-    canManageBaseWeapons: false,
-    commissionRate: 0.3, // 30%
+    canManageWeapons: true,
+    canViewStatistics: true,
+    canManageFeedback: true,
+    canAccessAdminPanel: true,
+    isSystemAdmin: true,
+    canManageBaseWeapons: true
   },
   [Role.PATRON]: {
-    canEditWeapons: true,
-    canDeleteWeapons: true,
+    commissionRate: 0.15,
     canManageUsers: true,
-    canManageBaseWeapons: true,
-    commissionRate: 0.3, // 30%
+    canManageWeapons: true,
+    canViewStatistics: true,
+    canManageFeedback: false,
+    canAccessAdminPanel: true,
+    isSystemAdmin: false,
+    canManageBaseWeapons: true
   },
-  [Role.DEVELOPER]: {
-    canEditWeapons: true,
-    canDeleteWeapons: true,
-    canManageUsers: true,
-    canManageBaseWeapons: true,
-    commissionRate: 0, // Developers don't get commission
+  [Role.CO_PATRON]: {
+    commissionRate: 0.12,
+    canManageUsers: false,
+    canManageWeapons: true,
+    canViewStatistics: true,
+    canManageFeedback: false,
+    canAccessAdminPanel: false,
+    isSystemAdmin: false,
+    canManageBaseWeapons: false
   },
+  [Role.EMPLOYEE]: {
+    commissionRate: 0.10,
+    canManageUsers: false,
+    canManageWeapons: false,
+    canViewStatistics: false,
+    canManageFeedback: false,
+    canAccessAdminPanel: false,
+    isSystemAdmin: false,
+    canManageBaseWeapons: false
+  }
 };
 
-export const getRolePermissions = (role: Role): Permission => {
-  return RolePermissions[role];
-};
+export function getCommissionRate(role: Role): number {
+  return roleConfigurations[role].commissionRate;
+}
 
-export const hasPermission = (role: Role, permission: keyof Permission): boolean => {
-  return RolePermissions[role][permission] as boolean;
-};
+export function canManageUsers(role: Role): boolean {
+  return roleConfigurations[role].canManageUsers || roleConfigurations[role].isSystemAdmin;
+}
 
-export const getCommissionRate = (role: Role): number => {
-  return RolePermissions[role].commissionRate;
-};
+export function canManageWeapons(role: Role): boolean {
+  return roleConfigurations[role].canManageWeapons || roleConfigurations[role].isSystemAdmin;
+}
 
-export const isValidRole = (role: string): role is Role => {
-  return Object.values(Role).includes(role as Role);
-};
+export function canViewStatistics(role: Role): boolean {
+  return roleConfigurations[role].canViewStatistics || roleConfigurations[role].isSystemAdmin;
+}
+
+export function canManageFeedback(role: Role): boolean {
+  return roleConfigurations[role].canManageFeedback || roleConfigurations[role].isSystemAdmin;
+}
+
+export function canAccessAdminPanel(role: Role): boolean {
+  return roleConfigurations[role].canAccessAdminPanel || roleConfigurations[role].isSystemAdmin;
+}
+
+export function isSystemAdmin(role: Role): boolean {
+  return roleConfigurations[role].isSystemAdmin;
+}
+
+export function hasPermission(role: Role, permission: keyof Omit<RoleConfig, 'commissionRate'>): boolean {
+  return roleConfigurations[role][permission] as boolean || roleConfigurations[role].isSystemAdmin;
+}
 
 export const getRoleName = (role: Role): string => {
   switch (role) {

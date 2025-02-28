@@ -260,7 +260,7 @@ export default function WeaponsTable() {
                             <Button
                               onClick={() => handleEdit(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isAdmin && 'opacity-50 cursor-not-allowed'}`}
-                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canEditWeapons')}
+                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageWeapons')}
                               title="Modifier l&apos;arme"
                             >
                               <span className="sr-only">Modifier l&apos;arme</span>
@@ -269,7 +269,7 @@ export default function WeaponsTable() {
                             <Button
                               onClick={() => handleDelete(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!isAdmin && 'opacity-50 cursor-not-allowed'}`}
-                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canDeleteWeapons')}
+                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageWeapons')}
                               title="Supprimer l&apos;arme"
                             >
                               <span className="sr-only">Supprimer l&apos;arme</span>

@@ -6,6 +6,8 @@ import { Role } from '@prisma/client';
 const publicRoutes = [
   '/auth/signin',
   '/auth/error',
+  '/auth/reset',
+  '/auth/setup',
   '/api/auth/callback/credentials',
   '/api/auth/csrf',
   '/api/auth/session',
@@ -27,7 +29,13 @@ export default withAuth(
     const isApiRoute = path.startsWith('/api/');
 
     // Check if the route is public
-    if (publicRoutes.some(route => path.startsWith(route))) {
+    if (publicRoutes.some(route => {
+      // Exact match for paths like /auth/reset
+      if (path === route) return true;
+      // Prefix match for paths like /_next/...
+      if (route.endsWith('/') ? path.startsWith(route) : path.startsWith(route + '/') || path === route) return true;
+      return false;
+    })) {
       return NextResponse.next();
     }
 
@@ -131,6 +139,6 @@ export default withAuth(
 // Update matcher to exclude more static paths
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/).*)',
+    '/((?!_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/|auth/reset|auth/setup|api/auth/setup).*)',
   ],
 }; 

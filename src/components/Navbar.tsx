@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
   motion,
@@ -9,6 +11,8 @@ import {
 } from 'framer-motion';
 import { useEffect, useState, useRef } from 'react';
 import { useTheme } from 'next-themes';
+import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 import {
   SunIcon,
   MoonIcon,
@@ -16,21 +20,42 @@ import {
   XMarkIcon,
   ArrowRightOnRectangleIcon,
   ChartBarIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  UserCircleIcon,
+  UserIcon,
+  ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { signOut } from 'next-auth/react';
 import Tilt from 'react-parallax-tilt';
+import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-interface NavbarProps {
-  readonly currentPage: 'weapons' | 'statistics';
-  readonly onPageChange: (page: 'weapons' | 'statistics') => void;
+interface NavigationItem {
+  id: 'weapons' | 'statistics' | 'account';
+  label: string;
+  icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>;
+  href: string;
+  hideFromNav?: boolean;
 }
 
-export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
+const NAVIGATION_ITEMS: NavigationItem[] = [
+  { id: 'weapons', label: 'Armes', icon: RocketLaunchIcon, href: '/dashboard/weapons' },
+  { id: 'statistics', label: 'Statistiques', icon: ChartBarIcon, href: '/dashboard/statistics' },
+  { id: 'account', label: 'Mon Compte', icon: UserIcon, href: '/employee/account', hideFromNav: true }
+];
+
+export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHeaderFullyVisible, setIsHeaderFullyVisible] = useState(true);
+  const pathname = usePathname();
+
   const lastScrollY = useRef(0);
   const lastScrollTime = useRef(Date.now());
   const scrollVelocity = useRef(0);
@@ -47,9 +72,9 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
   const smoothScale = useSpring(rawScale, { stiffness: 300, damping: 15 });
 
   const { resolvedTheme, setTheme } = useTheme();
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
+  const { data: session } = useSession();
+
+  const currentPage = NAVIGATION_ITEMS.find(item => pathname === item.href)?.id || 'weapons';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -134,10 +159,6 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut({ redirect: true, callbackUrl: '/auth/signin' });
-  };
-
   return (
     <motion.header
       variants={navVariants}
@@ -154,91 +175,113 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
-            <Tilt 
-              tiltMaxAngleX={10} 
-              tiltMaxAngleY={10}
-              scale={1.05}
-              transitionSpeed={2500}
-              className="relative"
-            >
-              <motion.div
-                className="flex-shrink-0 relative"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <Link href="/dashboard/weapons">
+              <Tilt 
+                tiltMaxAngleX={10} 
+                tiltMaxAngleY={10}
+                scale={1.05}
+                transitionSpeed={2500}
+                className="relative"
               >
-                <h1 className="text-3xl font-black bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-transparent drop-shadow-sm">
-                  Armurerie
-                </h1>
-                <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
-              </motion.div>
-            </Tilt>
+                <motion.div
+                  className="flex-shrink-0 relative"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <h1 className="text-3xl font-black bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-transparent drop-shadow-sm">
+                    Armurerie
+                  </h1>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+                </motion.div>
+              </Tilt>
+            </Link>
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex ml-12 items-center space-x-8">
-              {[
-                { id: 'weapons', label: 'Armes', icon: RocketLaunchIcon },
-                { id: 'statistics', label: 'Statistiques', icon: ChartBarIcon }
-              ].map(({ id, label, icon: Icon }) => (
-                <motion.div
-                  key={id}
-                  variants={linkVariants}
-                  initial="initial"
-                  whileHover="hover"
-                  whileTap="tap"
-                  className="relative"
-                >
+              {NAVIGATION_ITEMS.filter(item => !item.hideFromNav).map(({ id, label, icon: Icon, href }) => (
+                <Link key={id} href={href}>
                   <motion.div
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="relative overflow-hidden rounded-lg"
+                    variants={linkVariants}
+                    initial="initial"
+                    whileHover="hover"
+                    whileTap="tap"
+                    className="relative"
                   >
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 0.1 }}
-                      className={`absolute inset-0 ${
-                        resolvedTheme === 'dark' 
-                          ? 'bg-red-500' 
-                          : 'bg-red-200'
-                      }`}
-                    />
-                    <Button
-                      onClick={() => {
-                        onPageChange(id as 'weapons' | 'statistics');
-                        if (mobileMenuOpen) setMobileMenuOpen(false);
-                      }}
-                      variant="ghost"
-                      className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg flex items-center gap-2
-                        ${currentPage === id
-                          ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
-                          : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
-                        }`}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="relative overflow-hidden rounded-lg"
                     >
-                      <Icon className="h-4 w-4" />
-                      {label}
-                    </Button>
-                  </motion.div>
-                  <AnimatePresence>
-                    {currentPage === id && isHeaderFullyVisible && (
                       <motion.div
-                        layoutId="navbar-indicator"
-                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        whileHover={{ opacity: 0.1 }}
+                        className={`absolute inset-0 ${
+                          resolvedTheme === 'dark' 
+                            ? 'bg-red-500' 
+                            : 'bg-red-200'
+                        }`}
                       />
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                      <Button
+                        variant="ghost"
+                        className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg flex items-center gap-2
+                          ${currentPage === id
+                            ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+                            : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                          }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </Button>
+                    </motion.div>
+                    <AnimatePresence>
+                      {currentPage === id && isHeaderFullyVisible && (
+                        <motion.div
+                          layoutId="navbar-indicator"
+                          className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </Link>
               ))}
             </div>
           </div>
 
           {/* Right side buttons */}
           <div className="hidden md:flex items-center space-x-4">
+            {session?.user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800">
+                    <UserCircleIcon className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
+                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      {session.user.username || session.user.name}
+                    </span>
+                    <ChevronDownIcon className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <Link href="/employee/account" passHref>
+                    <DropdownMenuItem className={`cursor-pointer ${currentPage === 'account' ? 'bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400' : ''}`}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>Mon compte</span>
+                    </DropdownMenuItem>
+                  </Link>
+                  <DropdownMenuItem onClick={() => signOut({ redirect: true, callbackUrl: '/auth/signin' })} className="text-red-500 dark:text-red-400">
+                    <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
+                    <span>Déconnexion</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={toggleTheme}
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               className="p-2 rounded-lg transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               {resolvedTheme === 'dark' ? (
@@ -247,107 +290,115 @@ export default function Navbar({ currentPage, onPageChange }: NavbarProps) {
                 <MoonIcon className="h-5 w-5 text-blue-500" />
               )}
             </motion.button>
-
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSignOut}
-                className="rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors duration-200"
-              >
-                <ArrowRightOnRectangleIcon className="h-5 w-5" />
-              </Button>
-            </motion.div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+          {/* Mobile menu button */}
+          <div className="flex md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              className="rounded-lg text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
             >
               {mobileMenuOpen ? (
-                <XMarkIcon className="h-6 w-6 text-neutral-900 dark:text-white" />
+                <XMarkIcon className="h-6 w-6" />
               ) : (
-                <Bars3Icon className="h-6 w-6 text-neutral-900 dark:text-white" />
+                <Bars3Icon className="h-6 w-6" />
               )}
-            </motion.button>
+            </Button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <motion.div
-            className="md:hidden py-4 space-y-2"
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={mobileMenuVariants}
-          >
-            {[
-              { id: 'weapons', label: 'Armes', icon: RocketLaunchIcon },
-              { id: 'statistics', label: 'Statistiques', icon: ChartBarIcon }
-            ].map(({ id, label, icon: Icon }) => (
-              <motion.div
-                key={id}
-                variants={linkVariants}
-                whileHover="hover"
-                whileTap="tap"
-                className="w-full"
-              >
-                <Button
-                  onClick={() => {
-                    onPageChange(id as 'weapons' | 'statistics');
-                    setMobileMenuOpen(false);
-                  }}
-                  variant="ghost"
-                  className={`w-full justify-start gap-2 ${
-                    currentPage === id
-                      ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
-                      : 'text-neutral-600 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {label}
-                </Button>
-              </motion.div>
-            ))}
-            <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
-              <Button
-                onClick={toggleTheme}
-                variant="ghost"
-                className="w-full justify-start gap-2"
-              >
-                {resolvedTheme === 'dark' ? (
-                  <>
-                    <SunIcon className="h-4 w-4 text-amber-500" />
-                    Mode clair
-                  </>
-                ) : (
-                  <>
-                    <MoonIcon className="h-4 w-4 text-blue-500" />
-                    Mode sombre
-                  </>
-                )}
-              </Button>
+        {/* Mobile menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              variants={mobileMenuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="md:hidden py-4 space-y-4"
+            >
+              {/* Navigation links */}
+              {NAVIGATION_ITEMS.filter(item => !item.hideFromNav).map(({ id, label, icon: Icon, href }) => (
+                <Link key={id} href={href}>
+                  <motion.div variants={linkVariants}>
+                    <Button
+                      variant="ghost"
+                      className={`w-full justify-start gap-2 ${
+                        currentPage === id
+                          ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+                          : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Button>
+                  </motion.div>
+                </Link>
+              ))}
+
+              {/* User section */}
+              {session?.user && (
+                <>
+                  <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                    <Link href="/employee/account" passHref>
+                      <Button
+                        variant="ghost"
+                        className={`w-full justify-start gap-2 ${
+                          currentPage === 'account'
+                            ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+                            : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white'
+                        }`}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <UserIcon className="h-4 w-4" />
+                        Mon compte
+                      </Button>
+                    </Link>
+                  </div>
+                </>
+              )}
+
+              {/* Theme toggle and sign out */}
+              <div className="pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                <motion.div variants={linkVariants}>
+                  <Button
+                    onClick={() => {
+                      setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-2"
+                  >
+                    {resolvedTheme === 'dark' ? (
+                      <>
+                        <SunIcon className="h-4 w-4 text-amber-500" />
+                        Mode clair
+                      </>
+                    ) : (
+                      <>
+                        <MoonIcon className="h-4 w-4 text-blue-500" />
+                        Mode sombre
+                      </>
+                    )}
+                  </Button>
+                </motion.div>
+                <motion.div variants={linkVariants}>
+                  <Button
+                    onClick={() => signOut({ redirect: true, callbackUrl: '/auth/signin' })}
+                    variant="ghost"
+                    className="w-full justify-start gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                    Déconnexion
+                  </Button>
+                </motion.div>
+              </div>
             </motion.div>
-            <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
-              <Button
-                onClick={handleSignOut}
-                variant="ghost"
-                className="w-full justify-start gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-              >
-                <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                Déconnexion
-              </Button>
-            </motion.div>
-          </motion.div>
-        )}
+          )}
+        </AnimatePresence>
       </motion.nav>
     </motion.header>
   );

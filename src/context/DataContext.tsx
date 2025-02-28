@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { getWeapons, getUsers, getBaseWeapons, Weapon, User, BaseWeapon } from '../services/api';
 import { useSession } from 'next-auth/react';
+import { LoadingOverlay } from '@/components/ui/loading';
 
 interface DataContextType {
   weapons: Weapon[];
@@ -94,7 +95,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       refreshBaseWeapons,
       refreshAll
     }}>
-      {children}
+      <LoadingOverlay loading={loading} text="Chargement des données...">
+        {children}
+      </LoadingOverlay>
     </DataContext.Provider>
   );
 }

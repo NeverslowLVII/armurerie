@@ -4,11 +4,13 @@ import { Role } from '@prisma/client';
 export interface User {
   id: number;
   name: string;
+  username: string;
   color: string | null;
   role: Role;
   email: string;
   password?: string;
   contractUrl?: string | null;
+  lastLogin?: Date;
 }
 
 interface UserState {
@@ -40,8 +42,13 @@ export const fetchUsers = createAsyncThunk(
 export const updateUser = createAsyncThunk(
   'users/updateUser',
   async ({ id, data }: { id?: number; data: Partial<User> }) => {
+    console.log('updateUser thunk called with:', { id, data });
+    
     const method = id ? 'PUT' : 'POST';
     const url = id ? `/api/employees/${id}` : '/api/employees';
+    
+    console.log('Making request to:', { method, url });
+    console.log('Request body:', JSON.stringify(data, null, 2));
     
     const response = await fetch(url, {
       method,
@@ -52,9 +59,19 @@ export const updateUser = createAsyncThunk(
     });
 
     if (!response.ok) {
-      throw new Error('Failed to update user');
+      const errorData = await response.json();
+      console.error('Update user failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        errorData,
+        requestData: data
+      });
+      throw new Error(errorData.error || 'Failed to update user');
     }
-    return await response.json();
+    
+    const result = await response.json();
+    console.log('Update user success:', result);
+    return result;
   }
 );
 
@@ -125,7 +142,7 @@ const userSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.users[action.payload.id] = action.payload;
+        state.users[action.payload.name] = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
         state.loading = false;
