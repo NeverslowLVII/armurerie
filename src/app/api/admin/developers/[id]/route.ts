@@ -34,7 +34,7 @@ export async function PUT(
     const existingDeveloper = await prisma.user.findFirst({
       where: {
         username,
-        role: Role.DEVELOPER,
+        role: Role.EMPLOYEE,
         NOT: {
           id,
         },
@@ -100,7 +100,7 @@ export async function DELETE(
       where: { id },
     });
 
-    if (!developer || developer.role !== Role.DEVELOPER) {
+    if (!developer || developer.role !== Role.EMPLOYEE) {
       return NextResponse.json(
         { error: 'Developer not found' },
         { status: 404 }

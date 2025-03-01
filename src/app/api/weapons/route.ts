@@ -22,7 +22,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   let data: any;
   let userId: number;
-  let baseWeapon: { prix_defaut: number } | null;
+  let baseWeapon: { prix_defaut: number; cout_production_defaut: number } | null;
   let createWeaponData: any;
   
   try {
@@ -83,7 +83,8 @@ export async function POST(request: NextRequest) {
       detenteur: data.detenteur || '',
       nom_arme: data.nom_arme,
       serigraphie: data.serigraphie,
-      prix: data.prix || baseWeapon.prix_defaut
+      prix: data.prix || baseWeapon.prix_defaut,
+      cout_production: data.cout_production || baseWeapon.cout_production_defaut
     };
 
     // Create weapon

@@ -311,19 +311,74 @@ export default function WeaponsTable() {
           >
             Précédent
           </Button>
-          {Array.from({ length: Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage) }).map((_, index) => (
-            <Button
-              key={index + 1}
-              onClick={() => paginate(index + 1)}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === index + 1
-                  ? 'bg-gradient-to-r from-red-600 to-orange-600 dark:bg-gradient-to-r dark:from-red-700 dark:to-orange-700 text-white'
-                  : 'bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 border dark:border-neutral-600'
-              }`}
-            >
-              {index + 1}
-            </Button>
-          ))}
+          
+          {(() => {
+            const totalPages = Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage);
+            const maxVisiblePages = 5; // Nombre maximum de boutons de page à afficher
+            
+            // Calculer les pages à afficher
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // Ajuster si on est proche de la fin
+            if (endPage - startPage + 1 < maxVisiblePages) {
+              startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            const pages = [];
+            
+            // Première page et ellipse si nécessaire
+            if (startPage > 1) {
+              pages.push(
+                <Button
+                  key={1}
+                  onClick={() => paginate(1)}
+                  className="px-3 py-1 rounded-md bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 border dark:border-neutral-600"
+                >
+                  1
+                </Button>
+              );
+              if (startPage > 2) {
+                pages.push(<span key="ellipsis-1" className="px-2 text-neutral-700 dark:text-neutral-300">...</span>);
+              }
+            }
+            
+            // Pages visibles
+            for (let i = startPage; i <= endPage; i++) {
+              pages.push(
+                <Button
+                  key={i}
+                  onClick={() => paginate(i)}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === i
+                      ? 'bg-gradient-to-r from-red-600 to-orange-600 dark:bg-gradient-to-r dark:from-red-700 dark:to-orange-700 text-white'
+                      : 'bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 border dark:border-neutral-600'
+                  }`}
+                >
+                  {i}
+                </Button>
+              );
+            }
+            
+            // Dernière page et ellipse si nécessaire
+            if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                pages.push(<span key="ellipsis-2" className="px-2 text-neutral-700 dark:text-neutral-300">...</span>);
+              }
+              pages.push(
+                <Button
+                  key={totalPages}
+                  onClick={() => paginate(totalPages)}
+                  className="px-3 py-1 rounded-md bg-white dark:bg-neutral-800 text-neutral-700 dark:text-white hover:bg-neutral-50 dark:hover:bg-neutral-700 border dark:border-neutral-600"
+                >
+                  {totalPages}
+                </Button>
+              );
+            }
+            
+            return pages;
+          })()}
+          
           <Button
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)}

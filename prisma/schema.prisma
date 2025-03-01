@@ -35,15 +35,16 @@ model BaseWeapon {
 }
 
 model Weapon {
-  id          Int        @id @default(autoincrement())
-  horodateur  DateTime
-  user_id     Int
-  detenteur   String
-  nom_arme    String
-  serigraphie String     @unique
-  prix        Int
-  base_weapon BaseWeapon @relation(fields: [nom_arme], references: [nom])
-  user        User       @relation(fields: [user_id], references: [id])
+  id              Int        @id @default(autoincrement())
+  horodateur      DateTime
+  user_id         Int
+  detenteur       String
+  nom_arme        String
+  serigraphie     String     @unique
+  prix            Int
+  cout_production Int        @default(0)
+  base_weapon     BaseWeapon @relation(fields: [nom_arme], references: [nom])
+  user            User       @relation(fields: [user_id], references: [id])
 }
 
 model Feedback {
@@ -54,15 +55,39 @@ model Feedback {
   status      FeedbackStatus @default(OPEN)
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
+  submittedBy Int?
   user_id     Int?
+  Employee    Employee?      @relation(fields: [submittedBy], references: [id])
   user        User?          @relation(fields: [user_id], references: [id])
+}
+
+model Developer {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  name     String
+}
+
+model Employee {
+  id          Int        @id @default(autoincrement())
+  color       String?
+  name        String
+  role        Role       @default(EMPLOYEE)
+  email       String?    @unique
+  username    String?    @unique
+  password    String?
+  contractUrl String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now())
+  lastLogin   DateTime?  @db.Timestamptz(6)
+  Feedback    Feedback[]
 }
 
 enum Role {
   EMPLOYEE
   DEVELOPER
-  PATRON
   CO_PATRON
+  PATRON
 }
 
 enum FeedbackType {
