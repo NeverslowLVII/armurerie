@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogPortal, DialogOverlay } from '@/components/ui/dialog';
 import { useAppDispatch } from '../redux/hooks';
 import { updateUser } from '../redux/slices/userSlice';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PencilIcon, XMarkIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, XMarkIcon, PlusIcon, TrashIcon, DocumentArrowUpIcon, ClockIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
 import { Role, User } from '@/services/api';
+import { getCommissionRate } from '@/utils/roles';
+import { toast } from '@/components/ui/use-toast';
 
 interface Props {
     open: boolean;
@@ -52,6 +54,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [tempColor, setTempColor] = useState('#000000');
   const [tempRole, setTempRole] = useState<Role>(Role.EMPLOYEE);
+  const [tempCommission, setTempCommission] = useState<number>(0);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +64,16 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   const [setupLink, setSetupLink] = useState<string | null>(null);
   const [isSetupLinkDialogOpen, setIsSetupLinkDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [contractFile, setContractFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showContractUpload, setShowContractUpload] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
+  // Mettre à jour la commission lorsque le rôle change
+  useEffect(() => {
+    const commissionRate = getCommissionRate(tempRole);
+    setTempCommission(commissionRate * 100); // Convertir en pourcentage pour l'affichage
+  }, [tempRole]);
 
   const handleUserUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +115,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
         username: newUsername.trim(),
         color: tempColor,
         role: tempRole,
+        commission: tempCommission / 100, // Convertir le pourcentage en décimal pour le stockage
         email: user.email // Conserver l'email existant
       };
 
@@ -123,6 +137,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       setNewUsername('');
       setTempColor('#000000');
       setTempRole(Role.EMPLOYEE);
+      setTempCommission(0);
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error('Update error details:', {
@@ -152,6 +167,14 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
         setTempColor(user.color || '#000000');
         setTimeout(() => {
           setTempRole(user.role as Role);
+          // Si l'utilisateur a une commission personnalisée, l'utiliser
+          // Sinon, utiliser la valeur par défaut basée sur le rôle
+          if (user.commission !== undefined && user.commission !== null) {
+            setTempCommission(user.commission * 100); // Convertir en pourcentage pour l'affichage
+          } else {
+            const defaultCommission = getCommissionRate(user.role as Role) * 100;
+            setTempCommission(defaultCommission);
+          }
         }, 100);
       }, 100);
     }, 100);
@@ -174,6 +197,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
           email: newUserEmail,
           color: tempColor,
           role: tempRole,
+          commission: tempCommission / 100, // Convertir le pourcentage en décimal pour le stockage
         }),
       });
 
@@ -189,6 +213,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       setNewUserEmail('');
       setTempColor('#000000');
       setTempRole(Role.EMPLOYEE);
+      setTempCommission(0);
       setSuccess('Utilisateur ajouté avec succès !');
       setSetupLink(data.setupLink);
       setIsSetupLinkDialogOpen(true);
@@ -207,6 +232,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     setNewUserEmail('');
     setTempColor('#000000');
     setTempRole(Role.EMPLOYEE);
+    setTempCommission(0);
     setSetupLink(null);
   };
 
@@ -245,10 +271,64 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     }
   };
 
+  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newRole = e.target.value as Role;
+    setTempRole(newRole);
+    // La commission sera mise à jour automatiquement grâce à l'effet ci-dessus
+  };
+
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleUploadContract = async () => {
+    if (!contractFile || !selectedUserId) return;
+
+    setIsUploading(true);
+    try {
+      // Dans un environnement de production, vous devriez d'abord uploader le fichier
+      // vers un service de stockage (ex: AWS S3) et obtenir l'URL
+      const contractUrl = URL.createObjectURL(contractFile);
+
+      const response = await fetch(`/api/employees/${selectedUserId}/contract`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ contractUrl }),
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Succès',
+          description: 'Contrat uploadé avec succès',
+        });
+        setContractFile(null);
+        setShowContractUpload(false);
+        await onUpdate();
+      } else {
+        throw new Error('Erreur lors de l\'upload du contrat');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible d\'uploader le contrat',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const openContractUpload = (userId: number) => {
+    setSelectedUserId(userId);
+    setShowContractUpload(true);
+  };
+
+  const viewContract = (contractUrl: string) => {
+    window.open(contractUrl, '_blank');
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -370,7 +450,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                       </label>
                       <SelectNative
                         value={tempRole}
-                        onChange={(e) => setTempRole(e.target.value as Role)}
+                        onChange={handleRoleChange}
                         className="w-full bg-neutral-800 border-neutral-600 text-neutral-100"
                         required
                         disabled={isSubmitting}
@@ -394,6 +474,26 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                         className="w-full h-10 bg-neutral-800 border-neutral-600"
                         disabled={isSubmitting}
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-300 mb-1">
+                        Commission (%)
+                      </label>
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.1"
+                        value={tempCommission}
+                        onChange={(e) => setTempCommission(parseFloat(e.target.value) || 0)}
+                        className="w-full bg-neutral-800 border-neutral-600 text-neutral-100"
+                        placeholder="0"
+                        disabled={isSubmitting}
+                      />
+                      <p className="mt-1 text-xs text-neutral-500">
+                        Pourcentage de commission sur les ventes
+                      </p>
                     </div>
 
                     <div className="pt-2">
@@ -488,9 +588,24 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                   className="w-4 h-4 rounded-full"
                                   style={{ backgroundColor: user.color || '#000000' }}
                                 />
+                                {user.contractUrl && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                                    <DocumentIcon className="h-3 w-3 mr-1" />
+                                    Contrat
+                                  </span>
+                                )}
                               </div>
                             </motion.div>
                             <div className="flex items-center space-x-2">
+                              <Button
+                                onClick={() => openContractUpload(user.id)}
+                                variant="ghost"
+                                className={`${user.contractUrl ? 'text-green-400 hover:text-green-300' : 'text-blue-400 hover:text-blue-300'} hover:bg-neutral-800`}
+                                disabled={isSubmitting}
+                                title={user.contractUrl ? "Voir ou remplacer le contrat" : "Uploader un contrat"}
+                              >
+                                <DocumentIcon className="h-5 w-5" />
+                              </Button>
                               <Button
                                 onClick={() => startEditing(user.name, user)}
                                 variant="ghost"
@@ -575,6 +690,97 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                   >
                     Fermer
                   </Button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
+
+      {/* Dialog pour l'upload de contrat */}
+      <Dialog open={showContractUpload} onOpenChange={() => setShowContractUpload(false)}>
+        <DialogPortal>
+          <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
+          <DialogContent className="max-w-lg p-6 bg-neutral-900 border border-neutral-800 shadow-2xl">
+            <div className="space-y-4">
+              <DialogTitle className="text-xl font-semibold text-neutral-100">
+                Upload de contrat
+              </DialogTitle>
+              <div className="space-y-4">
+                {selectedUserId && (
+                  <div className="mb-4">
+                    {users.find(u => u.id === selectedUserId)?.contractUrl ? (
+                      <div className="p-4 bg-green-900/20 border border-green-800 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <DocumentIcon className="h-5 w-5 text-green-500" />
+                            <span className="text-green-400">Cet employé a déjà un contrat</span>
+                          </div>
+                          <Button
+                            onClick={() => viewContract(users.find(u => u.id === selectedUserId)?.contractUrl || '')}
+                            variant="outline"
+                            className="text-green-400 border-green-700 hover:bg-green-900/30"
+                          >
+                            Voir le contrat
+                          </Button>
+                        </div>
+                        <p className="mt-2 text-xs text-neutral-400">
+                          L&apos;upload d&apos;un nouveau contrat remplacera le contrat existant.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-amber-900/20 border border-amber-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <DocumentIcon className="h-5 w-5 text-amber-500" />
+                          <span className="text-amber-400">Cet employé n&apos;a pas encore de contrat</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="p-4 bg-neutral-800 rounded-lg border border-neutral-700">
+                  <div className="space-y-4">
+                    <Input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={(e) => setContractFile(e.target.files?.[0] || null)}
+                      className="flex-1 bg-neutral-900 border-neutral-700"
+                    />
+                    <p className="text-xs text-neutral-500">
+                      Formats acceptés: PDF, DOC, DOCX
+                    </p>
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        onClick={() => setShowContractUpload(false)}
+                        variant="outline"
+                        className="text-neutral-300 border-neutral-600 hover:bg-neutral-800"
+                        disabled={isUploading}
+                      >
+                        Annuler
+                      </Button>
+                      <Button
+                        onClick={handleUploadContract}
+                        disabled={!contractFile || isUploading}
+                        className={`${
+                          isUploading
+                            ? 'bg-blue-500/50'
+                            : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400'
+                        } text-white`}
+                      >
+                        {isUploading ? (
+                          <div className="flex items-center gap-2">
+                            <ClockIcon className="h-4 w-4 animate-spin" />
+                            Upload...
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <DocumentArrowUpIcon className="h-4 w-4" />
+                            Upload
+                          </div>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

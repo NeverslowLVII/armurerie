@@ -57,6 +57,7 @@ export async function POST(request: Request) {
         email: data.email,
         password: tempPassword, // Ce mot de passe sera changé lors de la configuration
         color: data.color,
+        commission: data.commission || 0,
         role: data.role || 'EMPLOYEE'
       }
     })

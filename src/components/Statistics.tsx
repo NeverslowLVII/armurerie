@@ -385,7 +385,6 @@ export default function Statistics() {
     };
 
     const isActivePeriod = (days: number) => {
-        const endDate = new Date();
         const startDate = new Date();
         
         if (days === 0) {

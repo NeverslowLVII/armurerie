@@ -33,6 +33,7 @@ export interface User {
   color: string | null;
   role: Role;
   contractUrl?: string;
+  commission?: number;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -46,6 +47,7 @@ export interface UserCreate {
   color?: string;
   role?: Role;
   contractUrl?: string;
+  commission?: number;
 }
 
 export interface Weapon {

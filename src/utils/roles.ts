@@ -31,7 +31,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageBaseWeapons: true
   },
   [Role.PATRON]: {
-    commissionRate: 0.15,
+    commissionRate: 0.50,
     canManageUsers: true,
     canManageWeapons: true,
     canViewStatistics: true,
@@ -41,7 +41,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageBaseWeapons: true
   },
   [Role.CO_PATRON]: {
-    commissionRate: 0.12,
+    commissionRate: 0.30,
     canManageUsers: false,
     canManageWeapons: true,
     canViewStatistics: true,
@@ -51,7 +51,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageBaseWeapons: false
   },
   [Role.EMPLOYEE]: {
-    commissionRate: 0.10,
+    commissionRate: 0.20,
     canManageUsers: false,
     canManageWeapons: false,
     canViewStatistics: false,

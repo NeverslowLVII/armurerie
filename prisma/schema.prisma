@@ -16,6 +16,7 @@ model User {
   role        Role       @default(EMPLOYEE)
   color       String?
   contractUrl String?
+  commission  Float      @default(0)
   lastLogin   DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt

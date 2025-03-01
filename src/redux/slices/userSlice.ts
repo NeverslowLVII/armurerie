@@ -10,6 +10,7 @@ export interface User {
   email: string;
   password?: string;
   contractUrl?: string | null;
+  commission?: number;
   lastLogin?: Date;
 }
 

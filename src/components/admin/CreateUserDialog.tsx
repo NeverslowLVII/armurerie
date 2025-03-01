@@ -33,6 +33,7 @@ export function CreateUserDialog() {
       password: formData.get('password') as string,
       color: formData.get('color') as string,
       contractUrl: formData.get('contractUrl') as string,
+      commission: formData.get('commission') ? parseFloat(formData.get('commission') as string) : 0,
     };
 
     try {
@@ -118,6 +119,19 @@ export function CreateUserDialog() {
                 id="color"
                 name="color"
                 type="color"
+                disabled={isLoading}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="commission" className="dark:text-neutral-200">Commission (%)</Label>
+              <Input
+                id="commission"
+                name="commission"
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                placeholder="0"
                 disabled={isLoading}
               />
             </div>

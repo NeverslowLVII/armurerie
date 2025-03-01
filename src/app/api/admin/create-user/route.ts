@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, email, password, color, contractUrl } = await request.json();
+    const { name, email, password, color, contractUrl, commission } = await request.json();
 
     // Validation des données
     if (!name || !email || !password) {
@@ -49,6 +49,7 @@ export async function POST(request: Request) {
         password: hashedPassword,
         color,
         contractUrl,
+        commission: commission || 0,
         role: Role.EMPLOYEE,
       } as any,
     });
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
         email: (user as any).email,
         role: user.role,
         contractUrl: (user as any).contractUrl,
+        commission: (user as any).commission,
       },
     });
   } catch (error) {

@@ -7,15 +7,12 @@ import { Button } from '@/components/ui/button';
 import { SignaturePad } from '@/components/SignaturePad';
 import { WeeklySales } from '@/components/WeeklySales';
 import { toast } from '@/components/ui/use-toast';
-import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DocumentIcon,
   DocumentCheckIcon,
-  DocumentArrowUpIcon,
   UserCircleIcon,
   BanknotesIcon,
-  ClockIcon,
 } from '@heroicons/react/24/outline';
 import { Role } from '@prisma/client';
 
@@ -31,8 +28,6 @@ export default function EmployeeAccount() {
   const { data: session } = useSession();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [contractFile, setContractFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -82,43 +77,6 @@ export default function EmployeeAccount() {
     }
   };
 
-  const handleUploadContract = async (userId: number) => {
-    if (!contractFile) return;
-
-    setIsUploading(true);
-    try {
-      // Dans un environnement de production, vous devriez d'abord uploader le fichier
-      // vers un service de stockage (ex: AWS S3) et obtenir l'URL
-      const contractUrl = URL.createObjectURL(contractFile);
-
-      const response = await fetch(`/api/employees/${userId}/contract`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ contractUrl }),
-      });
-
-      if (response.ok) {
-        toast({
-          title: 'Succès',
-          description: 'Contrat uploadé avec succès',
-        });
-        setContractFile(null);
-      } else {
-        throw new Error('Erreur lors de l\'upload du contrat');
-      }
-    } catch (error) {
-      toast({
-        title: 'Erreur',
-        description: 'Impossible d\'uploader le contrat',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   if (!userInfo) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -126,8 +84,6 @@ export default function EmployeeAccount() {
       </div>
     );
   }
-
-  const isPatron = userInfo.role === 'PATRON' || userInfo.role === 'CO_PATRON';
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -189,7 +145,7 @@ export default function EmployeeAccount() {
           <CardDescription>
             {userInfo.contractUrl
               ? 'Votre contrat de travail signé'
-              : 'Signez votre contrat de travail'}
+              : 'Statut de votre contrat de travail'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -216,46 +172,17 @@ export default function EmployeeAccount() {
             </div>
           ) : (
             <div className="space-y-4">
-              {isPatron ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <Input
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) => setContractFile(e.target.files?.[0] || null)}
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={() => handleUploadContract(userInfo.id)}
-                      disabled={!contractFile || isUploading}
-                    >
-                      {isUploading ? (
-                        <div className="flex items-center gap-2">
-                          <ClockIcon className="h-4 w-4 animate-spin" />
-                          Upload...
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <DocumentArrowUpIcon className="h-4 w-4" />
-                          Upload
-                        </div>
-                      )}
-                    </Button>
-                  </div>
-                  <p className="text-sm text-neutral-500">
-                    Formats acceptés: PDF, DOC, DOCX
-                  </p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-4 p-6 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
-                  <DocumentIcon className="h-12 w-12 text-neutral-400" />
-                  <p className="text-center text-neutral-600 dark:text-neutral-400">
+              <div className="flex flex-col items-center gap-4 p-6 bg-neutral-50 dark:bg-neutral-800/50 rounded-lg">
+                <DocumentIcon className="h-12 w-12 text-neutral-400" />
+                <div className="text-center">
+                  <p className="text-neutral-600 dark:text-neutral-400">
                     Vous n&apos;avez pas encore de contrat.
-                    <br />
-                    Contactez votre responsable pour plus d&apos;informations.
+                  </p>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-500 mt-2">
+                    Contactez votre responsable pour plus d&apos;informations. Les contrats sont gérés par l&apos;administration.
                   </p>
                 </div>
-              )}
+              </div>
             </div>
           )}
         </CardContent>

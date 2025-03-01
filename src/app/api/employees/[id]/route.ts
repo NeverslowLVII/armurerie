@@ -175,12 +175,14 @@ export async function PUT(
       email?: string;
       color?: string | null;
       role?: Role;
+      commission?: number;
     } = {
       name: data.name,
       username: data.username,
       email: data.email,
       color: data.color,
-      role: data.role
+      role: data.role,
+      commission: data.commission
     }
 
     // Supprimer les champs undefined
