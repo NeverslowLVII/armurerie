@@ -3,13 +3,19 @@ import { Dialog, DialogContent, DialogTitle, DialogPortal, DialogOverlay } from 
 import { useAppDispatch } from '../redux/hooks';
 import { updateUser } from '../redux/slices/userSlice';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PencilIcon, XMarkIcon, PlusIcon, TrashIcon, DocumentArrowUpIcon, ClockIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, XMarkIcon, PlusIcon, TrashIcon, DocumentArrowUpIcon, ClockIcon, DocumentIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { SelectNative } from "@/components/ui/select-native";
 import { Role, User } from '@/services/api';
 import { getCommissionRate } from '@/utils/roles';
 import { toast } from '@/components/ui/use-toast';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 
 interface Props {
     open: boolean;
@@ -68,6 +74,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const [showContractUpload, setShowContractUpload] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [isEmailSending, setIsEmailSending] = useState<Record<number, boolean>>({});
 
   // Mettre à jour la commission lorsque le rôle change
   useEffect(() => {
@@ -328,6 +335,89 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
 
   const viewContract = (contractUrl: string) => {
     window.open(contractUrl, '_blank');
+  };
+
+  const sendSetupEmail = async (userId: number) => {
+    try {
+      setIsEmailSending(prev => ({ ...prev, [userId]: true }));
+      const response = await fetch(`/api/employees/${userId}/setup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'envoi de l\'email');
+      }
+
+      toast({
+        title: 'Email envoyé',
+        description: `Un email de configuration a été envoyé à l'employé.`,
+        variant: 'default',
+      });
+      
+      // Copier le lien dans le presse-papier pour l'administrateur
+      if (data.setupLink) {
+        navigator.clipboard.writeText(data.setupLink);
+        toast({
+          title: 'Lien copié',
+          description: 'Le lien de configuration a été copié dans le presse-papier.',
+          variant: 'default',
+        });
+      }
+    } catch (error) {
+      console.error('Error sending setup email:', error);
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : 'Erreur lors de l\'envoi de l\'email',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsEmailSending(prev => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  const copySetupLink = async (userId: number) => {
+    try {
+      setIsEmailSending(prev => ({ ...prev, [userId]: true }));
+      const response = await fetch(`/api/employees/${userId}/setup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ generateLinkOnly: true }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de la génération du lien');
+      }
+      
+      // Copier le lien dans le presse-papier pour l'administrateur
+      if (data.setupLink) {
+        navigator.clipboard.writeText(data.setupLink);
+        toast({
+          title: 'Lien copié',
+          description: 'Le lien de configuration a été copié dans le presse-papier.',
+          variant: 'default',
+        });
+      } else {
+        throw new Error('Aucun lien généré');
+      }
+    } catch (error) {
+      console.error('Error generating setup link:', error);
+      toast({
+        title: 'Erreur',
+        description: error instanceof Error ? error.message : 'Erreur lors de la génération du lien',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsEmailSending(prev => ({ ...prev, [userId]: false }));
+    }
   };
 
   return (
@@ -622,6 +712,50 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                               >
                                 <TrashIcon className="h-5 w-5" />
                               </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    className="text-blue-400 hover:text-blue-300 hover:bg-neutral-800"
+                                    disabled={isSubmitting || isEmailSending[user.id]}
+                                    title="Options de configuration"
+                                  >
+                                    {isEmailSending[user.id] ? (
+                                      <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                    ) : (
+                                      <EnvelopeIcon className="h-5 w-5" />
+                                    )}
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent 
+                                  align="end" 
+                                  className="bg-neutral-800 border-neutral-700 text-neutral-100 z-[9999]"
+                                  forceMount
+                                  sideOffset={5}
+                                  side="bottom"
+                                  avoidCollisions={true}
+                                >
+                                  <DropdownMenuItem 
+                                    onClick={() => sendSetupEmail(user.id)}
+                                    className="cursor-pointer hover:bg-neutral-700 focus:bg-neutral-700"
+                                  >
+                                    <EnvelopeIcon className="h-4 w-4 mr-2" />
+                                    Envoyer email de configuration
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => copySetupLink(user.id)}
+                                    className="cursor-pointer hover:bg-neutral-700 focus:bg-neutral-700"
+                                  >
+                                    <svg className="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    Copier le lien uniquement
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
                           </div>
                         </motion.div>
