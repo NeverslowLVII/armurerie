@@ -31,7 +31,6 @@
     "noUnusedParameters": true,
     "exactOptionalPropertyTypes": true,
     "types": [
-      "jest",
       "node"
     ],
     "forceConsistentCasingInFileNames": true

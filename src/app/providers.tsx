@@ -15,7 +15,7 @@ export function Providers({ children }: { readonly children: React.ReactNode }) 
           defaultTheme="dark"
           enableSystem={false}
         >
-          <DataProvider>
+          <DataProvider useOverlay={true}>
             {children}
           </DataProvider>
         </ThemeProvider>

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription } from '@/components/ui/alert-dialog';
-import { LoadingSpinner } from '@/components/ui/loading';
+import { LoadingButton } from '@/components/ui/loading';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -206,10 +206,9 @@ export default function SignInPage() {
                   type="submit"
                   disabled={isLoading}
                 >
-                  {isLoading && (
-                    <LoadingSpinner size="sm" className="mr-2" />
-                  )}
-                  Se connecter
+                  <LoadingButton loading={isLoading} spinnerSize="xs">
+                    Se connecter
+                  </LoadingButton>
                 </Button>
               </form>
             </div>

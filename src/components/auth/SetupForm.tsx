@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription } from '@/components/ui/alert-dialog';
-import { LoadingSpinner } from '@/components/ui/loading';
+import { LoadingButton } from '@/components/ui/loading';
 
 export default function SetupForm() {
   const router = useRouter();
@@ -105,15 +105,14 @@ export default function SetupForm() {
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button 
-            type="submit" 
+          <Button
+            className="w-full"
+            type="submit"
             disabled={isLoading}
-            onClick={() => console.log('Button clicked')}
           >
-            {isLoading && (
-              <LoadingSpinner size="sm" className="mr-2" />
-            )}
-            Configurer le compte
+            <LoadingButton loading={isLoading}>
+              Configurer le compte
+            </LoadingButton>
           </Button>
         </div>
       </form>

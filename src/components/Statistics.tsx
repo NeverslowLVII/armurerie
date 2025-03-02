@@ -16,7 +16,9 @@ import { Role } from '@/services/api';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
-import { LoadingSpinner } from '@/components/ui/loading';
+import { SkeletonLoading } from '@/components/ui/loading';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useShouldDisplayLoading } from '../context/DataContext';
 
 interface WeaponStats {
     totalWeapons: number;
@@ -154,6 +156,7 @@ const PERIOD_PRESETS = [
 
 export default function Statistics() {
     const { data: session } = useSession();
+    const shouldDisplayLoading = useShouldDisplayLoading();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [weaponStats, setWeaponStats] = useState<WeaponStats>({
@@ -414,10 +417,49 @@ export default function Statistics() {
         );
     }
 
-    if (loading) {
+    if (loading && shouldDisplayLoading) {
         return (
-            <div className="flex justify-center items-center h-64">
-                <LoadingSpinner size="lg" text="Chargement des statistiques..." />
+            <div className="container mx-auto px-4 py-8">
+                <SkeletonLoading isLoading={true} className="space-y-6">
+                    {/* Header skeleton */}
+                    <div className="sm:flex sm:items-center mb-4">
+                        <div className="sm:flex-auto">
+                            <Skeleton className="h-8 w-40 mb-2" />
+                            <Skeleton className="h-4 w-64" />
+                        </div>
+                        <div className="mt-3 sm:mt-0 sm:ml-4">
+                            <div className="flex flex-wrap gap-2 mb-2">
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                    <Skeleton key={i} className="h-8 w-24" />
+                                ))}
+                            </div>
+                            <div className="flex gap-2">
+                                <Skeleton className="h-10 w-32" />
+                                <Skeleton className="h-10 w-32" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Tabs skeleton */}
+                    <div className="mb-4">
+                        <div className="flex gap-2">
+                            <Skeleton className="h-10 w-32" />
+                            <Skeleton className="h-10 w-32" />
+                            <Skeleton className="h-10 w-32" />
+                        </div>
+                    </div>
+                    
+                    {/* Stats cards skeleton */}
+                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <Skeleton key={i} className="h-24 w-full rounded-lg" />
+                        ))}
+                    </div>
+                    
+                    {/* Charts skeleton */}
+                    <Skeleton className="h-80 w-full rounded-xl" />
+                    <Skeleton className="h-80 w-full rounded-xl" />
+                </SkeletonLoading>
             </div>
         );
     }

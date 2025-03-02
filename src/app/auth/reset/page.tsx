@@ -5,6 +5,8 @@ import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import armurerie from '@/assets/armurerie.webp';
+import { SkeletonLoading } from '@/components/ui/loading';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ResetPasswordPage() {
   return (
@@ -31,26 +33,21 @@ export default function ResetPasswordPage() {
             Armurerie
           </span>
         </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="relative z-20 mt-auto"
-        >
+        
+        <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
-            <p className="text-lg font-medium italic text-neutral-100">
-              &ldquo;Réinitialisez votre mot de passe pour récupérer l&apos;accès à votre compte.&rdquo;
+            <p className="text-lg text-white">
+              Réinitialisez votre mot de passe pour récupérer l&apos;accès à votre compte.
             </p>
-            <footer className="text-sm text-neutral-300">
-              <span className="font-semibold">Service de sécurité</span>
-              <span className="before:content-['—'] before:mx-2 text-neutral-400">Armurerie</span>
+            <footer className="text-sm text-white/70">
+              Armurerie - Système de gestion
             </footer>
           </blockquote>
-        </motion.div>
+        </div>
       </div>
       <motion.div 
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
         className="lg:p-8"
       >
@@ -74,9 +71,12 @@ export default function ResetPasswordPage() {
             </motion.p>
           </div>
           <Suspense fallback={
-            <div className="flex justify-center items-center min-h-[200px]">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-            </div>
+            <SkeletonLoading isLoading={true} className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-32 mx-auto" />
+            </SkeletonLoading>
           }>
             <ResetPasswordForm />
           </Suspense>

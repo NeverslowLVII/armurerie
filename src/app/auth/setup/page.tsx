@@ -1,6 +1,10 @@
+'use client';
+
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import SetupForm from '@/components/auth/SetupForm';
+import { SkeletonLoading } from '@/components/ui/loading';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const metadata: Metadata = {
   title: 'Configuration du compte | Armurerie',
@@ -45,7 +49,14 @@ export default function SetupPage() {
               Choisissez votre mot de passe pour activer votre compte
             </p>
           </div>
-          <Suspense fallback={<div>Chargement...</div>}>
+          <Suspense fallback={
+            <SkeletonLoading isLoading={true} className="space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-32 mx-auto" />
+            </SkeletonLoading>
+          }>
             <SetupForm />
           </Suspense>
         </div>

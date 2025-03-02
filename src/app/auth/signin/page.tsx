@@ -2,13 +2,23 @@
 
 import { Suspense } from 'react';
 import SignInPage from '@/components/auth/SignInPage';
+import { FullPageSkeletonLoading } from '@/components/ui/loading';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Page() {
   return (
     <Suspense fallback={
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-      </div>
+      <FullPageSkeletonLoading>
+        <div className="space-y-6">
+          <Skeleton className="h-12 w-64 mx-auto" />
+          <Skeleton className="h-6 w-full max-w-md mx-auto" />
+          <div className="space-y-4 max-w-md mx-auto">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </FullPageSkeletonLoading>
     }>
       <SignInPage />
     </Suspense>

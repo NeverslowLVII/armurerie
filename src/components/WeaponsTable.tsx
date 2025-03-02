@@ -6,12 +6,14 @@ import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
 import { MagnifyingGlassIcon, PencilIcon, TrashIcon, UserGroupIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { BaseWeaponsManager } from './BaseWeaponsManager';
-import { useData } from '../context/DataContext';
+import { useData, useShouldDisplayLoading } from '../context/DataContext';
 import { hasPermission, getRoleName } from '@/utils/roles';
 import { Role } from '@/services/api';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
+import { SkeletonLoading } from '@/components/ui/loading';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const tableVariants = {
   hidden: { opacity: 0 },
@@ -30,6 +32,7 @@ const rowVariants = {
 
 export default function WeaponsTable() {
   const { weapons, users, loading, error: apiError, refreshWeapons, refreshUsers } = useData();
+  const shouldDisplayLoading = useShouldDisplayLoading();
   const { data: session } = useSession();
   const [isColorManagerOpen, setIsColorManagerOpen] = useState(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -99,10 +102,71 @@ export default function WeaponsTable() {
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  if (loading) {
+  // Only show loading spinner if we should display it (not using overlay)
+  if (loading && shouldDisplayLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div data-testid="loading-spinner" className="animate-spin rounded-full h-12 w-12 border-b-2 border-neutral-900 dark:border-neutral-300"></div>
+      <div className="px-4 sm:px-6 lg:px-8">
+        <SkeletonLoading isLoading={true} className="space-y-4">
+          {/* Header skeleton */}
+          <div className="sm:flex sm:items-center">
+            <div className="sm:flex-auto">
+              <Skeleton className="h-8 w-64 mb-2" />
+              <Skeleton className="h-4 w-96" />
+            </div>
+            <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex space-x-3">
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-10 w-40" />
+            </div>
+          </div>
+          
+          {/* Search bar skeleton */}
+          <Skeleton className="h-10 w-full mt-8 mb-4" />
+          
+          {/* Table skeleton */}
+          <div className="mt-8 flow-root">
+            <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="inline-block min-w-full py-2 align-middle">
+                <div className="overflow-hidden shadow-lg ring-1 ring-black ring-opacity-5 sm:rounded-lg bg-white dark:bg-neutral-800">
+                  <table className="min-w-full divide-y divide-neutral-300 dark:divide-neutral-700">
+                    <thead>
+                      <tr>
+                        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                          <th key={i} className="px-3 py-3.5">
+                            <Skeleton className="h-6 w-full" />
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[1, 2, 3, 4, 5].map((row) => (
+                        <tr key={row}>
+                          {[1, 2, 3, 4, 5, 6, 7].map((cell) => (
+                            <td key={cell} className="whitespace-nowrap px-3 py-4">
+                              <Skeleton className="h-6 w-full" />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Pagination skeleton */}
+          <div className="mt-4 flex items-center justify-between">
+            <Skeleton className="h-6 w-64" />
+            <div className="flex items-center space-x-2">
+              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 w-10" />
+              <Skeleton className="h-10 w-10" />
+              <Skeleton className="h-10 w-10" />
+              <Skeleton className="h-10 w-24" />
+            </div>
+          </div>
+        </SkeletonLoading>
       </div>
     );
   }

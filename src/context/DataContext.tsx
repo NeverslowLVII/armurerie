@@ -19,7 +19,10 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-export function DataProvider({ children }: { children: ReactNode }) {
+// This context controls whether components should show their own loading indicators
+export const LoadingDisplayContext = createContext<boolean>(true);
+
+export function DataProvider({ children, useOverlay = true }: { children: ReactNode, useOverlay?: boolean }) {
   const { status } = useSession();
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -83,7 +86,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     refreshAll();
   }, [refreshAll, status]);
 
-  return (
+  const content = (
     <DataContext.Provider value={{
       weapons,
       users,
@@ -95,11 +98,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       refreshBaseWeapons,
       refreshAll
     }}>
-      <LoadingOverlay loading={loading} text="Chargement des données...">
+      <LoadingDisplayContext.Provider value={!useOverlay}>
         {children}
-      </LoadingOverlay>
+      </LoadingDisplayContext.Provider>
     </DataContext.Provider>
   );
+
+  return useOverlay ? (
+    <LoadingOverlay loading={loading} text="Chargement des données...">
+      {content}
+    </LoadingOverlay>
+  ) : content;
 }
 
 export function useData() {
@@ -108,4 +117,8 @@ export function useData() {
     throw new Error('useData must be used within a DataProvider');
   }
   return context;
+}
+
+export function useShouldDisplayLoading() {
+  return useContext(LoadingDisplayContext);
 } 
