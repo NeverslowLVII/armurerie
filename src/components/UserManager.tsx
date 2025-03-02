@@ -294,16 +294,13 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
 
     setIsUploading(true);
     try {
-      // Dans un environnement de production, vous devriez d'abord uploader le fichier
-      // vers un service de stockage (ex: AWS S3) et obtenir l'URL
-      const contractUrl = URL.createObjectURL(contractFile);
+      // Créer un FormData pour envoyer le fichier
+      const formData = new FormData();
+      formData.append('file', contractFile);
 
       const response = await fetch(`/api/employees/${selectedUserId}/contract`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ contractUrl }),
+        body: formData,
       });
 
       if (response.ok) {
@@ -335,6 +332,34 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
 
   const viewContract = (contractUrl: string) => {
     window.open(contractUrl, '_blank');
+  };
+
+  const deleteContract = async (userId: number) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/employees/${userId}/contract`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Succès',
+          description: 'Contrat supprimé avec succès',
+        });
+        await onUpdate();
+      } else {
+        throw new Error('Erreur lors de la suppression du contrat');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Impossible de supprimer le contrat',
+        variant: 'destructive',
+      });
+    }
   };
 
   const sendSetupEmail = async (userId: number) => {
@@ -835,32 +860,51 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       <Dialog open={showContractUpload} onOpenChange={() => setShowContractUpload(false)}>
         <DialogPortal>
           <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
-          <DialogContent className="max-w-lg p-6 bg-neutral-900 border border-neutral-800 shadow-2xl">
+          <DialogContent className="max-w-md p-5 bg-neutral-900 border border-neutral-800 shadow-2xl">
             <div className="space-y-4">
-              <DialogTitle className="text-xl font-semibold text-neutral-100">
-                Upload de contrat
-              </DialogTitle>
+              <div className="flex items-center justify-between">
+                <DialogTitle className="text-xl font-semibold text-neutral-100">
+                  Upload de contrat
+                </DialogTitle>
+                <Button
+                  onClick={() => setShowContractUpload(false)}
+                  variant="ghost"
+                  className="h-8 w-8 p-0 text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 rounded-full"
+                >
+                  <XMarkIcon className="h-5 w-5" />
+                  <span className="sr-only">Fermer</span>
+                </Button>
+              </div>
               <div className="space-y-4">
                 {selectedUserId && (
                   <div className="mb-4">
                     {users.find(u => u.id === selectedUserId)?.contractUrl ? (
                       <div className="p-4 bg-green-900/20 border border-green-800 rounded-lg">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col space-y-3">
                           <div className="flex items-center gap-2">
                             <DocumentIcon className="h-5 w-5 text-green-500" />
                             <span className="text-green-400">Cet employé a déjà un contrat</span>
                           </div>
-                          <Button
-                            onClick={() => viewContract(users.find(u => u.id === selectedUserId)?.contractUrl || '')}
-                            variant="outline"
-                            className="text-green-400 border-green-700 hover:bg-green-900/30"
-                          >
-                            Voir le contrat
-                          </Button>
+                          <div className="flex space-x-2">
+                            <Button
+                              onClick={() => viewContract(users.find(u => u.id === selectedUserId)?.contractUrl || '')}
+                              variant="outline"
+                              className="flex-1 text-green-400 border-green-700 hover:bg-green-900/30"
+                            >
+                              Voir le contrat
+                            </Button>
+                            <Button
+                              onClick={() => deleteContract(selectedUserId)}
+                              variant="outline"
+                              className="flex-1 text-red-400 border-red-700 hover:bg-red-900/30"
+                            >
+                              Supprimer
+                            </Button>
+                          </div>
+                          <p className="text-xs text-neutral-400">
+                            L&apos;upload d&apos;un nouveau contrat remplacera le contrat existant.
+                          </p>
                         </div>
-                        <p className="mt-2 text-xs text-neutral-400">
-                          L&apos;upload d&apos;un nouveau contrat remplacera le contrat existant.
-                        </p>
                       </div>
                     ) : (
                       <div className="p-4 bg-amber-900/20 border border-amber-800 rounded-lg">
@@ -885,29 +929,21 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                     </p>
                     <div className="flex justify-end space-x-2">
                       <Button
-                        onClick={() => setShowContractUpload(false)}
-                        variant="outline"
-                        className="text-neutral-300 border-neutral-600 hover:bg-neutral-800"
-                        disabled={isUploading}
-                      >
-                        Annuler
-                      </Button>
-                      <Button
                         onClick={handleUploadContract}
                         disabled={!contractFile || isUploading}
-                        className={`${
+                        className={`w-full ${
                           isUploading
                             ? 'bg-blue-500/50'
                             : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400'
                         } text-white`}
                       >
                         {isUploading ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <ClockIcon className="h-4 w-4 animate-spin" />
                             Upload...
                           </div>
                         ) : (
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             <DocumentArrowUpIcon className="h-4 w-4" />
                             Upload
                           </div>

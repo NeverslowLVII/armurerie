@@ -10,8 +10,6 @@
         "build": "prisma generate && next build",
         "start": "next start",
         "lint": "next lint",
-        "test": "NODE_ENV=development jest",
-        "test:armurerie": "NODE_ENV=development npx jest --coverage --runInBand",
         "find-duplicates": "jscpd ./src",
         "repomix": "npx repomix --config repomix.config.json --remove-comments --remove-empty-lines",
         "find-unused": "NODE_NO_WARNINGS=1 tsx scripts/find-unused-files.ts"
@@ -50,6 +48,7 @@
         "@types/react-virtualized": "^9.22.0",
         "@types/signature_pad": "^4.0.0",
         "@types/uuid": "^10.0.0",
+        "@vercel/blob": "^0.27.2",
         "axios": "^1.6.2",
         "bcrypt": "^5.1.1",
         "bcryptjs": "^2.4.3",
