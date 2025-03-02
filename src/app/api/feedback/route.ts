@@ -117,9 +117,9 @@ export async function DELETE(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const id = parseInt(searchParams.get('id') || '');
+    const id = Number.parseInt(searchParams.get('id') || '');
 
-    if (!id || isNaN(id)) {
+    if (!id || Number.isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid feedback ID' },
         { status: 400 }

@@ -4,8 +4,8 @@ import { prisma } from '@/lib/prisma'
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Parse user ID
-    const userId = parseInt(params.id)
-    if (isNaN(userId)) {
+    const userId = Number.parseInt(params.id)
+    if (Number.isNaN(userId)) {
       console.error('Invalid user ID:', params.id)
       return NextResponse.json(
         { error: 'Invalid user ID', user_id: params.id },

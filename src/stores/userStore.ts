@@ -25,7 +25,7 @@ class UserStore {
   }
 
   private checkStorageAvailability() {
-    if (typeof window === 'undefined') {
+    if (typeof globalThis === 'undefined') {
       this.isStorageAvailable = false;
       return;
     }
@@ -35,10 +35,10 @@ class UserStore {
       localStorage.setItem(testKey, testKey);
       localStorage.removeItem(testKey);
       this.isStorageAvailable = true;
-    } catch (e) {
+    } catch (error) {
       this.isStorageAvailable = false;
       if (process.env.NODE_ENV === 'development') {
-        console.warn('localStorage is not available:', e);
+        console.warn('localStorage is not available:', error);
       }
     }
   }
@@ -80,31 +80,26 @@ class UserStore {
   private async initializeFromBackend() {
     try {
       // Use absolute URL for server-side rendering
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const baseUrl = typeof globalThis === 'undefined' 
+        ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+        : globalThis.location.origin;
       const response = await fetch(`${baseUrl}/api/employees`);
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        // Update local cache with backend data
+        for (const user of data) {
+          if (this.validateUser(user)) {
+            this.users.set(user.name, user);
+          } else {
+            console.warn('Invalid user data from backend:', user);
+          }
+        }
+        
+        this.saveToStorage();
+        this.initialized = true;
+      } else {
         throw new Error('Failed to fetch users');
       }
-      
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        console.warn('Unexpected response type:', contentType);
-        return;
-      }
-
-      const users = await response.json();
-      
-      // Update local cache with backend data
-      users.forEach((user: User) => {
-        if (this.validateUser(user)) {
-          this.users.set(user.name, user);
-        } else {
-          console.warn('Invalid user data from backend:', user);
-        }
-      });
-      
-      this.saveToStorage();
-      this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize from backend:', error);
       // Fall back to local storage if backend fails
@@ -297,11 +292,11 @@ class UserStore {
       }
 
       // Update local state
-      names.forEach(name => {
+      for (const name of names) {
         if (name !== targetName) {
           this.users.delete(name);
         }
-      });
+      }
       this.saveToStorage();
     } catch (error) {
       console.error('Failed to merge users:', error);

@@ -53,7 +53,7 @@ export default function EmployeeAccount() {
         const data = await response.json();
         setUserInfo(data);
         setLastUpdated(new Date());
-      } catch (error) {
+      } catch {
         toast({
           title: 'Erreur',
           description: 'Impossible de charger les informations de l\'employé',
@@ -83,7 +83,7 @@ export default function EmployeeAccount() {
         title: 'Mise à jour',
         description: 'Données actualisées avec succès',
       });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: 'Impossible d\'actualiser les données',

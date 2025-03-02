@@ -32,7 +32,7 @@ export async function POST(
       return new NextResponse('Fichier manquant', { status: 400 });
     }
 
-    const userId = parseInt(params.id);
+    const userId = Number.parseInt(params.id);
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, name: true }
@@ -43,7 +43,7 @@ export async function POST(
     }
 
     // Générer un nom de fichier unique basé sur l'ID de l'utilisateur et la date
-    const fileName = `contracts/${user.id}_${user.name.replace(/\s+/g, '_')}_${Date.now()}.${file.name.split('.').pop()}`;
+    const fileName = `contracts/${user.id}_${user.name.replaceAll(/\s+/g, '_')}_${Date.now()}.${file.name.split('.').pop()}`;
     
     // Upload du fichier vers Vercel Blob Storage
     const { url } = await put(fileName, file, { access: 'public' });
@@ -75,7 +75,7 @@ export async function GET(
       return new NextResponse('Non autorisé', { status: 401 });
     }
 
-    const userId = parseInt(params.id);
+    const userId = Number.parseInt(params.id);
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { contractUrl: true },
@@ -112,7 +112,7 @@ export async function DELETE(
       return new NextResponse('Non autorisé - Accès réservé aux patrons', { status: 403 });
     }
 
-    const userId = parseInt(params.id);
+    const userId = Number.parseInt(params.id);
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { contractUrl: true }

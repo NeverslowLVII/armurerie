@@ -54,7 +54,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
         try {
             const priceInCents = selectedBaseWeapon 
                 ? selectedBaseWeapon.prix_defaut 
-                : parseInt(prix) * 100;
+                : Number.parseInt(prix) * 100;
 
             await updateWeapon(weapon.id, {
                 horodateur: new Date(horodatage).toISOString(),
@@ -70,8 +70,8 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
             setTimeout(() => {
                 onClose();
             }, 1000); // Fermer après 1 seconde pour montrer le message de succès
-        } catch (err) {
-            console.error('Erreur lors de la mise à jour de l\'arme:', err);
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour de l\'arme:', error);
             setError('Erreur lors de la mise à jour de l\'arme. Veuillez réessayer.');
         } finally {
             setIsLoading(false);
@@ -148,7 +148,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                                 id="baseWeapon"
                                 value={selectedBaseWeapon?.id ?? ''}
                                 onChange={(e) => {
-                                    const baseWeapon = baseWeapons.find(w => w.id === parseInt(e.target.value));
+                                    const baseWeapon = baseWeapons.find(w => w.id === Number.parseInt(e.target.value));
                                     handleBaseWeaponSelect(baseWeapon || null);
                                 }}
                                 className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"

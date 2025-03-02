@@ -19,7 +19,7 @@ export async function PUT(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = Number.parseInt(params.id);
     const { username, password, name } = await request.json();
 
     // Validate input
@@ -93,7 +93,7 @@ export async function DELETE(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = Number.parseInt(params.id);
 
     // Check if developer exists
     const developer = await prisma.user.findUnique({

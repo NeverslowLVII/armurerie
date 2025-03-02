@@ -26,7 +26,7 @@ export function WeeklySales() {
         const data = await response.json();
         setSales(data.sales);
         setTotalAmount(data.totalAmount);
-      } catch (error) {
+      } catch {
         toast({
           title: 'Erreur',
           description: 'Impossible de charger les ventes de la semaine',
@@ -107,7 +107,7 @@ export function WeeklySales() {
             <p className="text-sm text-neutral-400 dark:text-neutral-500 mt-1">Les ventes apparaîtront ici</p>
           </motion.div>
         ) : (
-          sales.map((sale, index) => (
+          sales.map((sale, _index) => (
             <motion.div
               key={sale.id}
               variants={item}

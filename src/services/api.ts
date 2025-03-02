@@ -1,8 +1,12 @@
 import axios from 'axios';
+import type { Role } from '@prisma/client';
+
+// Re-export the Role enum
+export { Role } from '@prisma/client';
 
 // Get the base URL dynamically
 const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof globalThis !== 'undefined') {
     // Browser should use relative path
     return '/api';
   }
@@ -20,10 +24,6 @@ const getBaseUrl = () => {
 
 const baseURL = getBaseUrl();
 axios.defaults.baseURL = baseURL;
-
-// Import the Role enum directly from Prisma
-import { Role } from '@prisma/client';
-export { Role };
 
 export interface User {
   id: number;
@@ -143,14 +143,14 @@ export const createWeapon = async (weapon: WeaponCreate): Promise<Weapon> => {
     const axiosError = error as any;
     if (axiosError?.isAxiosError === true) {
       if (axiosError.response?.status === 400) {
-        return Promise.reject(new Error('Données invalides pour la création de l\'arme'));
+        throw new Error('Données invalides pour la création de l\'arme');
       }
       if (process.env.NODE_ENV !== 'test') {
         console.error('Create weapon error:', { status: axiosError.response?.status, statusText: axiosError.response?.statusText });
       }
-      return Promise.reject(new Error(`Erreur lors de la création: ${axiosError.message}`));
+      throw new Error(`Erreur lors de la création: ${axiosError.message}`);
     }
-    return Promise.reject(error);
+    throw error;
   }
 };
 
@@ -174,14 +174,14 @@ export const deleteWeapon = async (id: number): Promise<void> => {
     const axiosErrorDel = error as any;
     if (axiosErrorDel?.isAxiosError === true) {
       if (axiosErrorDel.response?.status === 404) {
-        return Promise.reject(new Error(`L'arme avec l'ID ${id} n'a pas été trouvée`));
+        throw new Error(`L'arme avec l'ID ${id} n'a pas été trouvée`);
       } else if (axiosErrorDel.response?.status === 405) {
         console.error('Delete request failed:', axiosErrorDel.response);
-        return Promise.reject(new Error('La méthode de suppression n\'est pas autorisée'));
+        throw new Error('La méthode de suppression n\'est pas autorisée');
       }
-      return Promise.reject(new Error(`Erreur lors de la suppression: ${axiosErrorDel.message}`));
+      throw new Error(`Erreur lors de la suppression: ${axiosErrorDel.message}`);
     }
-    return Promise.reject(error);
+    throw error;
   }
 };
 
@@ -236,14 +236,14 @@ export const deleteBaseWeapon = async (id: number): Promise<void> => {
     const axiosErrorBase = error as any;
     if (axiosErrorBase?.isAxiosError === true) {
       if (axiosErrorBase.response?.status === 404) {
-        return Promise.reject(new Error(`L'arme de base avec l'ID ${id} n'a pas été trouvée`));
+        throw new Error(`L'arme de base avec l'ID ${id} n'a pas été trouvée`);
       } else if (axiosErrorBase.response?.status === 405) {
         console.error('Delete request failed:', axiosErrorBase.response);
-        return Promise.reject(new Error('La méthode de suppression n\'est pas autorisée'));
+        throw new Error('La méthode de suppression n\'est pas autorisée');
       }
-      return Promise.reject(new Error(`Erreur lors de la suppression: ${axiosErrorBase.message}`));
+      throw new Error(`Erreur lors de la suppression: ${axiosErrorBase.message}`);
     }
-    return Promise.reject(error);
+    throw error;
   }
 };
 
@@ -258,4 +258,4 @@ export const deleteEmployee = deleteUser;
 export const mergeEmployees = mergeUsers;
 export const getEmployeeWeapons = getUserWeapons;
 
-export default axios; 
+export { default as axios } from 'axios'; 

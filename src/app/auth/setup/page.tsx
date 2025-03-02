@@ -1,15 +1,9 @@
 'use client';
 
-import { Metadata } from 'next';
 import { Suspense } from 'react';
 import SetupForm from '@/components/auth/SetupForm';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
-
-export const metadata: Metadata = {
-  title: 'Configuration du compte | Armurerie',
-  description: 'Configurez votre compte Armurerie',
-};
 
 export default function SetupPage() {
   return (

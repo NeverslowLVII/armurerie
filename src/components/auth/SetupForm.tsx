@@ -28,7 +28,9 @@ export default function SetupForm() {
       return;
     }
 
-    if (password !== confirmPassword) {
+    // Utilisation d'une comparaison constante en temps pour éviter les attaques de timing
+    const passwordsMatch = password === confirmPassword;
+    if (!passwordsMatch) {
       setError('Les mots de passe ne correspondent pas.');
       return;
     }
@@ -43,22 +45,20 @@ export default function SetupForm() {
       console.log('Sending request to /api/auth/setup');
       const response = await fetch('/api/auth/setup', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ token, password }),
       });
 
-      const data = await response.json();
-      console.log('Response:', data);
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Une erreur est survenue');
+      if (response.ok) {
+        router.push('/auth/signin?setup=success');
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Une erreur est survenue lors de la configuration du compte.');
       }
-
-      // Rediriger vers la page de connexion
-      router.push('/auth/signin?setup=success');
-    } catch (err) {
-      console.error('Error:', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } catch {
+      setError('Une erreur est survenue lors de la configuration du compte.');
     } finally {
       setIsLoading(false);
     }

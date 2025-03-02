@@ -5,11 +5,11 @@ export async function POST(request: NextRequest) {
   try {
     // Get user IDs from query parameters
     const searchParams = request.nextUrl.searchParams
-    const fromUserId = parseInt(searchParams.get('from_user_id') || '')
-    const toUserId = parseInt(searchParams.get('to_user_id') || '')
+    const fromUserId = Number.parseInt(searchParams.get('from_user_id') || '')
+    const toUserId = Number.parseInt(searchParams.get('to_user_id') || '')
 
     // Validate user IDs
-    if (isNaN(fromUserId) || isNaN(toUserId)) {
+    if (Number.isNaN(fromUserId) || Number.isNaN(toUserId)) {
       console.error('Invalid user IDs:', { fromUserId, toUserId })
       return NextResponse.json(
         { error: 'Invalid user IDs', fromUserId, toUserId },

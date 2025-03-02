@@ -2,7 +2,8 @@
 export function stringToColor(str: string): string {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const codePoint = str.codePointAt(i) || 0; // Add fallback to 0 if undefined
+      hash = codePoint + ((hash << 5) - hash);
     }
   
     // Générer des composantes HSL pour des couleurs pastel
@@ -19,6 +20,6 @@ export function stringToColor(str: string): string {
     const matches = backgroundColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
     if (!matches) return 'black';
   
-    const l = parseInt(matches[3]); // Luminosité
+    const l = Number.parseInt(matches[3]); // Luminosité
     return l > 65 ? '#374151' : 'white'; // Gris foncé ou blanc selon la luminosité
   } 

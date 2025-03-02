@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id)
+    const id = Number.parseInt(params.id)
     const user = await prisma.user.findUnique({
       where: { id },
       include: { weapons: true }
@@ -38,7 +38,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id)
+    const id = Number.parseInt(params.id)
     const data = await request.json()
     
     console.log('PUT /api/employees/[id] - Request data:', {
@@ -112,7 +112,7 @@ export async function PUT(
         where: {
           username: data.username,
           NOT: {
-            id: parseInt(params.id)
+            id: Number.parseInt(params.id)
           }
         }
       })
@@ -137,7 +137,7 @@ export async function PUT(
         where: {
           email: data.email,
           NOT: {
-            id: parseInt(params.id)
+            id: Number.parseInt(params.id)
           }
         }
       })
@@ -186,11 +186,11 @@ export async function PUT(
     }
 
     // Supprimer les champs undefined
-    Object.keys(updateData).forEach(key => {
+    for (const key of Object.keys(updateData)) {
       if (updateData[key as keyof typeof updateData] === undefined) {
         delete updateData[key as keyof typeof updateData]
       }
-    })
+    }
 
     console.log('Final update data:', updateData)
     
@@ -225,8 +225,8 @@ export async function DELETE(
 ) {
   try {
     // Parse user ID
-    const userId = parseInt(params.id)
-    if (isNaN(userId)) {
+    const userId = Number.parseInt(params.id)
+    if (Number.isNaN(userId)) {
       console.error('Invalid user ID:', params.id)
       return NextResponse.json(
         { error: 'Invalid user ID', user_id: params.id },

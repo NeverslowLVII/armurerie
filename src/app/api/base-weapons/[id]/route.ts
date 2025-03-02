@@ -7,8 +7,8 @@ export async function GET(
 ) {
   try {
     // Try to find by ID first
-    const numericId = parseInt(params.id)
-    if (!isNaN(numericId)) {
+    const numericId = Number.parseInt(params.id, 10)
+    if (!Number.isNaN(numericId)) {
       const baseWeapon = await prisma.baseWeapon.findUnique({
         where: { id: numericId }
       })
@@ -45,8 +45,8 @@ export async function PUT(
 ) {
   try {
     // Try to find by ID first
-    const numericId = parseInt(params.id)
-    if (!isNaN(numericId)) {
+    const numericId = Number.parseInt(params.id, 10)
+    if (!Number.isNaN(numericId)) {
       const baseWeapon = await prisma.baseWeapon.findUnique({
         where: { id: numericId }
       })
@@ -104,8 +104,8 @@ export async function DELETE(
     console.log('Deleting base weapon with ID/name:', params.id)
 
     // Try to find by ID first
-    const numericId = parseInt(params.id)
-    if (!isNaN(numericId)) {
+    const numericId = Number.parseInt(params.id, 10)
+    if (!Number.isNaN(numericId)) {
       const baseWeapon = await prisma.baseWeapon.findUnique({
         where: { id: numericId }
       })

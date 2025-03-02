@@ -25,7 +25,7 @@ class EmployeeStore {
   }
 
   private checkStorageAvailability() {
-    if (typeof window === 'undefined') {
+    if (typeof globalThis === 'undefined') {
       this.isStorageAvailable = false;
       return;
     }
@@ -35,9 +35,9 @@ class EmployeeStore {
       localStorage.setItem(testKey, testKey);
       localStorage.removeItem(testKey);
       this.isStorageAvailable = true;
-    } catch (e) {
+    } catch (error) {
       this.isStorageAvailable = false;
-      console.warn('localStorage is not available:', e);
+      console.warn('localStorage is not available:', error);
     }
   }
 
@@ -78,24 +78,26 @@ class EmployeeStore {
   private async initializeFromBackend() {
     try {
       // Use absolute URL for server-side rendering
-      const baseUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+      const baseUrl = typeof globalThis === 'undefined' 
+        ? process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+        : globalThis.location.origin;
       const response = await fetch(`${baseUrl}/api/employees`);
-      if (!response.ok) {
+      if (response.ok) {
+        const data = await response.json();
+        // Update local cache with backend data
+        for (const emp of data) {
+          if (this.validateEmployee(emp)) {
+            this.employees.set(emp.name, emp);
+          } else {
+            console.warn('Invalid employee data from backend:', emp);
+          }
+        }
+        
+        this.saveToStorage();
+        this.initialized = true;
+      } else {
         throw new Error('Failed to fetch employees');
       }
-      const employees = await response.json();
-      
-      // Update local cache with backend data
-      employees.forEach((emp: Employee) => {
-        if (this.validateEmployee(emp)) {
-          this.employees.set(emp.name, emp);
-        } else {
-          console.warn('Invalid employee data from backend:', emp);
-        }
-      });
-      
-      this.saveToStorage();
-      this.initialized = true;
     } catch (error) {
       console.error('Failed to initialize from backend:', error);
       // Fall back to local storage if backend fails
@@ -291,11 +293,11 @@ class EmployeeStore {
     }
 
     // Update local state
-    names.forEach(name => {
+    for (const name of names) {
       if (name !== targetName) {
         this.employees.delete(name);
       }
-    });
+    }
     this.saveToStorage();
   }
 

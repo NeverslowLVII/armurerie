@@ -44,8 +44,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse user ID
-    userId = parseInt(data.user_id)
-    if (isNaN(userId)) {
+    userId = Number.parseInt(data.user_id)
+    if (Number.isNaN(userId)) {
       console.error('Invalid user ID:', data.user_id)
       return NextResponse.json(
         { error: 'Invalid user ID', user_id: data.user_id },

@@ -51,15 +51,12 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [_isScrolled, _setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHeaderFullyVisible, setIsHeaderFullyVisible] = useState(true);
   const pathname = usePathname();
 
   const lastScrollY = useRef(0);
-  const lastScrollTime = useRef(Date.now());
-  const scrollVelocity = useRef(0);
-  const ticking = useRef(false);
 
   const { scrollY } = useScroll();
   const opacity = useTransform(scrollY, [0, 50], [1, 0.98]);
@@ -78,45 +75,19 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          const currentTime = Date.now();
-          const timeDiff = currentTime - lastScrollTime.current;
-          
-          // Calculer la vélocité du scroll (pixels/ms)
-          scrollVelocity.current = Math.abs(currentScrollY - lastScrollY.current) / timeDiff;
-          
-          // Seuil de vélocité pour une réaction plus rapide
-          const isQuickScroll = scrollVelocity.current > 0.5;
-          
-          if (currentScrollY < 50) {
-            setIsVisible(true);
-            setIsScrolled(false);
-          } else {
-            setIsScrolled(true);
-            if (currentScrollY < lastScrollY.current) {
-              // Scroll vers le haut - réaction immédiate
-              setIsVisible(true);
-            } else if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
-              // Scroll vers le bas - cacher seulement si le scroll est rapide
-              if (isQuickScroll) {
-                setIsVisible(false);
-              }
-            }
-          }
-
-          lastScrollY.current = currentScrollY;
-          lastScrollTime.current = currentTime;
-          ticking.current = false;
-        });
-
-        ticking.current = true;
-      }
+      globalThis.requestAnimationFrame(() => {
+        const currentScrollY = globalThis.scrollY;
+        if (currentScrollY > lastScrollY.current) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
+        lastScrollY.current = currentScrollY;
+      });
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    globalThis.addEventListener('scroll', handleScroll, { passive: true });
+    return () => globalThis.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navVariants: Variants = {
@@ -166,7 +137,7 @@ export default function Navbar() {
       animate={isVisible ? "visible" : "hidden"}
       onAnimationComplete={() => setIsHeaderFullyVisible(isVisible)}
       style={{ opacity, scale: smoothScale, willChange: "transform, opacity" }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-150 ${isScrolled ? 'py-2' : 'py-4'}`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-150 ${_isScrolled ? 'py-2' : 'py-4'}`}
     >
       <motion.nav
         style={{ backdropFilter: smoothBackdrop, willChange: "backdrop-filter" }}

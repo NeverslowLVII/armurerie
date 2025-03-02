@@ -55,7 +55,7 @@ export default function DeveloperManager({ open, onClose }: Props) {
       if (!response.ok) throw new Error('Failed to fetch developers');
       const data = await response.json();
       setDevelopers(data);
-    } catch (error) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible de charger les développeurs",
@@ -98,7 +98,7 @@ export default function DeveloperManager({ open, onClose }: Props) {
       setNewUsername('');
       setNewPassword('');
       setNewName('');
-    } catch (error) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible de créer le développeur",
@@ -137,7 +137,7 @@ export default function DeveloperManager({ open, onClose }: Props) {
       setNewUsername('');
       setNewPassword('');
       setNewName('');
-    } catch (error) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible de mettre à jour le développeur",
@@ -164,7 +164,7 @@ export default function DeveloperManager({ open, onClose }: Props) {
       });
 
       await fetchDevelopers();
-    } catch (error) {
+    } catch {
       toast({
         title: "Erreur",
         description: "Impossible de supprimer le développeur",

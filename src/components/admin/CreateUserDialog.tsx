@@ -33,7 +33,7 @@ export function CreateUserDialog() {
       password: formData.get('password') as string,
       color: formData.get('color') as string,
       contractUrl: formData.get('contractUrl') as string,
-      commission: formData.get('commission') ? parseFloat(formData.get('commission') as string) : 0,
+      commission: formData.get('commission') ? Number.parseFloat(formData.get('commission') as string) : 0,
     };
 
     try {
@@ -55,7 +55,7 @@ export function CreateUserDialog() {
       });
       setIsOpen(false);
       router.refresh();
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: "Impossible de créer l'utilisateur",

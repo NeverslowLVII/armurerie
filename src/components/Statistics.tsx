@@ -154,6 +154,14 @@ const PERIOD_PRESETS = [
     { label: 'Cette année', days: 365 }
 ];
 
+// Move this function outside the component
+const formatDateForInput = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 export default function Statistics() {
     const { data: session } = useSession();
     const shouldDisplayLoading = useShouldDisplayLoading();
@@ -226,7 +234,7 @@ export default function Statistics() {
             const profitByTypeMap = new Map<string, { profit: number; count: number }>();
             let totalCostProduction = 0;
 
-            filteredWeapons.forEach(weapon => {
+            for (const weapon of filteredWeapons) {
                 const normalizedName = normalizeWeaponName(weapon.nom_arme);
                 weaponTypeMap.set(normalizedName, (weaponTypeMap.get(normalizedName) || 0) + 1);
                 
@@ -239,13 +247,13 @@ export default function Statistics() {
                 });
                 
                 totalCostProduction += productionCost;
-            });
+            }
 
-            const weaponTypes = Array.from(weaponTypeMap.entries())
+            const weaponTypes = [...weaponTypeMap.entries()]
                 .map(([name, count]) => ({ name, count }))
                 .sort((a, b) => b.count - a.count);
 
-            const profitByType = Array.from(profitByTypeMap.entries())
+            const profitByType = [...profitByTypeMap.entries()]
                 .map(([name, data]) => ({
                     name,
                     profit: data.profit,
@@ -255,7 +263,8 @@ export default function Statistics() {
 
             // Calculer les statistiques quotidiennes
             const dailyStatsMap = new Map<string, { totalValue: number; totalCost: number; totalProfit: number; count: number }>();
-            filteredWeapons.forEach(weapon => {
+            
+            for (const weapon of filteredWeapons) {
                 const date = new Date(weapon.horodateur);
                 const day = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
                 const existing = dailyStatsMap.get(day) || { totalValue: 0, totalCost: 0, totalProfit: 0, count: 0 };
@@ -267,9 +276,9 @@ export default function Statistics() {
                     totalProfit: existing.totalProfit + profit,
                     count: existing.count + 1
                 });
-            });
+            }
 
-            const dailyStats = Array.from(dailyStatsMap.entries())
+            const dailyStats = [...dailyStatsMap.entries()]
                 .map(([day, stats]) => ({
                     day,
                     ...stats
@@ -278,7 +287,7 @@ export default function Statistics() {
 
             const totalValue = filteredWeapons.reduce((sum, w) => sum + w.prix, 0);
             const totalProfit = totalValue - totalCostProduction;
-            const totalTaxes = Math.round(totalProfit * 0.10); // 10% d'impôts
+            const totalTaxes = Math.round(totalProfit * 0.1); // 10% d'impôts
             const profitAfterTaxes = totalProfit - totalTaxes;
 
             setWeaponStats({
@@ -378,13 +387,6 @@ export default function Statistics() {
             startDate,
             endDate
         });
-    };
-
-    const formatDateForInput = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
     };
 
     const isActivePeriod = (days: number) => {

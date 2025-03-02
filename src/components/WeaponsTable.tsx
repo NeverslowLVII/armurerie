@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { deleteWeapon, Weapon } from '../services/api';
+import { Weapon } from '../services/api';
 import UserManager from './UserManager';
 import AddWeaponForm from './AddWeaponForm';
 import EditWeaponForm from './EditWeaponForm';
@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'react-hot-toast';
 
 const tableVariants = {
   hidden: { opacity: 0 },
@@ -51,27 +52,23 @@ export default function WeaponsTable() {
     setIsEditFormOpen(true);
   };
 
-  const handleDelete = async (weapon: Weapon) => {
-    if (!isAdmin) return;
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette arme ?')) {
-      try {
-        await deleteWeapon(weapon.id);
-        // Mettre à jour la liste localement avant de rafraîchir
-        const updatedWeapons = weapons.filter(w => w.id !== weapon.id);
-        const newTotalPages = Math.ceil(updatedWeapons.length / itemsPerPage);
-        if (currentPage > newTotalPages) {
-          setCurrentPage(Math.max(1, newTotalPages));
-        }
-        // Rafraîchir les données
-        await refreshWeapons();
-      } catch (error) {
-        console.error('Error deleting weapon:', error);
-        if (error instanceof Error) {
-          alert(`Erreur lors de la suppression : ${error.message}`);
+  const handleDelete = async (id: number) => {
+    try {
+      if (globalThis.confirm('Êtes-vous sûr de vouloir supprimer cette arme ?')) {
+        const response = await fetch(`/api/weapons/${id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          toast.success('Arme supprimée avec succès');
+          await refreshWeapons();
         } else {
-          alert('Une erreur est survenue lors de la suppression');
+          toast.error('Erreur lors de la suppression de l\'arme');
         }
       }
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast.error('Erreur lors de la suppression de l\'arme');
     }
   };
 
@@ -331,7 +328,7 @@ export default function WeaponsTable() {
                               <PencilIcon className="h-5 w-5" aria-hidden="true" />
                             </Button>
                             <Button
-                              onClick={() => handleDelete(weapon)}
+                              onClick={() => handleDelete(weapon.id)}
                               className={`text-red-600 hover:text-red-900 ${!isAdmin && 'opacity-50 cursor-not-allowed'}`}
                               disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageWeapons')}
                               title="Supprimer l&apos;arme"

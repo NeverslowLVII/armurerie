@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogPortal, DialogOverlay } from '@/components/ui/dialog';
-import { createBaseWeapon, updateBaseWeapon, deleteBaseWeapon } from '../services/api';
+import { createBaseWeapon, updateBaseWeapon } from '../services/api';
 import { PencilIcon, TrashIcon, PlusIcon, XMarkIcon, CurrencyDollarIcon, FireIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useData } from '../context/DataContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
+import { toast } from 'react-hot-toast';
 
 interface BaseWeaponsManagerProps {
     isOpen: boolean;
@@ -133,8 +134,8 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                 weapon.prix_defaut.toString().includes(searchQuery)
             )
             .sort((a, b) => {
-                const profitA = parseFloat(calculateProfit(a.prix_defaut, a.cout_production_defaut));
-                const profitB = parseFloat(calculateProfit(b.prix_defaut, b.cout_production_defaut));
+                const profitA = Number.parseFloat(calculateProfit(a.prix_defaut, a.cout_production_defaut));
+                const profitB = Number.parseFloat(calculateProfit(b.prix_defaut, b.cout_production_defaut));
                 return profitB - profitA;
             });
     }, [baseWeapons, searchQuery]);
@@ -164,8 +165,8 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
         try {
             await createBaseWeapon({
                 nom: newWeaponName,
-                prix_defaut: parseInt(newWeaponPrice) * 100,
-                cout_production_defaut: parseInt(newWeaponCostProduction) * 100
+                prix_defaut: Number.parseInt(newWeaponPrice) * 100,
+                cout_production_defaut: Number.parseInt(newWeaponCostProduction) * 100
             });
             setNewWeaponName('');
             setNewWeaponPrice('');
@@ -190,8 +191,8 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
         try {
             await updateBaseWeapon(editingWeapon.id, {
                 nom: newWeaponName,
-                prix_defaut: parseInt(newWeaponPrice) * 100,
-                cout_production_defaut: parseInt(newWeaponCostProduction) * 100
+                prix_defaut: Number.parseInt(newWeaponPrice) * 100,
+                cout_production_defaut: Number.parseInt(newWeaponCostProduction) * 100
             });
             setEditingWeapon(null);
             setNewWeaponName('');
@@ -209,20 +210,22 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
     };
 
     const handleDeleteWeapon = async (weaponId: number) => {
-        if (window.confirm('Êtes-vous sûr de vouloir supprimer cette arme de base ?')) {
-            setIsSubmitting(true);
-            setError(null);
-            try {
-                await deleteBaseWeapon(weaponId);
-                setSuccess('Arme de base supprimée avec succès !');
-                refreshBaseWeapons();
-                setTimeout(() => setSuccess(null), 3000);
-            } catch (error) {
-                setError('Erreur lors de la suppression de l\'arme de base');
-                console.error('Erreur lors de la suppression de l\'arme de base:', error);
-            } finally {
-                setIsSubmitting(false);
+        try {
+            if (globalThis.confirm('Êtes-vous sûr de vouloir supprimer cette arme de base ?')) {
+                const response = await fetch(`/api/base-weapons/${weaponId}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    toast.success('Arme de base supprimée avec succès');
+                    refreshBaseWeapons();
+                } else {
+                    toast.error('Erreur lors de la suppression de l\'arme de base');
+                }
             }
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            toast.error('Erreur lors de la suppression de l\'arme de base');
         }
     };
 
@@ -510,7 +513,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                                                                 >
                                                                     <span
                                                                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                                            getProfitClass(parseFloat(calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)))
+                                                                            getProfitClass(Number.parseFloat(calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)))
                                                                         }`}
                                                                     >
                                                                         Marge: {calculateProfit(weapon.prix_defaut, weapon.cout_production_defaut)}%

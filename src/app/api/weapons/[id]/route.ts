@@ -13,8 +13,8 @@ export async function GET(
       )
     }
 
-    const id = parseInt(params.id)
-    if (isNaN(id)) {
+    const id = Number.parseInt(params.id)
+    if (Number.isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid weapon ID', id: params.id },
         { status: 400 }
@@ -58,8 +58,8 @@ export async function PUT(
       )
     }
 
-    const id = parseInt(params.id)
-    if (isNaN(id)) {
+    const id = Number.parseInt(params.id)
+    if (Number.isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid weapon ID', id: params.id },
         { status: 400 }
@@ -90,7 +90,7 @@ export async function PUT(
           ...(data.prix && { prix: data.prix }),
           ...(data.user_id && { 
             user: {
-              connect: { id: parseInt(data.user_id) }
+              connect: { id: Number.parseInt(data.user_id) }
             }
           }),
           base_weapon: {
@@ -141,8 +141,8 @@ export async function DELETE(
       )
     }
 
-    const id = parseInt(params.id)
-    if (isNaN(id)) {
+    const id = Number.parseInt(params.id)
+    if (Number.isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid weapon ID', id: params.id },
         { status: 400 }

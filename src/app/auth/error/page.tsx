@@ -15,14 +15,16 @@ function ErrorContent() {
   let errorDescription = "Veuillez réessayer ou contacter l'administrateur.";
   
   switch (error) {
-    case 'CredentialsSignin':
+    case 'CredentialsSignin': {
       errorMessage = "Échec de connexion";
       errorDescription = "Les identifiants fournis sont incorrects. Veuillez vérifier votre email et mot de passe.";
       break;
-    case 'AccessDenied':
+    }
+    case 'AccessDenied': {
       errorMessage = "Accès refusé";
       errorDescription = "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource.";
       break;
+    }
     case 'OAuthSignin':
     case 'OAuthCallback':
     case 'OAuthCreateAccount':
@@ -31,14 +33,15 @@ function ErrorContent() {
     case 'OAuthAccountNotLinked':
     case 'EmailSignin':
     case 'CredentialsSignup':
-    case 'SessionRequired':
+    case 'SessionRequired': {
       errorMessage = "Erreur d'authentification";
       errorDescription = "Une erreur s'est produite lors du processus d'authentification. Veuillez réessayer.";
       break;
-    case 'Default':
-    default:
+    }
+    default: {
       // Use default message
       break;
+    }
   }
 
   return (

@@ -100,6 +100,32 @@ interface Feedback {
   };
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'OPEN': {
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+    }
+    case 'IN_PROGRESS': {
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+    }
+    case 'RESOLVED': {
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+    }
+    case 'REJECTED': {
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    }
+    default: {
+      return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200';
+    }
+  }
+};
+
+const getTypeColor = (type: string) => {
+  return type === 'BUG'
+    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+    : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+};
+
 export default function FeedbackManager({ open, onClose, userId }: Props) {
   const { data: session } = useSession();
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
@@ -221,22 +247,6 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
     feedback.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'OPEN': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'IN_PROGRESS': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'RESOLVED': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'REJECTED': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default: return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-200';
-    }
-  };
-
-  const getTypeColor = (type: string) => {
-    return type === 'BUG'
-      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-      : 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-  };
-
   if (!open) return null;
 
   return (
@@ -292,7 +302,7 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                 </div>
               </div>
 
-              <div className={`flex flex-1 min-h-0 ${!isDeveloper ? 'justify-center items-center' : ''}`}>
+              <div className={`flex flex-1 min-h-0 ${isDeveloper ? '' : 'justify-center items-center'}`}>
                 {/* Form Panel - Always visible */}
                 <div className={isDeveloper ? "w-1/3 border-r border-neutral-200 dark:border-neutral-700 p-4 overflow-y-auto" : "w-full max-w-lg p-4"}>
                   {error && (

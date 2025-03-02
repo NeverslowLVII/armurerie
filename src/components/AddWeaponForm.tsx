@@ -103,7 +103,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                             id="user"
                             value={selectedUser?.id ?? ''}
                             onChange={(e) => {
-                                const user = users.find(u => u.id === parseInt(e.target.value));
+                                const user = users.find(u => u.id === Number.parseInt(e.target.value));
                                 setSelectedUser(user || null);
                             }}
                             className="border p-2 rounded w-full dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
@@ -127,7 +127,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                             id="baseWeapon"
                             value={selectedBaseWeapon?.id ?? ''}
                             onChange={(e) => {
-                                const baseWeapon = baseWeapons.find(w => w.id === parseInt(e.target.value));
+                                const baseWeapon = baseWeapons.find(w => w.id === Number.parseInt(e.target.value));
                                 handleBaseWeaponSelect(baseWeapon || null);
                             }}
                             className="border p-2 rounded w-full dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"

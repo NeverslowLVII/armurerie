@@ -42,8 +42,8 @@ export default function SignInPage() {
       }
 
       router.push(callbackUrl);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Une erreur est survenue');
     } finally {
       setIsLoading(false);
     }

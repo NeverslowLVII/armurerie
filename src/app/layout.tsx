@@ -14,8 +14,12 @@ export const metadata: Metadata = {
   },
 }
 
-// Initialiser l'application au démarrage
-initializeApp().catch(console.error);
+// Initialize the app on the server side
+try {
+  await initializeApp();
+} catch (error) {
+  console.error('Failed to initialize app:', error);
+}
 
 export default function RootLayout({
   children,

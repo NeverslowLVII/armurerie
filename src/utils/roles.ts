@@ -31,7 +31,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageBaseWeapons: true
   },
   [Role.PATRON]: {
-    commissionRate: 0.50,
+    commissionRate: 0.5,
     canManageUsers: true,
     canManageWeapons: true,
     canViewStatistics: true,
@@ -41,7 +41,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageBaseWeapons: true
   },
   [Role.CO_PATRON]: {
-    commissionRate: 0.30,
+    commissionRate: 0.3,
     canManageUsers: false,
     canManageWeapons: true,
     canViewStatistics: true,
@@ -51,7 +51,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageBaseWeapons: false
   },
   [Role.EMPLOYEE]: {
-    commissionRate: 0.20,
+    commissionRate: 0.2,
     canManageUsers: false,
     canManageWeapons: false,
     canViewStatistics: false,
@@ -63,46 +63,90 @@ export const roleConfigurations: RoleConfigurations = {
 };
 
 export function getCommissionRate(role: Role): number {
-  return roleConfigurations[role].commissionRate;
+  return roleConfigurations[role as keyof typeof roleConfigurations].commissionRate;
 }
 
 export function canManageUsers(role: Role): boolean {
-  return roleConfigurations[role].canManageUsers || roleConfigurations[role].isSystemAdmin;
+  const config = roleConfigurations[role as keyof typeof roleConfigurations];
+  return config.canManageUsers || config.isSystemAdmin;
 }
 
 export function canManageWeapons(role: Role): boolean {
-  return roleConfigurations[role].canManageWeapons || roleConfigurations[role].isSystemAdmin;
+  const config = roleConfigurations[role as keyof typeof roleConfigurations];
+  return config.canManageWeapons || config.isSystemAdmin;
 }
 
 export function canViewStatistics(role: Role): boolean {
-  return roleConfigurations[role].canViewStatistics || roleConfigurations[role].isSystemAdmin;
+  const config = roleConfigurations[role as keyof typeof roleConfigurations];
+  return config.canViewStatistics || config.isSystemAdmin;
 }
 
 export function canManageFeedback(role: Role): boolean {
-  return roleConfigurations[role].canManageFeedback || roleConfigurations[role].isSystemAdmin;
+  const config = roleConfigurations[role as keyof typeof roleConfigurations];
+  return config.canManageFeedback || config.isSystemAdmin;
 }
 
 export function canAccessAdminPanel(role: Role): boolean {
-  return roleConfigurations[role].canAccessAdminPanel || roleConfigurations[role].isSystemAdmin;
+  const config = roleConfigurations[role as keyof typeof roleConfigurations];
+  return config.canAccessAdminPanel || config.isSystemAdmin;
 }
 
 export function isSystemAdmin(role: Role): boolean {
-  return roleConfigurations[role].isSystemAdmin;
+  return roleConfigurations[role as keyof typeof roleConfigurations].isSystemAdmin;
 }
 
 export function hasPermission(role: Role, permission: keyof Omit<RoleConfig, 'commissionRate'>): boolean {
-  return roleConfigurations[role][permission] as boolean || roleConfigurations[role].isSystemAdmin;
+  const config = roleConfigurations[role as keyof typeof roleConfigurations];
+  
+  // Use a safer pattern to check permissions
+  const permissionValue = (() => {
+    switch (permission) {
+      case 'canManageUsers': {
+        return config.canManageUsers;
+      }
+      case 'canManageWeapons': {
+        return config.canManageWeapons;
+      }
+      case 'canViewStatistics': {
+        return config.canViewStatistics;
+      }
+      case 'canManageFeedback': {
+        return config.canManageFeedback;
+      }
+      case 'canAccessAdminPanel': {
+        return config.canAccessAdminPanel;
+      }
+      case 'isSystemAdmin': {
+        return config.isSystemAdmin;
+      }
+      case 'canManageBaseWeapons': {
+        return config.canManageBaseWeapons;
+      }
+      default: {
+        return false;
+      }
+    }
+  })();
+  
+  return permissionValue || config.isSystemAdmin;
 }
 
 export const getRoleName = (role: Role): string => {
   switch (role) {
-    case Role.EMPLOYEE:
+    case Role.EMPLOYEE: {
       return 'Employé';
-    case Role.CO_PATRON:
+    }
+    case Role.DEVELOPER: {
+      return 'Développeur';
+    }
+    case Role.CO_PATRON: {
       return 'Co-Patron';
-    case Role.PATRON:
+    }
+    case Role.PATRON: {
       return 'Patron';
-    default:
-      return role;
+    }
+    default: {
+      return String(role);
+    }
   }
 }; 

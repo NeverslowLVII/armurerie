@@ -55,6 +55,10 @@ const successVariants = {
   exit: { opacity: 0, y: 20 }
 };
 
+const viewContract = (contractUrl: string) => {
+  globalThis.open(contractUrl, '_blank');
+};
+
 export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   const dispatch = useAppDispatch();
   const [editingUser, setEditingUser] = useState<string | null>(null);
@@ -244,7 +248,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   };
 
   const handleDeleteUser = async (user: User) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`)) {
+    if (!globalThis.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`)) {
       return;
     }
 
@@ -314,7 +318,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       } else {
         throw new Error('Erreur lors de l\'upload du contrat');
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: 'Impossible d\'uploader le contrat',
@@ -330,12 +334,8 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     setShowContractUpload(true);
   };
 
-  const viewContract = (contractUrl: string) => {
-    window.open(contractUrl, '_blank');
-  };
-
   const deleteContract = async (userId: number) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
+    if (!globalThis.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
       return;
     }
 
@@ -353,7 +353,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       } else {
         throw new Error('Erreur lors de la suppression du contrat');
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur',
         description: 'Impossible de supprimer le contrat',
@@ -601,7 +601,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                         max="100"
                         step="0.1"
                         value={tempCommission}
-                        onChange={(e) => setTempCommission(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setTempCommission(Number.parseFloat(e.target.value) || 0)}
                         className="w-full bg-neutral-800 border-neutral-600 text-neutral-100"
                         placeholder="0"
                         disabled={isSubmitting}

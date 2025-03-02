@@ -19,7 +19,14 @@ export async function initializeApp() {
       where: { role: DEFAULT_ADMIN.role }
     });
 
-    if (!adminExists) {
+    if (adminExists) {
+      console.log('Admin already exists:', {
+        id: adminExists.id,
+        email: adminExists.email,
+        name: adminExists.name,
+        role: adminExists.role
+      });
+    } else {
       console.log('No admin found. Creating default admin...');
       console.log('Default admin config:', {
         email: DEFAULT_ADMIN.email,
@@ -49,13 +56,6 @@ export async function initializeApp() {
       console.log('You can now login with:');
       console.log('Email:', DEFAULT_ADMIN.email);
       console.log('Password:', DEFAULT_ADMIN.password);
-    } else {
-      console.log('Admin already exists:', {
-        id: adminExists.id,
-        email: adminExists.email,
-        name: adminExists.name,
-        role: adminExists.role
-      });
     }
 
     isInitialized = true;

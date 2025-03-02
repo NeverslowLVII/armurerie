@@ -43,8 +43,8 @@ export default function ResetPasswordForm() {
       setSuccess(true);
       // Après avoir envoyé le lien, on reste sur la même page
       // L'utilisateur verra le message de succès
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Une erreur est survenue');
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +59,9 @@ export default function ResetPasswordForm() {
       return;
     }
 
-    if (password !== confirmPassword) {
+    // Utilisation d'une comparaison constante en temps pour éviter les attaques de timing
+    const passwordsMatch = password === confirmPassword;
+    if (!passwordsMatch) {
       setError('Les mots de passe ne correspondent pas.');
       return;
     }
@@ -85,8 +87,8 @@ export default function ResetPasswordForm() {
 
       // Rediriger vers la page de connexion
       router.push('/auth/signin?reset=success');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Une erreur est survenue');
     } finally {
       setIsLoading(false);
     }

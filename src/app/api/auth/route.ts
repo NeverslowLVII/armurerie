@@ -72,7 +72,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 86400 // 24 hours
+      maxAge: 86_400 // 24 hours
     });
 
     return response;
@@ -124,7 +124,7 @@ export async function GET() {
       }
 
       return NextResponse.json({ user });
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid token' },
         { status: 401 }

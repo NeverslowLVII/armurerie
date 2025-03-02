@@ -127,9 +127,9 @@ const userSlice = createSlice({
         state.loading = false;
         state.initialized = true;
         const usersRecord: Record<string, User> = {};
-        action.payload.forEach((user: User) => {
+        for (const user of action.payload) {
           usersRecord[user.name] = user;
-        });
+        }
         state.users = usersRecord;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
@@ -152,10 +152,22 @@ const userSlice = createSlice({
       // Merge users
       .addCase(mergeUsers.fulfilled, (state, action) => {
         const { names, targetUser } = action.payload;
-        names.forEach((name: string) => {
-          delete state.users[name];
-        });
-        state.users[targetUser.name] = targetUser;
+        
+        // Create a new Map from the current users
+        const usersMap = new Map(Object.entries(state.users));
+        
+        // Remove merged users
+        for (const name of names) {
+          usersMap.delete(name);
+        }
+        
+        // Add target user safely
+        if (targetUser && typeof targetUser.name === 'string') {
+          usersMap.set(targetUser.name, targetUser);
+        }
+        
+        // Convert Map back to object and update state
+        state.users = Object.fromEntries(usersMap);
       })
       // Delete user
       .addCase(deleteUser.pending, (state) => {

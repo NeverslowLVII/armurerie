@@ -21,8 +21,8 @@ export async function POST(
     }
 
     // Récupérer l'ID de l'employé
-    const employeeId = parseInt(params.id);
-    if (isNaN(employeeId)) {
+    const employeeId = Number.parseInt(params.id);
+    if (Number.isNaN(employeeId)) {
       return NextResponse.json(
         { error: 'ID d\'employé invalide' },
         { status: 400 }
@@ -50,7 +50,14 @@ export async function POST(
     const setupLink = generateSetupLink(employee.id, employee.email, baseUrl);
 
     // Si on veut juste le lien, on n'envoie pas d'email
-    if (!generateLinkOnly) {
+    if (generateLinkOnly) {
+      // Retourner juste le lien sans envoyer d'email
+      return NextResponse.json({
+        success: true,
+        message: `Lien de configuration généré pour ${employee.name}`,
+        setupLink
+      });
+    } else {
       // Envoyer l'email de configuration
       await sendEmail({
         to: employee.email,
@@ -62,13 +69,6 @@ export async function POST(
         success: true,
         message: `Email de configuration envoyé à ${employee.email}`,
         setupLink // Pour les tests ou pour permettre à l'admin de copier le lien
-      });
-    } else {
-      // Retourner juste le lien sans envoyer d'email
-      return NextResponse.json({
-        success: true,
-        message: `Lien de configuration généré pour ${employee.name}`,
-        setupLink
       });
     }
   } catch (error) {
