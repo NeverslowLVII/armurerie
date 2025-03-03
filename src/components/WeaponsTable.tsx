@@ -8,6 +8,7 @@ import { MagnifyingGlassIcon, PencilIcon, TrashIcon, UserGroupIcon, SparklesIcon
 import { BaseWeaponsManager } from './BaseWeaponsManager';
 import { useData, useShouldDisplayLoading } from '../context/DataContext';
 import { hasPermission, getRoleName } from '@/utils/roles';
+import { getTextColorForBackground } from '@/utils/colors';
 import { Role } from '@/services/api';
 import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
@@ -300,7 +301,7 @@ export default function WeaponsTable() {
                           <motion.span
                             whileHover={{ scale: 1.05 }}
                             className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                              weapon.user.color ? 'text-white' : 'text-neutral-900 bg-neutral-100'
+                              weapon.user.color ? `${getTextColorForBackground(weapon.user.color)}` : 'text-neutral-900 bg-neutral-100'
                             }`}
                             style={weapon.user.color ? { backgroundColor: weapon.user.color } : {}}
                           >

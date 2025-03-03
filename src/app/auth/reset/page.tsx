@@ -7,6 +7,7 @@ import Image from 'next/image';
 import armurerie from '@/assets/armurerie.webp';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
+import { RandomQuote } from '@/components/ui/RandomQuote';
 
 export default function ResetPasswordPage() {
   return (
@@ -34,16 +35,7 @@ export default function ResetPasswordPage() {
           </span>
         </motion.div>
         
-        <div className="relative z-20 mt-auto">
-          <blockquote className="space-y-2">
-            <p className="text-lg text-white">
-              Réinitialisez votre mot de passe pour récupérer l&apos;accès à votre compte.
-            </p>
-            <footer className="text-sm text-white/70">
-              Armurerie - Système de gestion
-            </footer>
-          </blockquote>
-        </div>
+        <RandomQuote />
       </div>
       <motion.div 
         initial={{ opacity: 0 }}

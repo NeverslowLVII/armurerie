@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertDialog, AlertDialogContent, AlertDialogDescription } from '@/components/ui/alert-dialog';
 import { LoadingButton } from '@/components/ui/loading';
+import { RandomQuote } from '@/components/ui/RandomQuote';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -73,22 +74,7 @@ export default function SignInPage() {
             Armurerie
           </span>
         </motion.div>
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="relative z-20 mt-auto"
-        >
-          <blockquote className="space-y-2">
-            <p className="text-lg font-medium italic text-neutral-100">
-              &ldquo;La meilleure armurerie de Saint-Denis, en même temps c&apos;est la seule&rdquo;
-            </p>
-            <footer className="text-sm text-neutral-300">
-              <span className="font-semibold">Theodore Roosevelt</span>
-              <span className="before:content-['—'] before:mx-2 text-neutral-400">1899</span>
-            </footer>
-          </blockquote>
-        </motion.div>
+        <RandomQuote />
       </div>
       <motion.div 
         initial={{ opacity: 0, x: 20 }}
