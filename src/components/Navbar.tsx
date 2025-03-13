@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface NavigationItem {
-  id: 'weapons' | 'statistics' | 'account';
+  id: 'weapons' | 'statistics' | 'account' | 'comparison';
   label: string;
   icon: React.ForwardRefExoticComponent<React.SVGProps<SVGSVGElement>>;
   href: string;
@@ -45,6 +45,7 @@ interface NavigationItem {
 
 const NAVIGATION_ITEMS: NavigationItem[] = [
   { id: 'weapons', label: 'Armes', icon: RocketLaunchIcon, href: '/dashboard/weapons' },
+  { id: 'comparison', label: 'Comparateur', icon: RocketLaunchIcon, href: '/weapons/comparison' },
   { id: 'statistics', label: 'Statistiques', icon: ChartBarIcon, href: '/dashboard/statistics' },
   { id: 'account', label: 'Mon Compte', icon: UserIcon, href: '/employee/account', hideFromNav: true }
 ];

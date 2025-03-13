@@ -47,6 +47,37 @@ model Weapon {
   user            User       @relation(fields: [user_id], references: [id])
 }
 
+model WeaponCatalog {
+  id                 Int      @id @default(autoincrement())
+  name               String   @unique
+  category           String
+  puissance          Float
+  cadence            Float
+  precision          Float
+  portee             Int
+  capacite           Int
+  recharge           Float
+  cout               Float
+  vente              Float
+  canon_precision    Int      @default(0)
+  canon_long         Int      @default(0)
+  canon              Int      @default(0) 
+  canon_court        Int      @default(0)
+  ressort            Int      @default(0)
+  mire               Int      @default(0)
+  detente            Int      @default(0)
+  chien              Int      @default(0)
+  armature_legere    Int      @default(0)
+  armature           Int      @default(0)
+  armature_lourde    Int      @default(0)
+  armature_precision Int      @default(0)
+  crosse             Int      @default(0)
+  total_ressort      Int      @default(0)
+  total_acier        Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
 model Feedback {
   id          Int            @id @default(autoincrement())
   type        FeedbackType
