@@ -87,7 +87,7 @@ export function WeeklySales() {
       >
         <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-200">Total des ventes</h3>
         <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent">
-          {totalAmount.toLocaleString('fr-FR')}€
+          {(totalAmount / 100).toLocaleString('us-US')} $
         </span>
       </motion.div>
 
@@ -120,7 +120,7 @@ export function WeeklySales() {
                   Sérigraphie: <span className="text-green-600 dark:text-green-400">{sale.serigraphie}</span>
                 </p>
               </div>
-              <span className="font-semibold text-green-600 dark:text-green-400">{sale.prix.toLocaleString('fr-FR')}€</span>
+              <span className="font-semibold text-green-600 dark:text-green-400">{(sale.prix / 100).toLocaleString('us-US')} $</span>
             </motion.div>
           ))
         )}

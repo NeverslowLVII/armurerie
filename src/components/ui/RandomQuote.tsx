@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useId } from 'react';
 import { motion } from 'framer-motion';
-import { getRandomQuote, quotes, getQuoteByStableId } from '@/data/quotes';
+import { getQuoteByStableId } from '@/data/quotes';
 
 interface RandomQuoteProps {
   className?: string;
@@ -13,8 +13,8 @@ export function RandomQuote({ className = '' }: RandomQuoteProps) {
   const id = useId();
   
   // Utiliser une citation basée sur l'ID stable pour le rendu initial
-  const [quote, setQuote] = useState(() => getQuoteByStableId(id));
-  const [isClient, setIsClient] = useState(false);
+  const [quote, _setQuote] = useState(() => getQuoteByStableId(id));
+  const [_isClient, setIsClient] = useState(false);
 
   // Optionnel: Changer la citation aléatoirement après le montage du composant
   useEffect(() => {

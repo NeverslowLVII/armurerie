@@ -43,12 +43,15 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
         setSuccess(false);
 
         try {
+            // Conversion du prix de dollars (avec décimales) en centimes
+            const prixEnCentimes = Math.round(Number.parseFloat(prix) * 100);
+            
             await createWeapon({
                 user_id: selectedUser.id,
                 detenteur,
                 nom_arme: selectedBaseWeapon.nom,
                 serigraphie,
-                prix: selectedBaseWeapon.prix_defaut,
+                prix: prixEnCentimes, // Utiliser le prix saisi et converti en centimes
                 cout_production: selectedBaseWeapon.cout_production_defaut,
                 horodateur: new Date().toISOString()
             });

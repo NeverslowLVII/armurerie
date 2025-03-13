@@ -9,7 +9,8 @@ import {
     ChartBarIcon,
     CurrencyDollarIcon,
     FireIcon,
-    LockClosedIcon
+    LockClosedIcon,
+    DocumentTextIcon
 } from '@heroicons/react/24/outline';
 import { getCommissionRate } from '@/utils/roles';
 import { Role } from '@/services/api';
@@ -82,7 +83,7 @@ interface DateRange {
     endDate: Date;
 }
 
-type TabType = 'overview' | 'weapons' | 'employees';
+type TabType = 'overview' | 'weapons' | 'employees' | 'income';
 
 const normalizeWeaponName = (name: string): string => {
     name = name.toLowerCase().trim();
@@ -190,6 +191,8 @@ export default function Statistics() {
         topEmployee: null,
         employeePerformance: []
     });
+    const [filteredWeapons, setFilteredWeapons] = useState<Weapon[]>([]);
+    const [employeesData, setEmployeesData] = useState<any[]>([]);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [dateRange, setDateRange] = useState<DateRange>(() => {
         const endDate = new Date();
@@ -222,19 +225,21 @@ export default function Statistics() {
             setLoading(true);
             setError(null);
             
-            const [weaponsData, employeesData] = await Promise.all([
+            const [weaponsData, employees] = await Promise.all([
                 getWeapons(),
                 getEmployees()
             ]);
             
-            const filteredWeapons = filterDataByDateRange(weaponsData);
+            const filtered = filterDataByDateRange(weaponsData);
+            setFilteredWeapons(filtered);
+            setEmployeesData(employees);
             
             // Normaliser et calculer les statistiques des armes
             const weaponTypeMap = new Map<string, number>();
             const profitByTypeMap = new Map<string, { profit: number; count: number }>();
             let totalCostProduction = 0;
 
-            for (const weapon of filteredWeapons) {
+            for (const weapon of filtered) {
                 const normalizedName = normalizeWeaponName(weapon.nom_arme);
                 weaponTypeMap.set(normalizedName, (weaponTypeMap.get(normalizedName) || 0) + 1);
                 
@@ -264,7 +269,7 @@ export default function Statistics() {
             // Calculer les statistiques quotidiennes
             const dailyStatsMap = new Map<string, { totalValue: number; totalCost: number; totalProfit: number; count: number }>();
             
-            for (const weapon of filteredWeapons) {
+            for (const weapon of filtered) {
                 const date = new Date(weapon.horodateur);
                 const day = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
                 const existing = dailyStatsMap.get(day) || { totalValue: 0, totalCost: 0, totalProfit: 0, count: 0 };
@@ -285,21 +290,21 @@ export default function Statistics() {
                 }))
                 .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
 
-            const totalValue = filteredWeapons.reduce((sum, w) => sum + w.prix, 0);
+            const totalValue = filtered.reduce((sum, w) => sum + w.prix, 0);
             const totalProfit = totalValue - totalCostProduction;
             const totalTaxes = Math.round(totalProfit * 0.1); // 10% d'impôts
             const profitAfterTaxes = totalProfit - totalTaxes;
 
             setWeaponStats({
-                totalWeapons: filteredWeapons.length,
+                totalWeapons: filtered.length,
                 totalValue,
                 totalCostProduction,
                 totalProfit,
                 totalTaxes,
                 profitAfterTaxes,
-                averagePrice: totalValue / filteredWeapons.length || 0,
-                averageCostProduction: totalCostProduction / filteredWeapons.length || 0,
-                averageProfit: totalProfit / filteredWeapons.length || 0,
+                averagePrice: totalValue / filtered.length || 0,
+                averageCostProduction: totalCostProduction / filtered.length || 0,
+                averageProfit: totalProfit / filtered.length || 0,
                 profitMargin: totalValue > 0 ? (totalProfit / totalValue) * 100 : 0,
                 weaponTypes,
                 dailyStats,
@@ -307,11 +312,11 @@ export default function Statistics() {
             });
 
             // Calculer les statistiques des employés
-            const employeeStats = employeesData.reduce<{
+            const employeeStats = employees.reduce<{
                 employeePerformance: { name: string; count: number }[];
                 employeeProfits: { name: string; profit: number; sales: number; commission: number; role: string }[];
             }>((acc, emp) => {
-                const empWeapons = filteredWeapons.filter(w => w.user.name === emp.name);
+                const empWeapons = filtered.filter(w => w.user.name === emp.name);
                 
                 const totalProfit = empWeapons.reduce((sum, weapon) => {
                     const productionCost = weapon.base_weapon?.cout_production_defaut || 0;
@@ -341,7 +346,7 @@ export default function Statistics() {
             });
 
             setEmployeeStats({
-                totalEmployees: employeesData.length,
+                totalEmployees: employees.length,
                 employeeWeaponCounts: {},
                 employeeValueTotals: {},
                 employeeProfits: employeeStats.employeeProfits.sort((a, b) => b.profit - a.profit),
@@ -403,6 +408,137 @@ export default function Statistics() {
         }
         
         return dateRange.startDate.getTime() === startDate.getTime();
+    };
+
+    // Calculer des données du compte de résultat par période (jour, semaine, mois)
+    const calculateIncomeStatementData = useCallback(() => {
+        if (!filteredWeapons || filteredWeapons.length === 0) return [];
+        
+        // Créer un map par période
+        const periodMap = new Map<string, {
+            revenue: number;
+            productionCost: number;
+            commissions: number;
+            grossProfit: number;
+            taxes: number;
+            netProfit: number;
+            count: number;
+        }>();
+        
+        // Définir la période en fonction de la plage de dates
+        const diffDays = Math.ceil((dateRange.endDate.getTime() - dateRange.startDate.getTime()) / (1000 * 60 * 60 * 24));
+        let periodFormat: 'day' | 'week' | 'month' = 'day';
+        
+        if (diffDays > 90) {
+            periodFormat = 'month';
+        } else if (diffDays > 30) {
+            periodFormat = 'week';
+        }
+        
+        // Calculer les statistiques par période
+        for (const weapon of filteredWeapons) {
+            const date = new Date(weapon.horodateur);
+            let periodKey: string;
+            
+            if (periodFormat === 'day') {
+                periodKey = formatDateForInput(date);
+            } else if (periodFormat === 'week') {
+                // Trouver le lundi de la semaine
+                const dayOfWeek = date.getDay();
+                const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                const monday = new Date(date);
+                monday.setDate(date.getDate() - diff);
+                periodKey = `Semaine du ${formatDateForInput(monday)}`;
+            } else {
+                periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            }
+            
+            const price = weapon.prix || 0;
+            const productionCost = weapon.base_weapon?.cout_production_defaut || 0;
+            const grossProfit = price - productionCost;
+            
+            // Trouver l'employé et calculer sa commission
+            const employee = employeesData.find(emp => emp.id === weapon.user_id);
+            const commissionRate = employee ? getCommissionRate(employee.role as Role) : 0;
+            const commission = grossProfit * commissionRate;
+            
+            // Calculer les taxes (10% du bénéfice brut)
+            const taxes = grossProfit * 0.1;
+            
+            // Bénéfice net
+            const netProfit = grossProfit - commission - taxes;
+            
+            if (periodMap.has(periodKey)) {
+                const current = periodMap.get(periodKey)!;
+                periodMap.set(periodKey, {
+                    revenue: current.revenue + price,
+                    productionCost: current.productionCost + productionCost,
+                    commissions: current.commissions + commission,
+                    grossProfit: current.grossProfit + grossProfit,
+                    taxes: current.taxes + taxes,
+                    netProfit: current.netProfit + netProfit,
+                    count: current.count + 1
+                });
+            } else {
+                periodMap.set(periodKey, {
+                    revenue: price,
+                    productionCost: productionCost,
+                    commissions: commission,
+                    grossProfit: grossProfit,
+                    taxes: taxes,
+                    netProfit: netProfit,
+                    count: 1
+                });
+            }
+        }
+        
+        // Convertir Map en tableau pour les graphiques
+        return [...periodMap.entries()]
+            .map(([period, data]) => ({
+                period,
+                ...data
+            }))
+            .sort((a, b) => {
+                // Trier par période
+                return a.period.localeCompare(b.period);
+            });
+            
+    }, [filteredWeapons, dateRange, employeesData]);
+
+    // Données du compte de résultat
+    const incomeStatementData = calculateIncomeStatementData();
+    
+    // Calcul des totaux pour le compte de résultat
+    const incomeStatementTotals = incomeStatementData.reduce((acc, item) => {
+        return {
+            revenue: acc.revenue + item.revenue,
+            productionCost: acc.productionCost + item.productionCost,
+            commissions: acc.commissions + item.commissions,
+            grossProfit: acc.grossProfit + item.grossProfit,
+            taxes: acc.taxes + item.taxes,
+            netProfit: acc.netProfit + item.netProfit,
+            count: acc.count + item.count
+        };
+    }, {
+        revenue: 0,
+        productionCost: 0,
+        commissions: 0,
+        grossProfit: 0,
+        taxes: 0,
+        netProfit: 0,
+        count: 0
+    });
+
+    // Fonction pour formater les montants en dollars
+    const formatDollars = (amount: number) => {
+        // Conversion des centimes en dollars (division par 100)
+        const dollars = amount / 100;
+        return new Intl.NumberFormat('en-US', { 
+            style: 'currency', 
+            currency: 'USD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(dollars);
     };
 
     if (!session || (session.user.role !== Role.PATRON && 
@@ -538,57 +674,50 @@ export default function Statistics() {
                 </div>
             </motion.div>
 
-            <motion.div 
-                className="mb-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-            >
-                <nav className="flex gap-2" role="tablist" aria-label="Sections des statistiques">
+            <div className="border-b border-neutral-200 dark:border-neutral-700">
+                <nav className="flex space-x-4 overflow-x-auto hide-scrollbar">
                     <button
-                        role="tab"
-                        aria-selected={activeTab === 'overview'}
-                        aria-controls="overview-panel"
-                        id="overview-tab"
+                        className={`py-2 px-1 inline-flex items-center gap-1 border-b-2 text-sm font-medium transition-colors ${activeTab === 'overview'
+                            ? 'border-red-500 text-red-500'
+                            : 'border-transparent text-neutral-600 dark:text-neutral-300 hover:text-red-500 hover:border-red-300'
+                            }`}
                         onClick={() => setActiveTab('overview')}
-                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
-                            activeTab === 'overview'
-                                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
-                        }`}
                     >
+                        <ChartBarIcon className="h-4 w-4" />
                         Vue d&apos;ensemble
                     </button>
                     <button
-                        role="tab"
-                        aria-selected={activeTab === 'weapons'}
-                        aria-controls="weapons-panel"
-                        id="weapons-tab"
+                        className={`py-2 px-1 inline-flex items-center gap-1 border-b-2 text-sm font-medium transition-colors ${activeTab === 'weapons'
+                            ? 'border-red-500 text-red-500'
+                            : 'border-transparent text-neutral-600 dark:text-neutral-300 hover:text-red-500 hover:border-red-300'
+                            }`}
                         onClick={() => setActiveTab('weapons')}
-                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
-                            activeTab === 'weapons'
-                                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
-                        }`}
                     >
+                        <FireIcon className="h-4 w-4" />
                         Armes
                     </button>
                     <button
-                        role="tab"
-                        aria-selected={activeTab === 'employees'}
-                        aria-controls="employees-panel"
-                        id="employees-tab"
+                        className={`py-2 px-1 inline-flex items-center gap-1 border-b-2 text-sm font-medium transition-colors ${activeTab === 'employees'
+                            ? 'border-red-500 text-red-500'
+                            : 'border-transparent text-neutral-600 dark:text-neutral-300 hover:text-red-500 hover:border-red-300'
+                            }`}
                         onClick={() => setActiveTab('employees')}
-                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 ${
-                            activeTab === 'employees'
-                                ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-sm'
-                                : 'text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white bg-white dark:bg-neutral-800 backdrop-blur-sm'
-                        }`}
                     >
+                        <LockClosedIcon className="h-4 w-4" />
                         Employés
                     </button>
+                    <button
+                        className={`py-2 px-1 inline-flex items-center gap-1 border-b-2 text-sm font-medium transition-colors ${activeTab === 'income'
+                            ? 'border-red-500 text-red-500'
+                            : 'border-transparent text-neutral-600 dark:text-neutral-300 hover:text-red-500 hover:border-red-300'
+                            }`}
+                        onClick={() => setActiveTab('income')}
+                    >
+                        <DocumentTextIcon className="h-4 w-4" />
+                        Compte de résultat
+                    </button>
                 </nav>
-            </motion.div>
+            </div>
 
             <AnimatePresence mode="wait">
                 {activeTab === 'overview' && (
@@ -845,6 +974,222 @@ export default function Statistics() {
                                 </ResponsiveContainer>
                             </div>
                         </motion.div>
+                    </motion.div>
+                )}
+
+                {activeTab === 'income' && (
+                    <motion.div
+                        initial="hidden"
+                        animate="visible"
+                        variants={chartVariants}
+                        className="space-y-8"
+                    >
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <StatCard 
+                                title="Revenus totaux" 
+                                value={formatDollars(incomeStatementTotals.revenue)} 
+                                icon={CurrencyDollarIcon} 
+                            />
+                            <StatCard 
+                                title="Bénéfice brut" 
+                                value={formatDollars(incomeStatementTotals.grossProfit)} 
+                                icon={CurrencyDollarIcon} 
+                            />
+                            <StatCard 
+                                title="Bénéfice net" 
+                                value={formatDollars(incomeStatementTotals.netProfit)} 
+                                icon={CurrencyDollarIcon} 
+                            />
+                        </div>
+
+                        {/* Compte de résultat détaillé */}
+                        <div className="bg-white dark:bg-neutral-800 rounded-lg overflow-hidden shadow">
+                            <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700">
+                                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                                    Compte de résultat détaillé
+                                </h3>
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    Période du {formatDateForInput(dateRange.startDate)} au {formatDateForInput(dateRange.endDate)}
+                                </p>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
+                                    <thead className="bg-neutral-50 dark:bg-neutral-900">
+                                        <tr>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                                                Élément
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                                                Montant
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+                                                % du revenu
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
+                                        <tr>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900 dark:text-white">
+                                                Chiffre d&apos;affaires
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-neutral-900 dark:text-white">
+                                                {formatDollars(incomeStatementTotals.revenue)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-neutral-900 dark:text-white">
+                                                100%
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-500 dark:text-neutral-400 pl-10">
+                                                Coût de production
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-red-500">
+                                                -{formatDollars(incomeStatementTotals.productionCost)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-neutral-500 dark:text-neutral-400">
+                                                {incomeStatementTotals.revenue > 0 
+                                                    ? `${(incomeStatementTotals.productionCost / incomeStatementTotals.revenue * 100).toFixed(1)}%` 
+                                                    : "0%"}
+                                            </td>
+                                        </tr>
+                                        <tr className="bg-neutral-50 dark:bg-neutral-900">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-neutral-900 dark:text-white">
+                                                Marge brute
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-neutral-900 dark:text-white">
+                                                {formatDollars(incomeStatementTotals.revenue - incomeStatementTotals.productionCost)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-neutral-900 dark:text-white">
+                                                {incomeStatementTotals.revenue > 0 
+                                                    ? `${((incomeStatementTotals.revenue - incomeStatementTotals.productionCost) / incomeStatementTotals.revenue * 100).toFixed(1)}%` 
+                                                    : "0%"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-500 dark:text-neutral-400 pl-10">
+                                                Charges du personnel
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-red-500">
+                                                -{formatDollars(incomeStatementTotals.commissions)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-neutral-500 dark:text-neutral-400">
+                                                {incomeStatementTotals.revenue > 0 
+                                                    ? `${(incomeStatementTotals.commissions / incomeStatementTotals.revenue * 100).toFixed(1)}%` 
+                                                    : "0%"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-neutral-900 dark:text-white">
+                                                Bénéfice d&apos;exploitation
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-neutral-900 dark:text-white">
+                                                {formatDollars(incomeStatementTotals.grossProfit)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-neutral-900 dark:text-white">
+                                                {incomeStatementTotals.revenue > 0 
+                                                    ? `${(incomeStatementTotals.grossProfit / incomeStatementTotals.revenue * 100).toFixed(1)}%` 
+                                                    : "0%"}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-500 dark:text-neutral-400 pl-10">
+                                                Taxes (10%)
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-red-500">
+                                                -{formatDollars(incomeStatementTotals.taxes)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-neutral-500 dark:text-neutral-400">
+                                                {incomeStatementTotals.revenue > 0 
+                                                    ? `${(incomeStatementTotals.taxes / incomeStatementTotals.revenue * 100).toFixed(1)}%` 
+                                                    : "0%"}
+                                            </td>
+                                        </tr>
+                                        <tr className="bg-neutral-50 dark:bg-neutral-900">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-neutral-900 dark:text-white">
+                                                Résultat net
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-right text-neutral-900 dark:text-white">
+                                                {formatDollars(incomeStatementTotals.netProfit)}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-right text-neutral-900 dark:text-white">
+                                                {incomeStatementTotals.revenue > 0 
+                                                    ? `${(incomeStatementTotals.netProfit / incomeStatementTotals.revenue * 100).toFixed(1)}%` 
+                                                    : "0%"}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Graphique d'évolution */}
+                        <div className="bg-white dark:bg-neutral-800 rounded-lg overflow-hidden shadow p-6">
+                            <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+                                Évolution du compte de résultat
+                            </h3>
+                            <div className="h-96">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart
+                                        data={incomeStatementData}
+                                        margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+                                    >
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis 
+                                            dataKey="period" 
+                                            angle={-45} 
+                                            textAnchor="end"
+                                            height={70}
+                                            tick={{ fontSize: 12 }}
+                                        />
+                                        <YAxis />
+                                        <Tooltip 
+                                            formatter={(value: number) => formatDollars(value)}
+                                            labelFormatter={(label) => `Période: ${label}`}
+                                        />
+                                        <Legend />
+                                        <Bar dataKey="revenue" name="Chiffre d&apos;affaires" fill="#60a5fa" />
+                                        <Bar dataKey="grossProfit" name="Bénéfice brut" fill="#34d399" />
+                                        <Bar dataKey="netProfit" name="Résultat net" fill="#f87171" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+
+                        {/* Graphique de répartition */}
+                        <div className="bg-white dark:bg-neutral-800 rounded-lg overflow-hidden shadow p-6">
+                            <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+                                Répartition des coûts
+                            </h3>
+                            <div className="h-96">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={[
+                                                { name: 'Coût de production', value: incomeStatementTotals.productionCost },
+                                                { name: 'Charges du personnel', value: incomeStatementTotals.commissions },
+                                                { name: 'Taxes', value: incomeStatementTotals.taxes },
+                                                { name: 'Bénéfice net', value: incomeStatementTotals.netProfit }
+                                            ]}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            outerRadius={120}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                            label={({ name, percent }) => 
+                                                `${name} : ${(percent * 100).toFixed(0)}%`
+                                            }
+                                        >
+                                            <Cell fill="#ef4444" />
+                                            <Cell fill="#f97316" />
+                                            <Cell fill="#eab308" />
+                                            <Cell fill="#10b981" />
+                                        </Pie>
+                                        <Tooltip formatter={(value: number) => formatDollars(value)} />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>
