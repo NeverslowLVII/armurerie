@@ -6,12 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, Search, X, Plus, Minus, FileSpreadsheet, BarChart4 } from 'lucide-react';
+import { AlertCircle, Search, X, Plus, Minus, FileSpreadsheet, BarChart4, Check } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import axios from 'axios';
+import { notifyOrderValidation } from '@/utils/discord';
+import { useSession } from 'next-auth/react';
 
 interface WeaponComponent {
   id?: string;
@@ -66,6 +68,8 @@ export function WeaponOrderCalculator() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<string>('components');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: session } = useSession();
 
   // Fetch weapons data
   useEffect(() => {
@@ -228,6 +232,80 @@ export function WeaponOrderCalculator() {
   // Calculate profit margin and percentage
   const profit = totals.vente - totals.cout;
   const profitPercentage = totals.cout > 0 ? (profit / totals.cout) * 100 : 0;
+
+  // Fonction pour valider et soumettre la commande
+  const handleSubmitOrder = async () => {
+    if (selectedWeapons.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Veuillez sélectionner au moins une arme pour valider la commande.",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Préparer les données pour la commande
+      const orderData = {
+        items: selectedWeapons.map(item => ({
+          name: item.weapon.name,
+          quantity: item.quantity,
+          price: item.weapon.vente,
+          cost: item.weapon.cout
+        })),
+        total: totals.vente,
+        profit: profit,
+        profitPercentage: profitPercentage,
+        components: {
+          canon_precision: totals.canon_precision,
+          canon_long: totals.canon_long,
+          canon: totals.canon,
+          canon_court: totals.canon_court,
+          ressort: totals.ressort,
+          mire: totals.mire,
+          detente: totals.detente,
+          chien: totals.chien,
+          armature_legere: totals.armature_legere,
+          armature: totals.armature,
+          armature_lourde: totals.armature_lourde,
+          armature_precision: totals.armature_precision,
+          crosse: totals.crosse,
+          total_ressort: totals.total_ressort,
+          total_acier: totals.total_acier
+        }
+      };
+
+      // Ici, vous pouvez ajouter le code pour sauvegarder la commande dans votre base de données
+      // await axios.post('/api/orders', orderData);
+
+      // Envoyer une notification Discord
+      const username = session?.user?.name || session?.user?.email || "Utilisateur inconnu";
+      await notifyOrderValidation(orderData, username);
+      
+      // Réinitialiser la commande après soumission
+      setSelectedWeapons([]);
+      
+      // Notification de succès
+      toast({
+        title: "Commande validée",
+        description: "Votre commande a été validée avec succès.",
+        duration: 5000,
+      });
+    } catch (error) {
+      console.error('Erreur lors de la validation de la commande:', error);
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de la validation de la commande. Veuillez réessayer.",
+        duration: 5000,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Loading state with skeleton UI
   if (loading) {
@@ -509,7 +587,7 @@ export function WeaponOrderCalculator() {
                           <div className="grid grid-cols-2 gap-4">
                             <Card className="bg-neutral-50 dark:bg-neutral-900">
                               <CardContent className="p-4">
-                                <p className="text-sm text-neutral-500 dark:text-neutral-400">Coût d&apos;achat</p>
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400">Coût de production</p>
                                 <p className="text-xl font-bold mt-1 tabular-nums">{totals.cout.toFixed(2)}$</p>
                               </CardContent>
                             </Card>
@@ -575,13 +653,24 @@ export function WeaponOrderCalculator() {
                   </Tabs>
                 </CardContent>
                 
-                <CardFooter className="flex justify-end border-t border-neutral-200 dark:border-neutral-800">
+                <CardFooter className="flex justify-between border-t border-neutral-200 dark:border-neutral-800">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleClearSelection}
                   >
                     Réinitialiser
+                  </Button>
+                  
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={handleSubmitOrder}
+                    disabled={selectedWeapons.length === 0 || isSubmitting}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    {isSubmitting ? "Validation..." : "Valider la commande"}
+                    {!isSubmitting && <Check className="ml-2 h-4 w-4" />}
                   </Button>
                 </CardFooter>
               </>
