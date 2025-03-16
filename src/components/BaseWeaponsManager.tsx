@@ -489,7 +489,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                                                                 >
                                                                     <CurrencyDollarIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-neutral-500" />
                                                                     <span>
-                                                                        {new Intl.NumberFormat('fr-FR', {
+                                                                        {new Intl.NumberFormat('us-US', {
                                                                             style: 'currency',
                                                                             currency: 'USD'
                                                                         }).format(weapon.prix_defaut / 100)}
@@ -501,7 +501,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                                                                 >
                                                                     <FireIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-neutral-500" />
                                                                     <span>
-                                                                        {new Intl.NumberFormat('fr-FR', {
+                                                                        {new Intl.NumberFormat('us-US', {
                                                                             style: 'currency',
                                                                             currency: 'USD'
                                                                         }).format(weapon.cout_production_defaut / 100)}

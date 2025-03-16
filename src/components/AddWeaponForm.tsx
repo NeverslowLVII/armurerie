@@ -584,7 +584,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                                             onCheckedChange={(checked) => setDeleteOrderAfterAdd(checked === true)}
                                         />
                                         <Label htmlFor="deleteOrder" className="ml-2">
-                                            Supprimer la commande du canal Discord après l'ajout
+                                            Supprimer la commande du canal Discord après l&apos;ajout
                                         </Label>
                                     </div>
                                 </div>

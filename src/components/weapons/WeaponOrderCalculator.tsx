@@ -515,28 +515,14 @@ export function WeaponOrderCalculator() {
                                 { name: 'Armature lourde', value: totals.armature_lourde },
                                 { name: 'Armature de précision', value: totals.armature_precision },
                                 { name: 'Crosse', value: totals.crosse }
-                              ].filter(item => item.value > 0).map(item => (
+                              ].map(item => (
                                 <div key={item.name} className="flex justify-between items-center py-1.5 px-3 bg-neutral-50 dark:bg-neutral-900 rounded-md">
                                   <span className="text-neutral-700 dark:text-neutral-300">{item.name}</span>
                                   <Badge variant="secondary" className="tabular-nums">{item.value}</Badge>
                                 </div>
                               ))}
                               
-                              {[
-                                { name: 'Canon de précision', value: totals.canon_precision },
-                                { name: 'Canon long', value: totals.canon_long },
-                                { name: 'Canon', value: totals.canon },
-                                { name: 'Canon court', value: totals.canon_court },
-                                { name: 'Ressort', value: totals.ressort },
-                                { name: 'Mire', value: totals.mire },
-                                { name: 'Détente', value: totals.detente },
-                                { name: 'Chien', value: totals.chien },
-                                { name: 'Armature légère', value: totals.armature_legere },
-                                { name: 'Armature', value: totals.armature },
-                                { name: 'Armature lourde', value: totals.armature_lourde },
-                                { name: 'Armature de précision', value: totals.armature_precision },
-                                { name: 'Crosse', value: totals.crosse }
-                              ].every(item => item.value === 0) && (
+                              {selectedWeapons.length === 0 && (
                                 <p className="col-span-2 text-center text-sm text-neutral-500 dark:text-neutral-400">
                                   Aucun composant nécessaire
                                 </p>
