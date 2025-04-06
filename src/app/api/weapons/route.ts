@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
       horodateur: data.horodateur ? new Date(data.horodateur) : new Date(),
       user_id: userId,
       detenteur: data.detenteur || '',
+      bp: data.bp || null,
       nom_arme: data.nom_arme,
       serigraphie: data.serigraphie,
       prix: data.prix || baseWeapon.prix_defaut,

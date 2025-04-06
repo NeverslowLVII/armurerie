@@ -187,11 +187,7 @@ export default function Navbar() {
                       <motion.div
                         initial={{ opacity: 0 }}
                         whileHover={{ opacity: 0.1 }}
-                        className={`absolute inset-0 ${
-                          resolvedTheme === 'dark' 
-                            ? 'bg-red-500' 
-                            : 'bg-red-200'
-                        }`}
+                        className="absolute inset-0 bg-red-200"
                       />
                       <Button
                         variant="ghost"

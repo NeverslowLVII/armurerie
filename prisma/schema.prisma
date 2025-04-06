@@ -39,6 +39,7 @@ model Weapon {
   horodateur      DateTime
   user_id         Int
   detenteur       String
+  bp              String?
   nom_arme        String
   serigraphie     String     @unique
   prix            Int

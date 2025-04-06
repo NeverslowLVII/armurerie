@@ -18,6 +18,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
     const { baseWeapons } = useData();
     const [user, setUser] = useState(weapon?.user?.name ?? '');
     const [detenteur, setDetenteur] = useState(weapon?.detenteur ?? '');
+    const [bp, setBp] = useState(weapon?.bp ?? '');
     const [nomArme, setNomArme] = useState(weapon?.nom_arme ?? '');
     const [serigraphie, setSerigraphie] = useState(weapon?.serigraphie ?? '');
     const [prix, setPrix] = useState(weapon ? (weapon.prix / 100).toString() : '');
@@ -31,6 +32,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
         if (weapon) {
             setUser(weapon.user.name);
             setDetenteur(weapon.detenteur);
+            setBp(weapon.bp || '');
             setNomArme(weapon.nom_arme);
             setSerigraphie(weapon.serigraphie);
             setPrix((weapon.prix / 100).toString());
@@ -60,6 +62,7 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                 horodateur: new Date(horodatage).toISOString(),
                 user_id: weapon.user_id,
                 detenteur,
+                bp,
                 nom_arme: selectedBaseWeapon ? selectedBaseWeapon.nom : nomArme,
                 serigraphie,
                 prix: priceInCents,
@@ -177,6 +180,20 @@ export default function EditWeaponForm({ isOpen, onClose, weapon, onWeaponUpdate
                                 onChange={(e) => setDetenteur(e.target.value)}
                                 className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 required
+                                disabled={isLoading}
+                            />
+                        </div>
+
+                        <div className="mb-4">
+                            <label htmlFor="bp" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                                BP (Boîte Postale)
+                            </label>
+                            <Input
+                                id="bp"
+                                type="text"
+                                value={bp}
+                                onChange={(e) => setBp(e.target.value)}
+                                className="border p-2 rounded w-full dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
                                 disabled={isLoading}
                             />
                         </div>

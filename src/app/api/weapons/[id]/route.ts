@@ -86,6 +86,7 @@ export async function PUT(
         data: {
           ...(data.horodateur && { horodateur: new Date(data.horodateur) }),
           ...(data.detenteur && { detenteur: data.detenteur }),
+          ...(data.bp !== undefined && { bp: data.bp }),
           ...(data.serigraphie && { serigraphie: data.serigraphie }),
           ...(data.prix && { prix: data.prix }),
           ...(data.user_id && { 

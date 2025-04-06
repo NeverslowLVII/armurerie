@@ -37,6 +37,7 @@ export interface Weapon {
         commission?: number;
     };
     detenteur: string;
+    bp?: string;
     nom_arme: string;
     serigraphie: string;
     prix: number;

@@ -16,6 +16,7 @@ import { useSession } from 'next-auth/react';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'react-hot-toast';
+import { ClientMessageGenerator } from './client-messages';
 
 const tableVariants = {
   hidden: { opacity: 0 },
@@ -225,6 +226,7 @@ export default function WeaponsTable() {
           >
             Ajouter une arme
           </Button>
+          <ClientMessageGenerator />
         </div>
       </motion.div>
 
@@ -270,6 +272,9 @@ export default function WeaponsTable() {
                       Détenteur
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
+                      BP
+                    </th>
+                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
                       Nom de l&apos;arme
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-neutral-900 dark:text-neutral-200">
@@ -312,6 +317,7 @@ export default function WeaponsTable() {
                           </motion.span>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">{weapon.detenteur}</td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">{weapon.bp || "-"}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">{weapon.nom_arme}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">{weapon.serigraphie}</td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-neutral-900 dark:text-neutral-200">

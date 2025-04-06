@@ -55,6 +55,7 @@ export interface Weapon {
   horodateur: string;
   user_id: number;
   detenteur: string;
+  bp?: string;
   nom_arme: string;
   serigraphie: string;
   prix: number;
@@ -67,6 +68,7 @@ export interface WeaponCreate {
   horodateur: string;
   user_id: number;
   detenteur: string;
+  bp?: string;
   nom_arme: string;
   serigraphie: string;
   prix: number;

@@ -60,6 +60,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
     const [selectedUser, setSelectedUser] = useState<typeof users[0] | null>(null);
     const [selectedBaseWeapon, setSelectedBaseWeapon] = useState<typeof baseWeapons[0] | null>(null);
     const [detenteur, setDetenteur] = useState('');
+    const [bp, setBp] = useState('');
     const [serigraphie, setSerigraphie] = useState('');
     const [prix, setPrix] = useState('');
     
@@ -75,8 +76,9 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
 
     const resetForm = () => {
         setSelectedUser(null);
-        setSelectedBaseWeapon(null);
         setDetenteur('');
+        setBp('');
+        setSelectedBaseWeapon(null);
         setSerigraphie('');
         setPrix('');
         setOrderName('');
@@ -104,6 +106,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
             await createWeapon({
                 user_id: selectedUser.id,
                 detenteur,
+                bp,
                 nom_arme: selectedBaseWeapon.nom,
                 serigraphie,
                 prix: prixEnCentimes, // Utiliser le prix saisi et converti en centimes
@@ -225,6 +228,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
             const weaponsToAdd: Array<{
                 user_id: number;
                 detenteur: string;
+                bp: string;
                 nom_arme: string;
                 serigraphie: string;
                 prix: number;
@@ -242,6 +246,7 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                     weaponsToAdd.push({
                         user_id: selectedUser.id,
                         detenteur: detenteur || orderName,
+                        bp,
                         nom_arme: item.baseWeapon.nom,
                         serigraphie: serialNumber,
                         prix: item.baseWeapon.prix_defaut,
@@ -398,6 +403,20 @@ export default function AddWeaponForm({ isOpen, onClose, onWeaponAdded }: AddWea
                         onChange={(e) => setDetenteur(e.target.value)}
                         className="border p-2 rounded w-full dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
                         required
+                        disabled={isLoading}
+                    />
+                </div>
+
+                <div className="mb-4">
+                    <label htmlFor="bp" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                        BP (Boîte Postale)
+                    </label>
+                    <Input
+                        id="bp"
+                        type="text"
+                        value={bp}
+                        onChange={(e) => setBp(e.target.value)}
+                        className="border p-2 rounded w-full dark:bg-neutral-700 dark:border-neutral-600 dark:text-white"
                         disabled={isLoading}
                     />
                 </div>
