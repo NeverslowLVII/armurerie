@@ -1,11 +1,15 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogContent, AlertDialogDescription } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+} from '@/components/ui/alert-dialog';
 import { LoadingButton } from '@/components/ui/loading';
 
 export default function SetupForm() {
@@ -75,7 +79,7 @@ export default function SetupForm() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               disabled={isLoading}
               required
             />
@@ -87,7 +91,7 @@ export default function SetupForm() {
               type="password"
               placeholder="••••••••"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={e => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               required
             />
@@ -96,26 +100,17 @@ export default function SetupForm() {
             <AlertDialog open={!!error}>
               <AlertDialogContent>
                 <AlertDialogDescription>{error}</AlertDialogDescription>
-                <Button 
-                  className="mt-4" 
-                  onClick={() => setError(null)}
-                >
+                <Button className="mt-4" onClick={() => setError(null)}>
                   Fermer
                 </Button>
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button
-            className="w-full"
-            type="submit"
-            disabled={isLoading}
-          >
-            <LoadingButton loading={isLoading}>
-              Configurer le compte
-            </LoadingButton>
+          <Button className="w-full" type="submit" disabled={isLoading}>
+            <LoadingButton loading={isLoading}>Configurer le compte</LoadingButton>
           </Button>
         </div>
       </form>
     </div>
   );
-} 
+}

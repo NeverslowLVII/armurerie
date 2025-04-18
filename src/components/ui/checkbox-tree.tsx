@@ -5,9 +5,9 @@
  * headless component, your contributions are welcome!
  */
 
-"use client";
+'use client';
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from 'react';
 
 interface TreeNode {
   id: string;
@@ -32,21 +32,21 @@ function useCheckboxTree(initialTree: TreeNode) {
   const [checkedNodes, setCheckedNodes] = useState<Set<string>>(initialCheckedNodes);
 
   const isChecked = useCallback(
-    (node: TreeNode): boolean | "indeterminate" => {
+    (node: TreeNode): boolean | 'indeterminate' => {
       if (!node.children) {
         return checkedNodes.has(node.id);
       }
 
-      const childrenChecked = node.children.map((child) => isChecked(child));
-      if (childrenChecked.every((status) => status === true)) {
+      const childrenChecked = node.children.map(child => isChecked(child));
+      if (childrenChecked.every(status => status === true)) {
         return true;
       }
-      if (childrenChecked.some((status) => status === true || status === "indeterminate")) {
-        return "indeterminate";
+      if (childrenChecked.some(status => status === true || status === 'indeterminate')) {
+        return 'indeterminate';
       }
       return false;
     },
-    [checkedNodes],
+    [checkedNodes]
   );
 
   const handleCheck = useCallback(
@@ -59,7 +59,7 @@ function useCheckboxTree(initialTree: TreeNode) {
         } else {
           newCheckedNodes.delete(n.id);
         }
-        n.children?.forEach((child) => toggleNode(child, check));
+        n.children?.forEach(child => toggleNode(child, check));
       };
 
       const currentStatus = isChecked(node);
@@ -68,7 +68,7 @@ function useCheckboxTree(initialTree: TreeNode) {
       toggleNode(node, newCheck);
       setCheckedNodes(newCheckedNodes);
     },
-    [checkedNodes, isChecked],
+    [checkedNodes, isChecked]
   );
 
   return { isChecked, handleCheck };
@@ -78,7 +78,7 @@ interface CheckboxTreeProps {
   tree: TreeNode;
   renderNode: (props: {
     node: TreeNode;
-    isChecked: boolean | "indeterminate";
+    isChecked: boolean | 'indeterminate';
     onCheckedChange: () => void;
     children: React.ReactNode;
   }) => React.ReactNode;

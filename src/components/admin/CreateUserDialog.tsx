@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -33,7 +33,9 @@ export function CreateUserDialog() {
       password: formData.get('password') as string,
       color: formData.get('color') as string,
       contractUrl: formData.get('contractUrl') as string,
-      commission: formData.get('commission') ? Number.parseFloat(formData.get('commission') as string) : 0,
+      commission: formData.get('commission')
+        ? Number.parseFloat(formData.get('commission') as string)
+        : 0,
     };
 
     try {
@@ -71,29 +73,28 @@ export function CreateUserDialog() {
       <DialogTrigger asChild>
         <Button>Ajouter un utilisateur</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100">
+      <DialogContent className="bg-white text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100 sm:max-w-[425px]">
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle className="text-neutral-900 dark:text-neutral-100">
               Créer un compte utilisateur
             </DialogTitle>
             <DialogDescription className="text-neutral-700 dark:text-neutral-300">
-              Créez un nouveau compte pour un utilisateur. Un email avec ses identifiants lui sera envoyé.
+              Créez un nouveau compte pour un utilisateur. Un email avec ses identifiants lui sera
+              envoyé.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name" className="dark:text-neutral-200">Nom</Label>
-              <Input
-                id="name"
-                name="name"
-                placeholder="John Doe"
-                required
-                disabled={isLoading}
-              />
+              <Label htmlFor="name" className="dark:text-neutral-200">
+                Nom
+              </Label>
+              <Input id="name" name="name" placeholder="John Doe" required disabled={isLoading} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email" className="dark:text-neutral-200">Email</Label>
+              <Label htmlFor="email" className="dark:text-neutral-200">
+                Email
+              </Label>
               <Input
                 id="email"
                 name="email"
@@ -104,26 +105,21 @@ export function CreateUserDialog() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password" className="dark:text-neutral-200">Mot de passe</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                disabled={isLoading}
-              />
+              <Label htmlFor="password" className="dark:text-neutral-200">
+                Mot de passe
+              </Label>
+              <Input id="password" name="password" type="password" required disabled={isLoading} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="color" className="dark:text-neutral-200">Couleur</Label>
-              <Input
-                id="color"
-                name="color"
-                type="color"
-                disabled={isLoading}
-              />
+              <Label htmlFor="color" className="dark:text-neutral-200">
+                Couleur
+              </Label>
+              <Input id="color" name="color" type="color" disabled={isLoading} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="commission" className="dark:text-neutral-200">Commission (%)</Label>
+              <Label htmlFor="commission" className="dark:text-neutral-200">
+                Commission (%)
+              </Label>
               <Input
                 id="commission"
                 name="commission"
@@ -136,7 +132,9 @@ export function CreateUserDialog() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="contractUrl" className="dark:text-neutral-200">URL du contrat</Label>
+              <Label htmlFor="contractUrl" className="dark:text-neutral-200">
+                URL du contrat
+              </Label>
               <Input
                 id="contractUrl"
                 name="contractUrl"
@@ -155,4 +153,4 @@ export function CreateUserDialog() {
       </DialogContent>
     </Dialog>
   );
-} 
+}

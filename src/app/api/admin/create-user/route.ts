@@ -20,10 +20,7 @@ export async function POST(request: Request) {
 
     // Validation des données
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Vérifier si l'email existe déjà
@@ -32,10 +29,7 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
     }
 
     // Hasher le mot de passe
@@ -67,9 +61,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Create user error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create user account' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
   }
-} 
+}

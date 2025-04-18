@@ -1,19 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useToast } from '@/components/ui/use-toast';
 
 interface Props {
-  open: boolean;
-  onClose: () => void;
+  readonly open: boolean;
+  readonly onClose: () => void;
 }
 
 interface Developer {
@@ -23,21 +18,21 @@ interface Developer {
 }
 
 const listItemVariants = {
-  hidden: { 
-    opacity: 0, 
+  hidden: {
+    opacity: 0,
     y: 20,
-    scale: 0.95
+    scale: 0.95,
   },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      type: "spring",
+      type: 'spring',
       stiffness: 300,
-      damping: 30
-    }
-  }
+      damping: 30,
+    },
+  },
 };
 
 export default function DeveloperManager({ open, onClose }: Props) {
@@ -57,9 +52,9 @@ export default function DeveloperManager({ open, onClose }: Props) {
       setDevelopers(data);
     } catch {
       toast({
-        title: "Erreur",
-        description: "Impossible de charger les développeurs",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de charger les développeurs',
+        variant: 'destructive',
       });
     }
   }, [toast]);
@@ -90,8 +85,8 @@ export default function DeveloperManager({ open, onClose }: Props) {
       if (!response.ok) throw new Error('Failed to create developer');
 
       toast({
-        title: "Succès",
-        description: "Développeur créé avec succès",
+        title: 'Succès',
+        description: 'Développeur créé avec succès',
       });
 
       await fetchDevelopers();
@@ -100,9 +95,9 @@ export default function DeveloperManager({ open, onClose }: Props) {
       setNewName('');
     } catch {
       toast({
-        title: "Erreur",
-        description: "Impossible de créer le développeur",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de créer le développeur',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -128,8 +123,8 @@ export default function DeveloperManager({ open, onClose }: Props) {
       if (!response.ok) throw new Error('Failed to update developer');
 
       toast({
-        title: "Succès",
-        description: "Développeur mis à jour avec succès",
+        title: 'Succès',
+        description: 'Développeur mis à jour avec succès',
       });
 
       await fetchDevelopers();
@@ -139,9 +134,9 @@ export default function DeveloperManager({ open, onClose }: Props) {
       setNewName('');
     } catch {
       toast({
-        title: "Erreur",
-        description: "Impossible de mettre à jour le développeur",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de mettre à jour le développeur',
+        variant: 'destructive',
       });
     } finally {
       setIsSubmitting(false);
@@ -159,16 +154,16 @@ export default function DeveloperManager({ open, onClose }: Props) {
       if (!response.ok) throw new Error('Failed to delete developer');
 
       toast({
-        title: "Succès",
-        description: "Développeur supprimé avec succès",
+        title: 'Succès',
+        description: 'Développeur supprimé avec succès',
       });
 
       await fetchDevelopers();
     } catch {
       toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le développeur",
-        variant: "destructive",
+        title: 'Erreur',
+        description: 'Impossible de supprimer le développeur',
+        variant: 'destructive',
       });
     }
   };
@@ -182,7 +177,7 @@ export default function DeveloperManager({ open, onClose }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] bg-white dark:bg-neutral-800">
+      <DialogContent className="bg-white dark:bg-neutral-800 sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-neutral-900 dark:text-white">
             Gérer les développeurs
@@ -192,16 +187,25 @@ export default function DeveloperManager({ open, onClose }: Props) {
         <div className="grid grid-cols-2 gap-6">
           {/* Form Panel */}
           <div className="space-y-4">
-            <form onSubmit={editingDeveloper ? (e) => { e.preventDefault(); handleUpdate(editingDeveloper); } : handleSubmit}>
+            <form
+              onSubmit={
+                editingDeveloper
+                  ? e => {
+                      e.preventDefault();
+                      handleUpdate(editingDeveloper);
+                    }
+                  : handleSubmit
+              }
+            >
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Nom d&apos;utilisateur
                   </label>
                   <Input
                     type="text"
                     value={newUsername}
-                    onChange={(e) => setNewUsername(e.target.value)}
+                    onChange={e => setNewUsername(e.target.value)}
                     className="w-full"
                     required
                     disabled={isSubmitting}
@@ -209,13 +213,13 @@ export default function DeveloperManager({ open, onClose }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                     Nom complet
                   </label>
                   <Input
                     type="text"
                     value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
+                    onChange={e => setNewName(e.target.value)}
                     className="w-full"
                     required
                     disabled={isSubmitting}
@@ -223,13 +227,13 @@ export default function DeveloperManager({ open, onClose }: Props) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                    {editingDeveloper ? "Nouveau mot de passe (optionnel)" : "Mot de passe"}
+                  <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                    {editingDeveloper ? 'Nouveau mot de passe (optionnel)' : 'Mot de passe'}
                   </label>
                   <Input
                     type="password"
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
+                    onChange={e => setNewPassword(e.target.value)}
                     className="w-full"
                     required={!editingDeveloper}
                     disabled={isSubmitting}
@@ -252,22 +256,33 @@ export default function DeveloperManager({ open, onClose }: Props) {
                       Annuler
                     </Button>
                   )}
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-red-600 hover:bg-red-700 text-white"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        {editingDeveloper ? 'Mise à jour...' : 'Création...'}
-                      </>
-                    ) : (
-                      editingDeveloper ? 'Mettre à jour' : 'Créer'
-                    )}
+                  <Button type="submit" disabled={isSubmitting} className="w-full">
+                    {(() => {
+                      if (isSubmitting) {
+                        const statusText = editingDeveloper ? 'Mise à jour...' : 'Création...';
+                        return (
+                          <>
+                            <svg
+                              className="mr-2 h-4 w-4 animate-spin"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            {statusText}
+                          </>
+                        );
+                      } else if (editingDeveloper) {
+                        return 'Mettre à jour';
+                      } else {
+                        return 'Créer';
+                      }
+                    })()}
                   </Button>
                 </div>
               </div>
@@ -275,19 +290,19 @@ export default function DeveloperManager({ open, onClose }: Props) {
           </div>
 
           {/* List Panel */}
-          <div className="border-l border-neutral-200 dark:border-neutral-700 pl-6">
-            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-4">
+          <div className="border-l border-neutral-200 pl-6 dark:border-neutral-700">
+            <h3 className="mb-4 text-lg font-medium text-neutral-900 dark:text-white">
               Développeurs existants
             </h3>
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {developers.map((developer) => (
+                {developers.map(developer => (
                   <motion.div
                     key={developer.id}
                     variants={listItemVariants}
                     initial="hidden"
                     animate="visible"
-                    className="p-4 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700"
+                    className="rounded-lg border border-neutral-200 p-4 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
                   >
                     <div className="flex items-center justify-between">
                       <div>
@@ -326,4 +341,4 @@ export default function DeveloperManager({ open, onClose }: Props) {
       </DialogContent>
     </Dialog>
   );
-} 
+}

@@ -10,7 +10,11 @@ import armurerie from '@/assets/armurerie.webp';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogContent, AlertDialogDescription } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+} from '@/components/ui/alert-dialog';
 import { LoadingButton } from '@/components/ui/loading';
 import { RandomQuote } from '@/components/ui/RandomQuote';
 
@@ -51,8 +55,8 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="container relative h-screen flex-col items-center justify-center grid bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
-      <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex overflow-hidden">
+    <div className="container relative grid h-screen flex-col items-center justify-center bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
+      <div className="relative hidden h-full flex-col overflow-hidden bg-muted p-10 text-white lg:flex">
         <div className="absolute inset-0">
           <Image
             src={armurerie}
@@ -64,19 +68,19 @@ export default function SignInPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 backdrop-blur-[2px]" />
         </div>
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="relative z-20 flex items-center"
         >
-          <span className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent">
             Armurerie
           </span>
         </motion.div>
         <RandomQuote />
       </div>
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
@@ -84,7 +88,7 @@ export default function SignInPage() {
       >
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -92,7 +96,7 @@ export default function SignInPage() {
             >
               Connexion
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -111,12 +115,10 @@ export default function SignInPage() {
                 <AlertDialog open={!!setup}>
                   <AlertDialogContent>
                     <AlertDialogDescription>
-                      Votre compte a été configuré avec succès. Vous pouvez maintenant vous connecter.
+                      Votre compte a été configuré avec succès. Vous pouvez maintenant vous
+                      connecter.
                     </AlertDialogDescription>
-                    <Button 
-                      className="mt-4" 
-                      onClick={() => router.replace('/auth/signin')}
-                    >
+                    <Button className="mt-4" onClick={() => router.replace('/auth/signin')}>
                       Fermer
                     </Button>
                   </AlertDialogContent>
@@ -126,18 +128,19 @@ export default function SignInPage() {
                 <AlertDialog open={!!reset}>
                   <AlertDialogContent>
                     <AlertDialogDescription>
-                      Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.
+                      Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous
+                      connecter.
                     </AlertDialogDescription>
-                    <Button 
-                      className="mt-4" 
-                      onClick={() => router.replace('/auth/signin')}
-                    >
+                    <Button className="mt-4" onClick={() => router.replace('/auth/signin')}>
                       Fermer
                     </Button>
                   </AlertDialogContent>
                 </AlertDialog>
               )}
-              <form onSubmit={onSubmit} className="space-y-4 bg-white dark:bg-neutral-900 p-4 rounded-lg">
+              <form
+                onSubmit={onSubmit}
+                className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="identifier">Email ou nom d&apos;utilisateur</Label>
                   <Input
@@ -146,7 +149,7 @@ export default function SignInPage() {
                     type="text"
                     placeholder="nom@exemple.fr"
                     value={identifier}
-                    onChange={(e) => setIdentifier(e.target.value)}
+                    onChange={e => setIdentifier(e.target.value)}
                     disabled={isLoading}
                     required
                     className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -168,7 +171,7 @@ export default function SignInPage() {
                     type="password"
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     disabled={isLoading}
                     required
                     className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -178,10 +181,7 @@ export default function SignInPage() {
                   <AlertDialog open={!!error}>
                     <AlertDialogContent>
                       <AlertDialogDescription>{error}</AlertDialogDescription>
-                      <Button 
-                        className="mt-4" 
-                        onClick={() => setError(null)}
-                      >
+                      <Button className="mt-4" onClick={() => setError(null)}>
                         Fermer
                       </Button>
                     </AlertDialogContent>
@@ -203,4 +203,4 @@ export default function SignInPage() {
       </motion.div>
     </div>
   );
-} 
+}

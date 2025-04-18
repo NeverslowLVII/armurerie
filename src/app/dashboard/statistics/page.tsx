@@ -28,28 +28,33 @@ export default function StatisticsPage() {
     fetchWeapons();
   }, []);
 
-  return (
-    <div className="container mx-auto py-6">
-      {loading ? (
-        <div className="text-center py-10">
-          <div className="w-16 h-16 border-4 border-t-red-500 border-neutral-200 dark:border-neutral-700 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-neutral-600 dark:text-neutral-400">Chargement des données...</p>
-        </div>
-      ) : (error ? (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
-          <p className="text-red-600 dark:text-red-400">{error}</p>
-          <button 
-            onClick={() => globalThis.location.reload()} 
-            className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-          >
-            Réessayer
-          </button>
-        </div>
-      ) : (
-        <div className="bg-white dark:bg-neutral-800 shadow-lg dark:shadow-neutral-700 rounded-lg p-6">
-          <Statistics weapons={weapons} />
-        </div>
-      ))}
-    </div>
-  );
-} 
+  let content;
+  if (loading) {
+    content = (
+      <div className="py-10 text-center">
+        <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-neutral-200 border-t-red-500 dark:border-neutral-700"></div>
+        <p className="mt-4 text-neutral-600 dark:text-neutral-400">Chargement des données...</p>
+      </div>
+    );
+  } else if (error) {
+    content = (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-800 dark:bg-red-900/20">
+        <p className="text-red-600 dark:text-red-400">{error}</p>
+        <button
+          onClick={() => globalThis.location.reload()}
+          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-white transition-colors hover:bg-red-700"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-800 dark:shadow-neutral-700">
+        <Statistics weapons={weapons} />
+      </div>
+    );
+  }
+
+  return <div className="container mx-auto py-6">{content}</div>;
+}

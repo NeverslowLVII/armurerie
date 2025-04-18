@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { Suspense } from 'react';
 import { WeaponComparison } from '@/components/weapons/WeaponComparison';
@@ -14,11 +14,11 @@ const WeaponComparisonSkeleton = () => (
   <div className="space-y-6">
     <div className="grid grid-cols-2 gap-4">
       <div>
-        <Skeleton className="h-5 w-16 mb-2" />
+        <Skeleton className="mb-2 h-5 w-16" />
         <Skeleton className="h-10 w-full" />
       </div>
       <div>
-        <Skeleton className="h-5 w-16 mb-2" />
+        <Skeleton className="mb-2 h-5 w-16" />
         <Skeleton className="h-10 w-full" />
       </div>
     </div>
@@ -36,7 +36,7 @@ const WeaponOrderSkeleton = () => (
   <div className="space-y-6">
     <div className="max-h-60 space-y-2">
       {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center space-x-2 py-1 border-b">
+        <div key={i} className="flex items-center space-x-2 border-b py-1">
           <Skeleton className="h-4 w-4 rounded" />
           <Skeleton className="h-5 w-full max-w-[200px]" />
         </div>
@@ -49,19 +49,19 @@ const WeaponOrderSkeleton = () => (
 /**
  * Weapon Comparison Page Component
  * Displays a side-by-side comparison tool for weapons and an order calculator
- * 
+ *
  * Note: The API endpoint has been fixed to use /weapons/catalog directly
  * instead of /api/weapons/catalog to avoid path duplication.
  */
 export default function WeaponComparisonPage() {
   return (
-    <div className="container mx-auto py-6 px-4 sm:px-6">
-      <h1 className="text-3xl font-bold mb-6 text-neutral-900 dark:text-white">
+    <div className="container mx-auto px-4 py-6 sm:px-6">
+      <h1 className="mb-6 text-3xl font-bold text-neutral-900 dark:text-white">
         Comparateur d&apos;Armes - Saint-Denis
       </h1>
-      
+
       <Tabs defaultValue="comparison" className="space-y-6">
-        <TabsList className="w-full max-w-md mx-auto mb-2">
+        <TabsList className="mx-auto mb-2 w-full max-w-md">
           <TabsTrigger value="comparison" className="flex-1">
             Comparaison
           </TabsTrigger>
@@ -72,7 +72,7 @@ export default function WeaponComparisonPage() {
 
         <TabsContent value="comparison" className="m-0">
           <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-6 text-neutral-900 dark:text-white">
+            <h2 className="mb-6 text-xl font-semibold text-neutral-900 dark:text-white">
               Comparaison des Armes
             </h2>
             <Suspense fallback={<WeaponComparisonSkeleton />}>
@@ -80,10 +80,10 @@ export default function WeaponComparisonPage() {
             </Suspense>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="order" className="m-0">
           <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-6 text-neutral-900 dark:text-white">
+            <h2 className="mb-6 text-xl font-semibold text-neutral-900 dark:text-white">
               Passer une Commande
             </h2>
             <Suspense fallback={<WeaponOrderSkeleton />}>
@@ -94,4 +94,4 @@ export default function WeaponComparisonPage() {
       </Tabs>
     </div>
   );
-} 
+}

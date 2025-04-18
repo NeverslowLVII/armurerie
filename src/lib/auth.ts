@@ -43,8 +43,8 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: 'credentials',
       credentials: {
-        identifier: { label: 'Email ou nom d\'utilisateur', type: 'text' },
-        password: { label: 'Mot de passe', type: 'password' }
+        identifier: { label: "Email ou nom d'utilisateur", type: 'text' },
+        password: { label: 'Mot de passe', type: 'password' },
       },
       async authorize(credentials): Promise<User | null> {
         if (!credentials?.identifier || !credentials?.password) {
@@ -53,10 +53,7 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findFirst({
           where: {
-            OR: [
-              { email: credentials.identifier },
-              { username: credentials.identifier }
-            ]
+            OR: [{ email: credentials.identifier }, { username: credentials.identifier }],
           },
         });
 
@@ -72,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         // Update last login time
         await prisma.user.update({
           where: { id: user.id },
-          data: { lastLogin: new Date() }
+          data: { lastLogin: new Date() },
         });
 
         return {
@@ -84,8 +81,8 @@ export const authOptions: NextAuthOptions = {
           color: user.color || null,
           contractUrl: user.contractUrl || null,
         };
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, user }) {
@@ -103,7 +100,7 @@ export const authOptions: NextAuthOptions = {
         session.user.username = token.username || null;
       }
       return session;
-    }
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
-}; 
+};

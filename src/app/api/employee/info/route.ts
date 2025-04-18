@@ -33,4 +33,4 @@ export async function GET() {
     console.error('Error in employee info route:', error);
     return new NextResponse('Erreur interne du serveur', { status: 500 });
   }
-} 
+}

@@ -13,7 +13,14 @@ export const metadata: Metadata = {
 async function getUsers() {
   return (await prisma.user.findMany({
     orderBy: { name: 'asc' },
-    select: ({ id: true, name: true, role: true, color: true, email: true, contractUrl: true } as any)
+    select: {
+      id: true,
+      name: true,
+      role: true,
+      color: true,
+      email: true,
+      contractUrl: true,
+    } as any,
   })) as any[];
 }
 

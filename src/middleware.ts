@@ -19,7 +19,7 @@ const publicRoutes = [
   '/images',
   '/assets',
   '/static',
-  '/vercel.svg'
+  '/vercel.svg',
 ];
 
 export default withAuth(
@@ -29,13 +29,20 @@ export default withAuth(
     const isApiRoute = path.startsWith('/api/');
 
     // Check if the route is public
-    if (publicRoutes.some(route => {
-      // Exact match for paths like /auth/reset
-      if (path === route) return true;
-      // Prefix match for paths like /_next/...
-      if (route.endsWith('/') ? path.startsWith(route) : path.startsWith(route + '/') || path === route) return true;
-      return false;
-    })) {
+    if (
+      publicRoutes.some(route => {
+        // Exact match for paths like /auth/reset
+        if (path === route) return true;
+        // Prefix match for paths like /_next/...
+        if (
+          route.endsWith('/')
+            ? path.startsWith(route)
+            : path.startsWith(route + '/') || path === route
+        )
+          return true;
+        return false;
+      })
+    ) {
       return NextResponse.next();
     }
 
@@ -53,23 +60,20 @@ export default withAuth(
             'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Authorization',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Max-Age': '86400'
-          }
+            'Access-Control-Max-Age': '86400',
+          },
         });
       }
 
-      return new NextResponse(
-        JSON.stringify({ error: 'Authentication required' }),
-        { 
-          status: 401,
-          headers: { 
-            'content-type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-          }
-        }
-      );
+      return new NextResponse(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: {
+          'content-type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      });
     }
 
     // Protected routes - require auth
@@ -82,18 +86,15 @@ export default withAuth(
     // Admin routes - require PATRON or CO_PATRON
     if (path.startsWith('/admin') && token.role !== Role.PATRON && token.role !== Role.CO_PATRON) {
       if (isApiRoute) {
-        return new NextResponse(
-          JSON.stringify({ error: 'Access denied' }),
-          { 
-            status: 403,
-            headers: { 
-              'content-type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-            }
-          }
-        );
+        return new NextResponse(JSON.stringify({ error: 'Access denied' }), {
+          status: 403,
+          headers: {
+            'content-type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+        });
       }
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
@@ -101,29 +102,26 @@ export default withAuth(
     // Developer routes - require DEVELOPER
     if (path.startsWith('/api/feedback') && token.role !== Role.DEVELOPER) {
       if (isApiRoute) {
-        return new NextResponse(
-          JSON.stringify({ error: 'Access denied' }),
-          { 
-            status: 403,
-            headers: { 
-              'content-type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-              'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-            }
-          }
-        );
+        return new NextResponse(JSON.stringify({ error: 'Access denied' }), {
+          status: 403,
+          headers: {
+            'content-type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+        });
       }
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
     const response = NextResponse.next();
-    
+
     // Add CORS headers to all responses
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
+
     return response;
   },
   {
@@ -141,4 +139,4 @@ export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/|auth/reset|auth/setup|api/auth/setup).*)',
   ],
-}; 
+};

@@ -12,26 +12,20 @@ export async function POST(request: Request) {
     // Vérifier le token
     const payload = verifyToken(token);
     console.log('Token verification result:', payload);
-    
+
     if (!payload || payload.type !== 'setup') {
       console.log('Invalid token or wrong type');
-      return NextResponse.json(
-        { error: 'Token invalide ou expiré' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token invalide ou expiré' }, { status: 401 });
     }
 
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId }
+      where: { id: payload.userId },
     });
     console.log('User found:', !!user);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Utilisateur non trouvé' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
     }
 
     // Hasher le nouveau mot de passe
@@ -43,8 +37,8 @@ export async function POST(request: Request) {
       where: { id: user.id },
       data: {
         password: hashedPassword,
-        lastLogin: new Date()
-      }
+        lastLogin: new Date(),
+      },
     });
     console.log('User updated successfully');
 
@@ -56,4 +50,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

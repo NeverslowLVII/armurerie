@@ -14,4 +14,4 @@ export async function GET() {
     console.error('Error fetching weapon catalog:', error);
     return NextResponse.json({ error: 'Failed to fetch weapon catalog' }, { status: 500 });
   }
-} 
+}

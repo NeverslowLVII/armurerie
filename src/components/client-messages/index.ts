@@ -1,2 +1,2 @@
 export * from './ClientMessageGenerator';
-export * from './utils'; 
+export * from './utils';

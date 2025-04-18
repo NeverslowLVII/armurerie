@@ -48,4 +48,4 @@ export async function GET() {
     console.error('Error in weekly sales route:', error);
     return new NextResponse('Erreur interne du serveur', { status: 500 });
   }
-} 
+}

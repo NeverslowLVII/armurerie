@@ -13,26 +13,17 @@ export async function POST(request: Request) {
     // Find user by email or username
     const user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: email || '' },
-          { username: username || '' }
-        ]
+        OR: [{ email: email || '' }, { username: username || '' }],
       },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
     // Update last login
@@ -48,7 +39,7 @@ export async function POST(request: Request) {
         email: user.email,
         username: user.username,
         role: user.role,
-        name: user.name
+        name: user.name,
       },
       JWT_SECRET,
       { expiresIn: '24h' }
@@ -64,24 +55,21 @@ export async function POST(request: Request) {
         name: user.name,
         role: user.role,
         color: user.color,
-        contractUrl: user.contractUrl
-      }
+        contractUrl: user.contractUrl,
+      },
     });
 
     response.cookies.set('auth_token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 86_400 // 24 hours
+      maxAge: 86_400, // 24 hours
     });
 
     return response;
   } catch (error) {
     console.error('Authentication error:', error);
-    return NextResponse.json(
-      { error: 'Authentication failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });
   }
 }
 
@@ -89,12 +77,9 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const authToken = cookies().get('auth_token')?.value;
-    
+
     if (!authToken) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
@@ -115,8 +100,8 @@ export async function GET() {
           name: true,
           role: true,
           color: true,
-          contractUrl: true
-        }
+          contractUrl: true,
+        },
       });
 
       if (!user) {
@@ -125,16 +110,10 @@ export async function GET() {
 
       return NextResponse.json({ user });
     } catch {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
   } catch (error) {
     console.error('Error verifying token:', error);
-    return NextResponse.json(
-      { error: 'Authentication failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Authentication failed' }, { status: 500 });
   }
-} 
+}

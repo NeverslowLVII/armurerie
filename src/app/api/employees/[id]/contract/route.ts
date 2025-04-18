@@ -5,10 +5,7 @@ import { authOptions } from '@/lib/auth';
 import { Role } from '@prisma/client';
 import { put, del } from '@vercel/blob';
 
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -27,7 +24,7 @@ export async function POST(
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
-    
+
     if (!file) {
       return new NextResponse('Fichier manquant', { status: 400 });
     }
@@ -35,7 +32,7 @@ export async function POST(
     const userId = Number.parseInt(params.id);
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true }
+      select: { id: true, name: true },
     });
 
     if (!user) {
@@ -44,7 +41,7 @@ export async function POST(
 
     // Générer un nom de fichier unique basé sur l'ID de l'utilisateur et la date
     const fileName = `contracts/${user.id}_${user.name.replaceAll(/\s+/g, '_')}_${Date.now()}.${file.name.split('.').pop()}`;
-    
+
     // Upload du fichier vers Vercel Blob Storage
     const { url } = await put(fileName, file, { access: 'public' });
 
@@ -64,10 +61,7 @@ export async function POST(
   }
 }
 
-export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -92,10 +86,7 @@ export async function GET(
   }
 }
 
-export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -115,7 +106,7 @@ export async function DELETE(
     const userId = Number.parseInt(params.id);
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { contractUrl: true }
+      select: { contractUrl: true },
     });
 
     if (!user?.contractUrl) {
@@ -124,7 +115,7 @@ export async function DELETE(
 
     // Extraire l'URL du blob à partir de l'URL complète
     const blobUrl = user.contractUrl;
-    
+
     try {
       // Supprimer le fichier de Vercel Blob Storage
       await del(blobUrl);
@@ -147,4 +138,4 @@ export async function DELETE(
     console.error('Error deleting contract:', error);
     return new NextResponse('Erreur interne du serveur', { status: 500 });
   }
-} 
+}

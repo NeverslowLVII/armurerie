@@ -1,6 +1,13 @@
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from 'react';
 import { getWeapons, getUsers, getBaseWeapons, Weapon, User, BaseWeapon } from '../services/api';
 import { useSession } from 'next-auth/react';
 import { LoadingOverlay } from '@/components/ui/loading';
@@ -22,7 +29,13 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 // This context controls whether components should show their own loading indicators
 export const LoadingDisplayContext = createContext<boolean>(true);
 
-export function DataProvider({ children, useOverlay = true }: { children: ReactNode, useOverlay?: boolean }) {
+export function DataProvider({
+  children,
+  useOverlay = true,
+}: {
+  children: ReactNode;
+  useOverlay?: boolean;
+}) {
   const { status } = useSession();
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -69,11 +82,7 @@ export function DataProvider({ children, useOverlay = true }: { children: ReactN
     setLoading(true);
     setError(null);
     try {
-      await Promise.all([
-        refreshWeapons(),
-        refreshUsers(),
-        refreshBaseWeapons()
-      ]);
+      await Promise.all([refreshWeapons(), refreshUsers(), refreshBaseWeapons()]);
     } catch (error) {
       console.error('Error refreshing data:', error);
       setError('Error refreshing data');
@@ -87,17 +96,19 @@ export function DataProvider({ children, useOverlay = true }: { children: ReactN
   }, [refreshAll, status]);
 
   const content = (
-    <DataContext.Provider value={{
-      weapons,
-      users,
-      baseWeapons,
-      loading,
-      error,
-      refreshWeapons,
-      refreshUsers,
-      refreshBaseWeapons,
-      refreshAll
-    }}>
+    <DataContext.Provider
+      value={{
+        weapons,
+        users,
+        baseWeapons,
+        loading,
+        error,
+        refreshWeapons,
+        refreshUsers,
+        refreshBaseWeapons,
+        refreshAll,
+      }}
+    >
       <LoadingDisplayContext.Provider value={!useOverlay}>
         {children}
       </LoadingDisplayContext.Provider>
@@ -108,7 +119,9 @@ export function DataProvider({ children, useOverlay = true }: { children: ReactN
     <LoadingOverlay loading={loading} text="Chargement des données...">
       {content}
     </LoadingOverlay>
-  ) : content;
+  ) : (
+    content
+  );
 }
 
 export function useData() {
@@ -121,4 +134,4 @@ export function useData() {
 
 export function useShouldDisplayLoading() {
   return useContext(LoadingDisplayContext);
-} 
+}

@@ -29,28 +29,25 @@ const initialState: UserState = {
 };
 
 // Async thunks
-export const fetchUsers = createAsyncThunk(
-  'users/fetchUsers',
-  async () => {
-    const response = await fetch('/api/employees');
-    if (!response.ok) {
-      throw new Error('Failed to fetch users');
-    }
-    return await response.json();
+export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
+  const response = await fetch('/api/employees');
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
   }
-);
+  return await response.json();
+});
 
 export const updateUser = createAsyncThunk(
   'users/updateUser',
   async ({ id, data }: { id?: number; data: Partial<User> }) => {
     console.log('updateUser thunk called with:', { id, data });
-    
+
     const method = id ? 'PUT' : 'POST';
     const url = id ? `/api/employees/${id}` : '/api/employees';
-    
+
     console.log('Making request to:', { method, url });
     console.log('Request body:', JSON.stringify(data, null, 2));
-    
+
     const response = await fetch(url, {
       method,
       headers: {
@@ -65,11 +62,11 @@ export const updateUser = createAsyncThunk(
         status: response.status,
         statusText: response.statusText,
         errorData,
-        requestData: data
+        requestData: data,
       });
       throw new Error(errorData.error || 'Failed to update user');
     }
-    
+
     const result = await response.json();
     console.log('Update user success:', result);
     return result;
@@ -78,7 +75,7 @@ export const updateUser = createAsyncThunk(
 
 export const mergeUsers = createAsyncThunk(
   'users/mergeUsers',
-  async ({ names, targetName }: { names: string[], targetName: string }) => {
+  async ({ names, targetName }: { names: string[]; targetName: string }) => {
     const response = await fetch('/api/employees/merge', {
       method: 'POST',
       headers: {
@@ -94,19 +91,16 @@ export const mergeUsers = createAsyncThunk(
   }
 );
 
-export const deleteUser = createAsyncThunk(
-  'users/deleteUser',
-  async (id: number) => {
-    const response = await fetch(`/api/employees/${id}`, {
-      method: 'DELETE',
-    });
+export const deleteUser = createAsyncThunk('users/deleteUser', async (id: number) => {
+  const response = await fetch(`/api/employees/${id}`, {
+    method: 'DELETE',
+  });
 
-    if (!response.ok) {
-      throw new Error('Failed to delete user');
-    }
-    return id;
+  if (!response.ok) {
+    throw new Error('Failed to delete user');
   }
-);
+  return id;
+});
 
 const userSlice = createSlice({
   name: 'users',
@@ -116,10 +110,10 @@ const userSlice = createSlice({
       state.initialized = action.payload;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
       // Fetch users
-      .addCase(fetchUsers.pending, (state) => {
+      .addCase(fetchUsers.pending, state => {
         state.loading = true;
         state.error = null;
       })
@@ -137,7 +131,7 @@ const userSlice = createSlice({
         state.error = action.error.message || 'Failed to fetch users';
       })
       // Update user
-      .addCase(updateUser.pending, (state) => {
+      .addCase(updateUser.pending, state => {
         state.loading = true;
         state.error = null;
       })
@@ -152,25 +146,25 @@ const userSlice = createSlice({
       // Merge users
       .addCase(mergeUsers.fulfilled, (state, action) => {
         const { names, targetUser } = action.payload;
-        
+
         // Create a new Map from the current users
         const usersMap = new Map(Object.entries(state.users));
-        
+
         // Remove merged users
         for (const name of names) {
           usersMap.delete(name);
         }
-        
+
         // Add target user safely
         if (targetUser && typeof targetUser.name === 'string') {
           usersMap.set(targetUser.name, targetUser);
         }
-        
+
         // Convert Map back to object and update state
         state.users = Object.fromEntries(usersMap);
       })
       // Delete user
-      .addCase(deleteUser.pending, (state) => {
+      .addCase(deleteUser.pending, state => {
         state.loading = true;
         state.error = null;
       })
@@ -194,4 +188,4 @@ export const deleteEmployee = deleteUser;
 export const mergeEmployees = mergeUsers;
 
 export const { setInitialized } = userSlice.actions;
-export default userSlice.reducer; 
+export default userSlice.reducer;

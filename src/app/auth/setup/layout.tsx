@@ -5,10 +5,6 @@ export const metadata: Metadata = {
   description: 'Configurez votre compte Armurerie',
 };
 
-export default function SetupLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function SetupLayout({ children }: { children: React.ReactNode }) {
   return children;
-} 
+}

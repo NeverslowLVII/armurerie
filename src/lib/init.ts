@@ -16,7 +16,7 @@ export async function initializeApp() {
 
     // Vérifier si un administrateur existe déjà
     const adminExists = await prisma.user.findFirst({
-      where: { role: DEFAULT_ADMIN.role }
+      where: { role: DEFAULT_ADMIN.role },
     });
 
     if (adminExists) {
@@ -24,7 +24,7 @@ export async function initializeApp() {
         id: adminExists.id,
         email: adminExists.email,
         name: adminExists.name,
-        role: adminExists.role
+        role: adminExists.role,
       });
     } else {
       console.log('No admin found. Creating default admin...');
@@ -32,9 +32,9 @@ export async function initializeApp() {
         email: DEFAULT_ADMIN.email,
         name: DEFAULT_ADMIN.name,
         role: DEFAULT_ADMIN.role,
-        color: DEFAULT_ADMIN.color
+        color: DEFAULT_ADMIN.color,
       });
-      
+
       // Créer l'administrateur par défaut
       const hashedPassword = await bcrypt.hash(DEFAULT_ADMIN.password, 10);
       const admin = await prisma.user.create({
@@ -44,14 +44,14 @@ export async function initializeApp() {
           name: DEFAULT_ADMIN.name,
           role: DEFAULT_ADMIN.role,
           color: DEFAULT_ADMIN.color,
-        }
+        },
       });
 
       console.log('Default admin created successfully:', {
         id: admin.id,
         email: admin.email,
         name: admin.name,
-        role: admin.role
+        role: admin.role,
       });
       console.log('You can now login with:');
       console.log('Email:', DEFAULT_ADMIN.email);
@@ -64,4 +64,4 @@ export async function initializeApp() {
     console.error('Error during app initialization:', error);
     throw error;
   }
-} 
+}

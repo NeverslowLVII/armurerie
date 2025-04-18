@@ -116,7 +116,7 @@ export const deleteUser = async (id: number): Promise<void> => {
 export const mergeUsers = async (userIds: number[], targetId: number): Promise<User> => {
   const response = await axios.post('/employees/merge', {
     user_ids: userIds,
-    target_id: targetId
+    target_id: targetId,
   });
   return response.data;
 };
@@ -135,20 +135,23 @@ export const getWeapon = async (id: number): Promise<Weapon> => {
 export const createWeapon = async (weapon: WeaponCreate): Promise<Weapon> => {
   try {
     const response = await axios.post('/weapons', weapon);
-    
+
     if (response.status !== 201 && response.status !== 200) {
       throw new Error(`Failed to create weapon: ${response.statusText}`);
     }
-    
+
     return response.data;
   } catch (error) {
     const axiosError = error as any;
     if (axiosError?.isAxiosError === true) {
       if (axiosError.response?.status === 400) {
-        throw new Error('Données invalides pour la création de l\'arme');
+        throw new Error("Données invalides pour la création de l'arme");
       }
       if (process.env.NODE_ENV !== 'test') {
-        console.error('Create weapon error:', { status: axiosError.response?.status, statusText: axiosError.response?.statusText });
+        console.error('Create weapon error:', {
+          status: axiosError.response?.status,
+          statusText: axiosError.response?.statusText,
+        });
       }
       throw new Error(`Erreur lors de la création: ${axiosError.message}`);
     }
@@ -165,10 +168,10 @@ export const deleteWeapon = async (id: number): Promise<void> => {
   try {
     const response = await axios.delete(`/weapons/${id}`, {
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (response.status !== 204 && response.status !== 200) {
       throw new Error(`Failed to delete weapon: ${response.statusText}`);
     }
@@ -179,7 +182,7 @@ export const deleteWeapon = async (id: number): Promise<void> => {
         throw new Error(`L'arme avec l'ID ${id} n'a pas été trouvée`);
       } else if (axiosErrorDel.response?.status === 405) {
         console.error('Delete request failed:', axiosErrorDel.response);
-        throw new Error('La méthode de suppression n\'est pas autorisée');
+        throw new Error("La méthode de suppression n'est pas autorisée");
       }
       throw new Error(`Erreur lors de la suppression: ${axiosErrorDel.message}`);
     }
@@ -196,8 +199,8 @@ export const reassignWeapons = async (fromUserId: number, toUserId: number): Pro
   const response = await axios.post('/employees/reassign-weapons', null, {
     params: {
       from_user_id: fromUserId,
-      to_user_id: toUserId
-    }
+      to_user_id: toUserId,
+    },
   });
   return response.data.message;
 };
@@ -218,7 +221,10 @@ export const createBaseWeapon = async (baseWeapon: BaseWeaponCreate): Promise<Ba
   return response.data;
 };
 
-export const updateBaseWeapon = async (id: number, baseWeapon: BaseWeaponCreate): Promise<BaseWeapon> => {
+export const updateBaseWeapon = async (
+  id: number,
+  baseWeapon: BaseWeaponCreate
+): Promise<BaseWeapon> => {
   const response = await axios.put(`/base-weapons/${id}`, baseWeapon);
   return response.data;
 };
@@ -227,10 +233,10 @@ export const deleteBaseWeapon = async (id: number): Promise<void> => {
   try {
     const response = await axios.delete(`/base-weapons/${id}`, {
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     });
-    
+
     if (response.status !== 204 && response.status !== 200) {
       throw new Error(`Failed to delete base weapon: ${response.statusText}`);
     }
@@ -241,7 +247,7 @@ export const deleteBaseWeapon = async (id: number): Promise<void> => {
         throw new Error(`L'arme de base avec l'ID ${id} n'a pas été trouvée`);
       } else if (axiosErrorBase.response?.status === 405) {
         console.error('Delete request failed:', axiosErrorBase.response);
-        throw new Error('La méthode de suppression n\'est pas autorisée');
+        throw new Error("La méthode de suppression n'est pas autorisée");
       }
       throw new Error(`Erreur lors de la suppression: ${axiosErrorBase.message}`);
     }
@@ -260,4 +266,4 @@ export const deleteEmployee = deleteUser;
 export const mergeEmployees = mergeUsers;
 export const getEmployeeWeapons = getUserWeapons;
 
-export { default as axios } from 'axios'; 
+export { default as axios } from 'axios';

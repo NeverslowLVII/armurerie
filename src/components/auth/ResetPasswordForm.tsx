@@ -1,11 +1,15 @@
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertDialog, AlertDialogContent, AlertDialogDescription } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+} from '@/components/ui/alert-dialog';
 import { ArrowPathIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -97,13 +101,16 @@ export default function ResetPasswordForm() {
   // Si nous sommes à l'étape de la demande de réinitialisation
   if (currentStep === 'request') {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="grid gap-6"
       >
-        <form onSubmit={onRequestReset} className="space-y-4 bg-white dark:bg-neutral-900 p-4 rounded-lg">
+        <form
+          onSubmit={onRequestReset}
+          className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900"
+        >
           <div className="grid gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
@@ -112,7 +119,7 @@ export default function ResetPasswordForm() {
                 type="email"
                 placeholder="nom@exemple.fr"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
                 className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -134,13 +141,11 @@ export default function ResetPasswordForm() {
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <Button 
+            <Button
               disabled={isLoading}
               className="w-full dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
             >
-              {isLoading && (
-                <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />
-              )}
+              {isLoading && <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />}
               Envoyer le lien de réinitialisation
             </Button>
             <Button
@@ -162,13 +167,16 @@ export default function ResetPasswordForm() {
 
   // Si nous sommes à l'étape de la réinitialisation du mot de passe
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="grid gap-6"
     >
-      <form onSubmit={onResetPassword} className="space-y-4 bg-white dark:bg-neutral-900 p-4 rounded-lg">
+      <form
+        onSubmit={onResetPassword}
+        className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900"
+      >
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="password">Nouveau mot de passe</Label>
@@ -177,7 +185,7 @@ export default function ResetPasswordForm() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               disabled={isLoading}
               required
               className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -190,7 +198,7 @@ export default function ResetPasswordForm() {
               type="password"
               placeholder="••••••••"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={e => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               required
               className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -203,13 +211,11 @@ export default function ResetPasswordForm() {
               </AlertDialogContent>
             </AlertDialog>
           )}
-          <Button 
+          <Button
             disabled={isLoading}
             className="w-full dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
           >
-            {isLoading && (
-              <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />
-            )}
+            {isLoading && <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />}
             Réinitialiser le mot de passe
           </Button>
           <Button
@@ -238,4 +244,4 @@ export default function ResetPasswordForm() {
       </form>
     </motion.div>
   );
-} 
+}

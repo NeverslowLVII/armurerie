@@ -8,7 +8,7 @@ This document outlines the UI/UX standards for the Armurerie application to ensu
 
 - **Primary**: Red to orange gradient (`from-red-500 to-orange-500`, `from-red-600 to-amber-500`)
 - **Secondary**: Blue (`text-blue-500`, `dark:text-blue-400`)
-- **Neutral**: 
+- **Neutral**:
   - Light mode: White backgrounds (`bg-white`) with neutral text (`text-neutral-900`, `text-neutral-500`)
   - Dark mode: Dark backgrounds (`bg-neutral-900`, `bg-neutral-800`) with light text (`text-white`, `text-neutral-400`)
 - **Accent**: Red (`text-red-500`, `text-red-600`) for emphasis and important elements
@@ -40,7 +40,7 @@ This document outlines the UI/UX standards for the Armurerie application to ensu
 
 - **Page Transitions**: Fade in with slight movement
   ```jsx
-  <motion.div 
+  <motion.div
     initial={{ opacity: 0 }}
     animate={{ opacity: 1 }}
     exit={{ opacity: 0 }}
@@ -49,7 +49,7 @@ This document outlines the UI/UX standards for the Armurerie application to ensu
   ```
 - **Element Transitions**: Staggered animations with delays
   ```jsx
-  <motion.h1 
+  <motion.h1
     initial={{ opacity: 0, y: -20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay: 0.2 }}
@@ -67,32 +67,37 @@ This document outlines the UI/UX standards for the Armurerie application to ensu
 Cards should have consistent styling:
 
 ```jsx
-<Card className="bg-white dark:bg-neutral-900 shadow-lg border border-neutral-200 dark:border-neutral-800 overflow-hidden relative group h-full">
+<Card className="group relative h-full overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
   <CardHeader>
     <CardTitle className="flex items-center gap-2 text-neutral-900 dark:text-white">
       <Icon className="h-5 w-5 text-red-500" />
       Card Title
     </CardTitle>
-    <CardDescription className="text-neutral-500 dark:text-neutral-400">Description text</CardDescription>
+    <CardDescription className="text-neutral-500 dark:text-neutral-400">
+      Description text
+    </CardDescription>
   </CardHeader>
-  <CardContent>
-    {/* Content */}
-  </CardContent>
+  <CardContent>{/* Content */}</CardContent>
 </Card>
 ```
 
 ### Buttons
 
 Primary buttons:
+
 ```jsx
-<Button className="bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white">
+<Button className="bg-gradient-to-r from-red-600 to-amber-500 text-white hover:from-red-700 hover:to-amber-600">
   Button Text
 </Button>
 ```
 
 Secondary buttons:
+
 ```jsx
-<Button variant="outline" className="border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+<Button
+  variant="outline"
+  className="border-neutral-200 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-800/50"
+>
   Button Text
 </Button>
 ```
@@ -102,7 +107,7 @@ Secondary buttons:
 Form elements should be consistent:
 
 ```jsx
-<div className="space-y-4 bg-white dark:bg-neutral-900 p-4 rounded-lg">
+<div className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900">
   <div className="space-y-2">
     <Label htmlFor="field">Field Label</Label>
     <Input
@@ -113,7 +118,9 @@ Form elements should be consistent:
       className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
     />
   </div>
-  <Button type="submit" className="w-full">Submit</Button>
+  <Button type="submit" className="w-full">
+    Submit
+  </Button>
 </div>
 ```
 
@@ -124,9 +131,9 @@ Form elements should be consistent:
 Auth pages should follow this structure:
 
 ```jsx
-<div className="container relative min-h-screen flex-col items-center justify-center grid bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
+<div className="container relative grid min-h-screen flex-col items-center justify-center bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
   {/* Left side - Image with overlay */}
-  <div className="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex overflow-hidden">
+  <div className="relative hidden h-full flex-col overflow-hidden bg-muted p-10 text-white lg:flex">
     <div className="absolute inset-0">
       <Image
         src={backgroundImage}
@@ -138,27 +145,23 @@ Auth pages should follow this structure:
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30 backdrop-blur-[2px]" />
     </div>
-    
+
     {/* Logo or brand */}
     <div className="relative z-20 flex items-center">
-      <span className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+      <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-2xl font-bold text-transparent">
         Armurerie
       </span>
     </div>
-    
+
     {/* Quote or description */}
     <div className="relative z-20 mt-auto">
       <blockquote className="space-y-2">
-        <p className="text-lg text-white">
-          Descriptive text or quote
-        </p>
-        <footer className="text-sm text-white/70">
-          Attribution or additional info
-        </footer>
+        <p className="text-lg text-white">Descriptive text or quote</p>
+        <footer className="text-sm text-white/70">Attribution or additional info</footer>
       </blockquote>
     </div>
   </div>
-  
+
   {/* Right side - Form */}
   <div className="lg:p-8">
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
@@ -166,15 +169,11 @@ Auth pages should follow this structure:
         <h1 className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">
           Page Title
         </h1>
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          Page description
-        </p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">Page description</p>
       </div>
-      
+
       {/* Form or content */}
-      <div className="space-y-4">
-        {/* Form elements */}
-      </div>
+      <div className="space-y-4">{/* Form elements */}</div>
     </div>
   </div>
 </div>
@@ -185,27 +184,21 @@ Auth pages should follow this structure:
 Content pages should follow this structure:
 
 ```jsx
-<div className="container mx-auto p-6 space-y-6">
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+<div className="container mx-auto space-y-6 p-6">
+  <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-transparent">
+      <h1 className="bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-3xl font-bold text-transparent">
         Page Title
       </h1>
-      <p className="text-sm text-neutral-500 dark:text-neutral-400">
-        Page description or metadata
-      </p>
+      <p className="text-sm text-neutral-500 dark:text-neutral-400">Page description or metadata</p>
     </div>
-    
+
     {/* Optional action buttons */}
-    <div className="flex items-center gap-3">
-      {/* Buttons or status indicators */}
-    </div>
+    <div className="flex items-center gap-3">{/* Buttons or status indicators */}</div>
   </div>
-  
+
   {/* Main content */}
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    {/* Cards or content sections */}
-  </div>
+  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">{/* Cards or content sections */}</div>
 </div>
 ```
 
@@ -217,9 +210,9 @@ Use skeleton loading for a better user experience:
 
 ```jsx
 <SkeletonLoading isLoading={true} className="space-y-6">
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+  <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <Skeleton className="h-10 w-48 mb-2" />
+      <Skeleton className="mb-2 h-10 w-48" />
       <Skeleton className="h-4 w-64" />
     </div>
     <div className="flex items-center gap-3">
@@ -227,8 +220,8 @@ Use skeleton loading for a better user experience:
       <Skeleton className="h-9 w-32" />
     </div>
   </div>
-  
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
     <Skeleton className="h-64 rounded-xl" />
     <Skeleton className="h-64 rounded-xl" />
   </div>
@@ -240,9 +233,9 @@ For auth pages:
 ```jsx
 <FullPageSkeletonLoading>
   <div className="space-y-6">
-    <Skeleton className="h-12 w-64 mx-auto" />
-    <Skeleton className="h-6 w-full max-w-md mx-auto" />
-    <div className="space-y-4 max-w-md mx-auto">
+    <Skeleton className="mx-auto h-12 w-64" />
+    <Skeleton className="mx-auto h-6 w-full max-w-md" />
+    <div className="mx-auto max-w-md space-y-4">
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />
@@ -288,4 +281,4 @@ For auth pages:
 5. Keep the UI clean and focused on the task at hand
 6. Use motion effects to guide attention and provide feedback
 7. Ensure all interactive elements have appropriate hover/focus states
-8. Follow a consistent color scheme throughout the application 
+8. Follow a consistent color scheme throughout the application

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/webpro/knip/main/schema.json",
+  "entry": ["src/app/**/*.{ts,tsx}", "src/pages/**/*.{ts,tsx}"],
+  "project": ["src/**/*.{ts,tsx}"],
+  "ignoreDependencies": [],
+  "ignoreBinaries": [],
+  "rules": {
+    "exports": "error",
+    "types": "error",
+    "files": "warn",
+    "dependencies": "warn"
+  }
+}

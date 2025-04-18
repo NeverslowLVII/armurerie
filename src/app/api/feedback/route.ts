@@ -20,11 +20,13 @@ export async function POST(request: Request) {
         status: finalStatus,
         ...(userId ? { user_id: userId } : {}),
       },
-      ...(userId ? {
-        include: {
-          user: true,
-        },
-      } : {}),
+      ...(userId
+        ? {
+            include: {
+              user: true,
+            },
+          }
+        : {}),
     });
 
     // Email notifications temporarily disabled
@@ -40,10 +42,7 @@ export async function POST(request: Request) {
     return NextResponse.json(feedback);
   } catch (error) {
     console.error('Error creating feedback:', error);
-    return NextResponse.json(
-      { error: 'Failed to create feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create feedback' }, { status: 500 });
   }
 }
 
@@ -69,10 +68,7 @@ export async function GET() {
     return NextResponse.json(feedback);
   } catch (error) {
     console.error('Error fetching feedback:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch feedback' }, { status: 500 });
   }
 }
 
@@ -99,10 +95,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json(feedback);
   } catch (error) {
     console.error('Error updating feedback:', error);
-    return NextResponse.json(
-      { error: 'Failed to update feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update feedback' }, { status: 500 });
   }
 }
 
@@ -120,10 +113,7 @@ export async function DELETE(request: Request) {
     const id = Number.parseInt(searchParams.get('id') || '');
 
     if (!id || Number.isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid feedback ID' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid feedback ID' }, { status: 400 });
     }
 
     await prisma.feedback.delete({
@@ -133,9 +123,6 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting feedback:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete feedback' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete feedback' }, { status: 500 });
   }
-} 
+}

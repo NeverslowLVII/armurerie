@@ -7,12 +7,12 @@ const transporter = nodemailer.createTransport({
   secure: true, // Enable SSL/TLS
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
+    pass: process.env.SMTP_PASS,
   },
   tls: {
     // Do not fail on invalid certs
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 // Use the NOTIFICATION_EMAIL environment variable for sender email
@@ -29,12 +29,16 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
-    console.log('Attempting to send email with Nodemailer:', { from: process.env.SMTP_USER, to, subject });
+    console.log('Attempting to send email with Nodemailer:', {
+      from: process.env.SMTP_USER,
+      to,
+      subject,
+    });
     const info = await transporter.sendMail({
       from: process.env.SMTP_USER,
       to,
       subject,
-      html
+      html,
     });
     console.log('Nodemailer sent email:', info);
     return { success: true, data: info };
@@ -78,4 +82,4 @@ export function generateResetPasswordEmailHtml(resetLink: string) {
       <p>Cordialement,<br>L'équipe Armurerie</p>
     </div>
   `;
-} 
+}

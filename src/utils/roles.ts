@@ -28,7 +28,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageFeedback: true,
     canAccessAdminPanel: true,
     isSystemAdmin: true,
-    canManageBaseWeapons: true
+    canManageBaseWeapons: true,
   },
   [Role.PATRON]: {
     commissionRate: 0.5,
@@ -38,7 +38,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageFeedback: false,
     canAccessAdminPanel: true,
     isSystemAdmin: false,
-    canManageBaseWeapons: true
+    canManageBaseWeapons: true,
   },
   [Role.CO_PATRON]: {
     commissionRate: 0.3,
@@ -48,7 +48,7 @@ export const roleConfigurations: RoleConfigurations = {
     canManageFeedback: false,
     canAccessAdminPanel: false,
     isSystemAdmin: false,
-    canManageBaseWeapons: false
+    canManageBaseWeapons: false,
   },
   [Role.EMPLOYEE]: {
     commissionRate: 0.2,
@@ -58,46 +58,20 @@ export const roleConfigurations: RoleConfigurations = {
     canManageFeedback: false,
     canAccessAdminPanel: false,
     isSystemAdmin: false,
-    canManageBaseWeapons: false
-  }
+    canManageBaseWeapons: false,
+  },
 };
 
 export function getCommissionRate(role: Role): number {
   return roleConfigurations[role as keyof typeof roleConfigurations].commissionRate;
 }
 
-export function canManageUsers(role: Role): boolean {
+export function hasPermission(
+  role: Role,
+  permission: keyof Omit<RoleConfig, 'commissionRate'>
+): boolean {
   const config = roleConfigurations[role as keyof typeof roleConfigurations];
-  return config.canManageUsers || config.isSystemAdmin;
-}
 
-export function canManageWeapons(role: Role): boolean {
-  const config = roleConfigurations[role as keyof typeof roleConfigurations];
-  return config.canManageWeapons || config.isSystemAdmin;
-}
-
-export function canViewStatistics(role: Role): boolean {
-  const config = roleConfigurations[role as keyof typeof roleConfigurations];
-  return config.canViewStatistics || config.isSystemAdmin;
-}
-
-export function canManageFeedback(role: Role): boolean {
-  const config = roleConfigurations[role as keyof typeof roleConfigurations];
-  return config.canManageFeedback || config.isSystemAdmin;
-}
-
-export function canAccessAdminPanel(role: Role): boolean {
-  const config = roleConfigurations[role as keyof typeof roleConfigurations];
-  return config.canAccessAdminPanel || config.isSystemAdmin;
-}
-
-export function isSystemAdmin(role: Role): boolean {
-  return roleConfigurations[role as keyof typeof roleConfigurations].isSystemAdmin;
-}
-
-export function hasPermission(role: Role, permission: keyof Omit<RoleConfig, 'commissionRate'>): boolean {
-  const config = roleConfigurations[role as keyof typeof roleConfigurations];
-  
   // Use a safer pattern to check permissions
   const permissionValue = (() => {
     switch (permission) {
@@ -127,7 +101,7 @@ export function hasPermission(role: Role, permission: keyof Omit<RoleConfig, 'co
       }
     }
   })();
-  
+
   return permissionValue || config.isSystemAdmin;
 }
 
@@ -149,4 +123,4 @@ export const getRoleName = (role: Role): string => {
       return String(role);
     }
   }
-}; 
+};

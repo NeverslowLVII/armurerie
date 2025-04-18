@@ -27,14 +27,12 @@ export default function UsersAdminClient({ users }: Props) {
 
   return (
     <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">Gestion des Utilisateurs</h1>
+      <div className="mb-8 flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+          Gestion des Utilisateurs
+        </h1>
         <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            className="flex items-center space-x-2"
-            asChild
-          >
+          <Button variant="outline" className="flex items-center space-x-2" asChild>
             <Link href="?showDevelopers=true">
               <UserCogIcon className="h-4 w-4" />
               <span>Gérer les développeurs</span>
@@ -45,17 +43,17 @@ export default function UsersAdminClient({ users }: Props) {
       </div>
 
       <div className="grid gap-4">
-        {users.map((user) => (
+        {users.map(user => (
           <div
             key={user.id}
-            className="flex items-center justify-between p-4 bg-white dark:bg-neutral-800 rounded-lg shadow"
+            className="flex items-center justify-between rounded-lg bg-white p-4 shadow dark:bg-neutral-800"
           >
             <div>
               <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">{user.name}</h3>
               <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.email}</p>
               <p className="text-sm text-neutral-700 dark:text-neutral-300">
                 <span
-                  className="inline-block w-3 h-3 rounded-full mr-2"
+                  className="mr-2 inline-block h-3 w-3 rounded-full"
                   style={{ backgroundColor: user.color ?? '#ccc' }}
                 />
                 {user.role}
@@ -64,29 +62,20 @@ export default function UsersAdminClient({ users }: Props) {
             <div className="flex gap-2">
               {user.contractUrl && (
                 <Button asChild variant="outline" size="sm">
-                  <Link
-                    href={user.contractUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <Link href={user.contractUrl} target="_blank" rel="noopener noreferrer">
                     Contrat
                   </Link>
                 </Button>
               )}
               <Button asChild variant="outline" size="sm">
-                <Link href={`/admin/users/${user.id}/edit`}>
-                  Modifier
-                </Link>
+                <Link href={`/admin/users/${user.id}/edit`}>Modifier</Link>
               </Button>
             </div>
           </div>
         ))}
       </div>
 
-      <DeveloperManager
-        open={showDevelopers}
-        onClose={() => router.push('/admin/users')}
-      />
+      <DeveloperManager open={showDevelopers} onClose={() => router.push('/admin/users')} />
     </div>
   );
-} 
+}

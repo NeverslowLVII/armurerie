@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const emailResult = await sendEmail({
       to: user.email,
       subject: 'Réinitialisation de votre mot de passe',
-      html: generateResetPasswordEmailHtml(resetLink)
+      html: generateResetPasswordEmailHtml(resetLink),
     });
     console.log('Email sending result:', emailResult);
 
@@ -48,22 +48,16 @@ export async function PUT(request: Request) {
     // Vérifier le token
     const payload = verifyToken(token);
     if (!payload || payload.type !== 'reset') {
-      return NextResponse.json(
-        { error: 'Token invalide ou expiré' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token invalide ou expiré' }, { status: 401 });
     }
 
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({
-      where: { id: payload.userId }
+      where: { id: payload.userId },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Utilisateur non trouvé' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
     }
 
     // Hasher le nouveau mot de passe
@@ -74,8 +68,8 @@ export async function PUT(request: Request) {
       where: { id: user.id },
       data: {
         password: hashedPassword,
-        lastLogin: new Date()
-      }
+        lastLogin: new Date(),
+      },
     });
 
     return NextResponse.json({ success: true });
@@ -86,4 +80,4 @@ export async function PUT(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

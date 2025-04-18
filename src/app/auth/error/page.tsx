@@ -10,19 +10,21 @@ import { Skeleton } from '@/components/ui/skeleton';
 function ErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams?.get('error');
-  
+
   let errorMessage = "Une erreur s'est produite lors de l'authentification.";
   let errorDescription = "Veuillez réessayer ou contacter l'administrateur.";
-  
+
   switch (error) {
     case 'CredentialsSignin': {
-      errorMessage = "Échec de connexion";
-      errorDescription = "Les identifiants fournis sont incorrects. Veuillez vérifier votre email et mot de passe.";
+      errorMessage = 'Échec de connexion';
+      errorDescription =
+        'Les identifiants fournis sont incorrects. Veuillez vérifier votre email et mot de passe.';
       break;
     }
     case 'AccessDenied': {
-      errorMessage = "Accès refusé";
-      errorDescription = "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource.";
+      errorMessage = 'Accès refusé';
+      errorDescription =
+        "Vous n'avez pas les permissions nécessaires pour accéder à cette ressource.";
       break;
     }
     case 'OAuthSignin':
@@ -35,7 +37,8 @@ function ErrorContent() {
     case 'CredentialsSignup':
     case 'SessionRequired': {
       errorMessage = "Erreur d'authentification";
-      errorDescription = "Une erreur s'est produite lors du processus d'authentification. Veuillez réessayer.";
+      errorDescription =
+        "Une erreur s'est produite lors du processus d'authentification. Veuillez réessayer.";
       break;
     }
     default: {
@@ -45,10 +48,13 @@ function ErrorContent() {
   }
 
   return (
-    <div className="max-w-md w-full bg-white dark:bg-neutral-800 shadow-lg rounded-lg p-8">
+    <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg dark:bg-neutral-800">
       <div className="text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-          <ExclamationTriangleIcon className="h-6 w-6 text-red-600 dark:text-red-400" aria-hidden="true" />
+          <ExclamationTriangleIcon
+            className="h-6 w-6 text-red-600 dark:text-red-400"
+            aria-hidden="true"
+          />
         </div>
         <h2 className="mt-3 text-2xl font-bold text-red-600 dark:text-red-400">{errorMessage}</h2>
         <p className="mt-2 text-neutral-600 dark:text-neutral-300">{errorDescription}</p>
@@ -67,21 +73,23 @@ function ErrorContent() {
 
 export default function AuthError() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-neutral-900">
-      <Suspense fallback={
-        <SkeletonLoading isLoading={true}>
-          <div className="max-w-md w-full bg-white dark:bg-neutral-800 shadow-lg rounded-lg p-8">
-            <div className="text-center">
-              <Skeleton className="h-12 w-12 rounded-full mx-auto" />
-              <Skeleton className="h-8 w-64 mx-auto mt-3" />
-              <Skeleton className="h-4 w-full mx-auto mt-2" />
-              <Skeleton className="h-10 w-48 mx-auto mt-6" />
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-neutral-900">
+      <Suspense
+        fallback={
+          <SkeletonLoading isLoading={true}>
+            <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg dark:bg-neutral-800">
+              <div className="text-center">
+                <Skeleton className="mx-auto h-12 w-12 rounded-full" />
+                <Skeleton className="mx-auto mt-3 h-8 w-64" />
+                <Skeleton className="mx-auto mt-2 h-4 w-full" />
+                <Skeleton className="mx-auto mt-6 h-10 w-48" />
+              </div>
             </div>
-          </div>
-        </SkeletonLoading>
-      }>
+          </SkeletonLoading>
+        }
+      >
         <ErrorContent />
       </Suspense>
     </div>
   );
-} 
+}

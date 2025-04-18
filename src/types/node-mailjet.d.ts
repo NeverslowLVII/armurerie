@@ -1,1 +1,1 @@
-declare module 'node-mailjet'; 
+declare module 'node-mailjet';

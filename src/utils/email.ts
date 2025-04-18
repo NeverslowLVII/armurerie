@@ -15,10 +15,10 @@ export async function sendFeedbackNotification(feedback: {
   title: string;
   description: string;
   status: string;
-  employee?: { name: string; } | null;
+  employee?: { name: string } | null;
 }) {
   const submittedBy = feedback.employee ? `by ${feedback.employee.name}` : 'anonymously';
-  
+
   await transporter.sendMail({
     from: process.env.SMTP_USER,
     to: process.env.NOTIFICATION_EMAIL,
@@ -33,4 +33,4 @@ export async function sendFeedbackNotification(feedback: {
       <p>${feedback.description}</p>
     `,
   });
-} 
+}

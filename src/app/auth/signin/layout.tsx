@@ -5,10 +5,6 @@ export const metadata: Metadata = {
   description: 'Connectez-vous à votre espace',
 };
 
-export default function Layout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return children;
-} 
+}

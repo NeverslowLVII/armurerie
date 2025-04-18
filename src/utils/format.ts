@@ -4,15 +4,15 @@
  * @returns Formatted string in USD with French locale
  */
 export const formatCurrency = (value: number): string => {
-    // Convert cents to dollars
-    const dollars = value / 100;
-    return new Intl.NumberFormat('us-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-        currencyDisplay: 'code'
-    }).format(dollars);
+  // Convert cents to dollars
+  const dollars = value / 100;
+  return new Intl.NumberFormat('us-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    currencyDisplay: 'code',
+  }).format(dollars);
 };
 
 /**
@@ -21,11 +21,11 @@ export const formatCurrency = (value: number): string => {
  * @returns Formatted date string
  */
 export const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('us-US', {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric'
-    });
+  return date.toLocaleDateString('us-US', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  });
 };
 
 /**
@@ -34,9 +34,9 @@ export const formatDate = (date: Date): string => {
  * @returns Formatted percentage string
  */
 export const formatPercentage = (value: number): string => {
-    return new Intl.NumberFormat('us-US', {
-        style: 'percent',
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1
-    }).format(value);
-}; 
+  return new Intl.NumberFormat('us-US', {
+    style: 'percent',
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value);
+};

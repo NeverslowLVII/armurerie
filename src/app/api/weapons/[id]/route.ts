@@ -1,84 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import {
+  handleGetById,
+  withErrorHandling,
+  validateId,
+  parseRequestBody,
+  createCorsOptionsResponse,
+} from '@/utils/api/crud-handlers';
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    if (!params.id || params.id === 'null') {
-      return NextResponse.json(
-        { error: 'Missing weapon ID' },
-        { status: 400 }
-      )
-    }
-
-    const id = Number.parseInt(params.id)
-    if (Number.isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid weapon ID', id: params.id },
-        { status: 400 }
-      )
-    }
-
-    const weapon = await prisma.weapon.findUnique({
-      where: { id },
-      include: {
-        user: true,
-        base_weapon: true
-      }
-    })
-    
-    if (!weapon) {
-      return NextResponse.json(
-        { error: 'Weapon not found', id },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json(weapon)
-  } catch (error) {
-    console.error('Get weapon error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch weapon' },
-      { status: 500 }
-    )
-  }
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  return handleGetById(
+    params,
+    async id => {
+      return prisma.weapon.findUnique({
+        where: { id },
+        include: {
+          user: true,
+          base_weapon: true,
+        },
+      });
+    },
+    'Weapon'
+  );
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    if (!params.id || params.id === 'null') {
-      return NextResponse.json(
-        { error: 'Missing weapon ID' },
-        { status: 400 }
-      )
-    }
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  return withErrorHandling(async () => {
+    const [isValid, id, errorResponse] = validateId(params.id);
+    if (!isValid) return errorResponse;
 
-    const id = Number.parseInt(params.id)
-    if (Number.isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid weapon ID', id: params.id },
-        { status: 400 }
-      )
-    }
+    const [data, parseError] = await parseRequestBody<any>(request);
+    if (parseError) return parseError;
 
-    const data = await request.json()
-    console.log('Update weapon data received:', data)
-    
+    console.log('Update weapon data received:', data);
+
     try {
       const baseWeapon = await prisma.baseWeapon.findUnique({
-        where: { nom: data.nom_arme }
-      })
+        where: { nom: data.nom_arme },
+      });
 
       if (!baseWeapon) {
         return NextResponse.json(
           { error: 'Base weapon not found', nom_arme: data.nom_arme },
           { status: 404 }
-        )
+        );
       }
 
       const weapon = await prisma.weapon.update({
@@ -89,103 +54,118 @@ export async function PUT(
           ...(data.bp !== undefined && { bp: data.bp }),
           ...(data.serigraphie && { serigraphie: data.serigraphie }),
           ...(data.prix && { prix: data.prix }),
-          ...(data.user_id && { 
+          ...(data.user_id && {
             user: {
-              connect: { id: Number.parseInt(data.user_id) }
-            }
+              connect: { id: Number.parseInt(data.user_id) },
+            },
           }),
           base_weapon: {
-            connect: { nom: data.nom_arme }
-          }
+            connect: { nom: data.nom_arme },
+          },
         },
         include: {
           user: true,
-          base_weapon: true
-        }
-      })
+          base_weapon: true,
+        },
+      });
 
-      return NextResponse.json(weapon)
+      return NextResponse.json(weapon);
     } catch (error) {
-      console.error('Prisma update error:', error)
+      console.error('Prisma update error:', error);
       if (error instanceof Error) {
         console.error('Error details:', {
           name: error.name,
           message: error.message,
-          stack: error.stack
-        })
+          stack: error.stack,
+        });
       }
       return NextResponse.json(
-        { error: 'Failed to update weapon', details: error instanceof Error ? error.message : String(error) },
+        {
+          error: 'Failed to update weapon',
+          details: error instanceof Error ? error.message : String(error),
+        },
         { status: 500 }
-      )
+      );
     }
-  } catch (error) {
-    console.error('Update weapon error:', error)
-    return NextResponse.json(
-      { error: 'Failed to update weapon' },
-      { status: 500 }
-    )
-  }
+  });
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    console.log('Deleting weapon with ID:', params.id)
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  return withErrorHandling(async () => {
+    const [isValid, id, errorResponse] = validateId(params.id);
+    if (!isValid) return errorResponse;
 
-    if (!params.id || params.id === 'null') {
-      return NextResponse.json(
-        { error: 'Missing weapon ID' },
-        { status: 400 }
-      )
-    }
+    console.log('Deleting weapon with ID:', id);
 
-    const id = Number.parseInt(params.id)
-    if (Number.isNaN(id)) {
-      return NextResponse.json(
-        { error: 'Invalid weapon ID', id: params.id },
-        { status: 400 }
-      )
+    // Récupérer les données envoyées dans le corps de la requête (si disponibles)
+    let bodyData: { username?: string; weaponData?: any } = {};
+    try {
+      bodyData = await request.json();
+    } catch {
+      // Pas de corps de requête, ce n'est pas grave
     }
 
     const weapon = await prisma.weapon.findUnique({
-      where: { id }
-    })
-    
+      where: { id },
+      include: {
+        user: true,
+      },
+    });
+
     if (!weapon) {
-      return NextResponse.json(
-        { error: 'Weapon not found', id },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Weapon not found', id }, { status: 404 });
     }
 
+    // Supprimer l'arme de la base de données
     await prisma.weapon.delete({
-      where: { id }
-    })
-    
-    console.log('Weapon deleted successfully:', id)
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Delete weapon error:', error)
-    return NextResponse.json(
-      { error: 'Failed to delete weapon', details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    )
-  }
+      where: { id },
+    });
+
+    console.log('Weapon deleted successfully:', id);
+
+    // Si des données sont disponibles, envoyer une notification Discord
+    if (bodyData.weaponData && bodyData.username) {
+      try {
+        // Importer la fonction de log Discord
+        const { logWeaponModification } = await import('@/utils/discord');
+
+        // Envoyer la notification
+        await logWeaponModification(bodyData.weaponData, bodyData.username, 'delete');
+
+        console.log('Discord notification sent for weapon deletion');
+      } catch (discordError) {
+        // Logger l'erreur mais ne pas faire échouer la suppression
+        console.error('Failed to send Discord notification:', discordError);
+      }
+    } else if (weapon) {
+      // Si pas de données spécifiques mais qu'on a l'arme, utiliser ces données
+      try {
+        const { logWeaponModification } = await import('@/utils/discord');
+
+        await logWeaponModification(
+          {
+            name: weapon.nom_arme,
+            model: weapon.nom_arme,
+            price: weapon.prix,
+            cost: weapon.cout_production,
+            description: weapon.serigraphie,
+          },
+          weapon.user?.name || 'Utilisateur inconnu',
+          'delete'
+        );
+
+        console.log('Discord notification sent for weapon deletion (fallback data)');
+      } catch (discordError) {
+        console.error('Failed to send Discord notification with fallback data:', discordError);
+      }
+    }
+
+    return NextResponse.json({ success: true });
+  });
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Max-Age': '86400'
-    }
-  })
-} 
+  return createCorsOptionsResponse();
+}

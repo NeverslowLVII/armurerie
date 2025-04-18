@@ -1,28 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Parse user ID
-    const userId = Number.parseInt(params.id)
+    const userId = Number.parseInt(params.id);
     if (Number.isNaN(userId)) {
-      console.error('Invalid user ID:', params.id)
-      return NextResponse.json(
-        { error: 'Invalid user ID', user_id: params.id },
-        { status: 400 }
-      )
+      console.error('Invalid user ID:', params.id);
+      return NextResponse.json({ error: 'Invalid user ID', user_id: params.id }, { status: 400 });
     }
 
     // Validate user exists
     const user = await prisma.user.findUnique({
-      where: { id: userId }
-    })
+      where: { id: userId },
+    });
     if (!user) {
-      console.error('User not found:', userId)
-      return NextResponse.json(
-        { error: 'User not found', user_id: userId },
-        { status: 404 }
-      )
+      console.error('User not found:', userId);
+      return NextResponse.json({ error: 'User not found', user_id: userId }, { status: 404 });
     }
 
     // Get weapons for user
@@ -30,21 +24,18 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
       where: { user_id: userId },
       include: {
         user: true,
-        base_weapon: true
-      }
-    })
+        base_weapon: true,
+      },
+    });
 
-    return NextResponse.json(weapons)
+    return NextResponse.json(weapons);
   } catch (error) {
-    console.error('Get user weapons error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch user weapons' },
-      { status: 500 }
-    )
+    console.error('Get user weapons error:', error);
+    return NextResponse.json({ error: 'Failed to fetch user weapons' }, { status: 500 });
   }
 }
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return new NextResponse(null, {
@@ -53,7 +44,7 @@ export async function OPTIONS() {
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Max-Age': '86400'
-    }
-  })
-} 
+      'Access-Control-Max-Age': '86400',
+    },
+  });
+}

@@ -18,7 +18,7 @@ export async function GET() {
 
     const developers = await prisma.user.findMany({
       where: {
-        role: Role.DEVELOPER
+        role: Role.DEVELOPER,
       },
       select: {
         id: true,
@@ -30,10 +30,7 @@ export async function GET() {
     return NextResponse.json(developers);
   } catch (error) {
     console.error('Error fetching developers:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch developers' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch developers' }, { status: 500 });
   }
 }
 
@@ -52,10 +49,7 @@ export async function POST(request: Request) {
 
     // Validate input
     if (!username || !password || !name) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Check if username already exists
@@ -64,10 +58,7 @@ export async function POST(request: Request) {
     });
 
     if (existingDeveloper) {
-      return NextResponse.json(
-        { error: 'Username already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username already exists' }, { status: 400 });
     }
 
     // Hash password
@@ -92,9 +83,6 @@ export async function POST(request: Request) {
     return NextResponse.json(developer);
   } catch (error) {
     console.error('Error creating developer:', error);
-    return NextResponse.json(
-      { error: 'Failed to create developer' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create developer' }, { status: 500 });
   }
-} 
+}

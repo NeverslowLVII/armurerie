@@ -5,10 +5,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { Role } from '@/services/api';
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     // Verify that the user is a patron
     const session = await getServerSession(authOptions);
@@ -24,10 +21,7 @@ export async function PUT(
 
     // Validate input
     if (!username || !name) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     // Check if username already exists for a different developer
@@ -42,10 +36,7 @@ export async function PUT(
     });
 
     if (existingDeveloper) {
-      return NextResponse.json(
-        { error: 'Username already exists' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Username already exists' }, { status: 400 });
     }
 
     // Update developer
@@ -72,17 +63,11 @@ export async function PUT(
     return NextResponse.json(developer);
   } catch (error) {
     console.error('Error updating developer:', error);
-    return NextResponse.json(
-      { error: 'Failed to update developer' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update developer' }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
   try {
     // Verify that the user is a patron
     const session = await getServerSession(authOptions);
@@ -101,10 +86,7 @@ export async function DELETE(
     });
 
     if (!developer || developer.role !== Role.EMPLOYEE) {
-      return NextResponse.json(
-        { error: 'Developer not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Developer not found' }, { status: 404 });
     }
 
     // Delete developer
@@ -115,9 +97,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting developer:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete developer' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to delete developer' }, { status: 500 });
   }
-} 
+}
