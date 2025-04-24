@@ -34,6 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Role } from '@prisma/client';
 
 interface NavigationItem {
   id: 'weapons' | 'statistics' | 'account' | 'comparison';
@@ -61,6 +62,7 @@ export default function Navbar() {
   const [_isScrolled, _setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isHeaderFullyVisible, setIsHeaderFullyVisible] = useState(true);
+  const [hasMounted, setHasMounted] = useState(false);
   const pathname = usePathname();
 
   const lastScrollY = useRef(0);
@@ -78,7 +80,20 @@ export default function Navbar() {
   const { resolvedTheme, setTheme } = useTheme();
   const { data: session } = useSession();
 
-  const currentPage = NAVIGATION_ITEMS.find(item => pathname === item.href)?.id || 'weapons';
+  // Filter navigation items based on user role
+  const availableNavItems = NAVIGATION_ITEMS.filter(item => {
+    if (item.id === 'statistics') {
+      // Allow PATRON and DEVELOPER to see Statistics
+      return session?.user?.role === Role.PATRON || session?.user?.role === Role.DEVELOPER;
+    }
+    return !item.hideFromNav; // Keep other items not explicitly hidden
+  });
+
+  const currentPage = availableNavItems.find(item => pathname === item.href)?.id || 'weapons';
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -176,53 +191,51 @@ export default function Navbar() {
 
             {/* Desktop Navigation Links */}
             <div className="ml-12 hidden items-center space-x-8 md:flex">
-              {NAVIGATION_ITEMS.filter(item => !item.hideFromNav).map(
-                ({ id, label, icon: Icon, href }) => (
-                  <Link key={id} href={href}>
+              {availableNavItems.map(({ id, label, icon: Icon, href }) => (
+                <Link key={id} href={href}>
+                  <motion.div
+                    variants={linkVariants}
+                    initial="initial"
+                    whileHover="hover"
+                    whileTap="tap"
+                    className="relative"
+                  >
                     <motion.div
-                      variants={linkVariants}
-                      initial="initial"
-                      whileHover="hover"
-                      whileTap="tap"
-                      className="relative"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="relative overflow-hidden rounded-lg"
                     >
                       <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="relative overflow-hidden rounded-lg"
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 0.1 }}
+                        className="absolute inset-0 bg-red-200"
+                      />
+                      <Button
+                        variant="ghost"
+                        className={`relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                          currentPage === id
+                            ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
+                            : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-white'
+                        }`}
                       >
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          whileHover={{ opacity: 0.1 }}
-                          className="absolute inset-0 bg-red-200"
-                        />
-                        <Button
-                          variant="ghost"
-                          className={`relative flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${
-                            currentPage === id
-                              ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
-                              : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-white'
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" />
-                          {label}
-                        </Button>
-                      </motion.div>
-                      <AnimatePresence>
-                        {currentPage === id && isHeaderFullyVisible && (
-                          <motion.div
-                            layoutId="navbar-indicator"
-                            className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                          />
-                        )}
-                      </AnimatePresence>
+                        <Icon className="h-4 w-4" />
+                        {label}
+                      </Button>
                     </motion.div>
-                  </Link>
-                )
-              )}
+                    <AnimatePresence>
+                      {currentPage === id && isHeaderFullyVisible && (
+                        <motion.div
+                          layoutId="navbar-indicator"
+                          className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                        />
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </Link>
+              ))}
             </div>
           </div>
 
@@ -253,7 +266,7 @@ export default function Navbar() {
                   </Link>
                   <DropdownMenuItem
                     onClick={() => signOut({ redirect: true, callbackUrl: '/auth/signin' })}
-                    className="text-red-500 dark:text-red-400"
+                    className="cursor-pointer text-red-500 dark:text-red-400"
                   >
                     <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
                     <span>Déconnexion</span>
@@ -267,12 +280,16 @@ export default function Navbar() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               className="rounded-lg p-2 transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+              aria-label={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
             >
-              {resolvedTheme === 'dark' ? (
-                <SunIcon className="h-5 w-5 text-amber-500" />
-              ) : (
-                <MoonIcon className="h-5 w-5 text-blue-500" />
+              {hasMounted && (
+                resolvedTheme === 'dark' ? (
+                  <SunIcon className="h-5 w-5 text-amber-500" />
+                ) : (
+                  <MoonIcon className="h-5 w-5 text-blue-500" />
+                )
               )}
+              {!hasMounted && <div className="h-5 w-5" />}
             </motion.button>
           </div>
 
@@ -304,26 +321,24 @@ export default function Navbar() {
               className="space-y-4 py-4 md:hidden"
             >
               {/* Navigation links */}
-              {NAVIGATION_ITEMS.filter(item => !item.hideFromNav).map(
-                ({ id, label, icon: Icon, href }) => (
-                  <Link key={id} href={href}>
-                    <motion.div variants={linkVariants}>
-                      <Button
-                        variant="ghost"
-                        className={`w-full justify-start gap-2 ${
-                          currentPage === id
-                            ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
-                            : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white'
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <Icon className="h-4 w-4" />
-                        {label}
-                      </Button>
-                    </motion.div>
-                  </Link>
-                )
-              )}
+              {availableNavItems.map(({ id, label, icon: Icon, href }) => (
+                <Link key={id} href={href}>
+                  <motion.div variants={linkVariants}>
+                    <Button
+                      variant="ghost"
+                      className={`w-full justify-start gap-2 ${
+                        currentPage === id
+                          ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
+                          : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                    </Button>
+                  </motion.div>
+                </Link>
+              ))}
 
               {/* User section */}
               {session?.user && (
@@ -358,17 +373,20 @@ export default function Navbar() {
                     variant="ghost"
                     className="w-full justify-start gap-2"
                   >
-                    {resolvedTheme === 'dark' ? (
-                      <>
-                        <SunIcon className="h-4 w-4 text-amber-500" />
-                        Mode clair
-                      </>
-                    ) : (
-                      <>
-                        <MoonIcon className="h-4 w-4 text-blue-500" />
-                        Mode sombre
-                      </>
+                    {hasMounted && (
+                      resolvedTheme === 'dark' ? (
+                        <>
+                          <SunIcon className="h-4 w-4 text-amber-500" />
+                          Mode clair
+                        </>
+                      ) : (
+                        <>
+                          <MoonIcon className="h-4 w-4 text-blue-500" />
+                          Mode sombre
+                        </>
+                      )
                     )}
+                    {!hasMounted && <div className="h-4 w-4" />}
                   </Button>
                 </motion.div>
                 <motion.div variants={linkVariants}>

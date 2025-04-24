@@ -256,7 +256,7 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
   return (
     <>
       <AnimatePresence>
-        <Dialog open={open} onClose={onClose} className="fixed inset-0 z-10 overflow-hidden">
+        <Dialog open={open} onClose={onClose} className="fixed inset-0 z-[60] overflow-hidden">
           <div className="flex min-h-screen items-center justify-center p-2">
             <motion.div variants={overlayVariants} initial="hidden" animate="visible" exit="exit">
               <div className="fixed inset-0 bg-neutral-500 bg-opacity-75 backdrop-blur-sm transition-opacity dark:bg-neutral-900 dark:bg-opacity-75" />

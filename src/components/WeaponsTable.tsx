@@ -52,15 +52,18 @@ export default function WeaponsTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
-  const isAdmin = session?.user.role === Role.PATRON || session?.user.role === Role.CO_PATRON;
+  // Include DEVELOPER in the check
+  const hasAdminAccess = session?.user.role === Role.PATRON || session?.user.role === Role.CO_PATRON || session?.user.role === Role.DEVELOPER;
+  const currentUserRole = session?.user.role as Role | undefined; // Get current user's role
 
   const handleEdit = (weapon: Weapon) => {
-    if (!isAdmin) return;
+    if (!hasAdminAccess) return; // Use updated check
     setSelectedWeapon(weapon);
     setIsEditFormOpen(true);
   };
 
   const handleDelete = async (id: number) => {
+    if (!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageWeapons')) return; // Check permission for current user
     try {
       if (globalThis.confirm('Êtes-vous sûr de vouloir supprimer cette arme ?')) {
         // Récupérer les informations de l'arme avant de la supprimer pour le log
@@ -101,7 +104,7 @@ export default function WeaponsTable() {
   };
 
   const handleManageUsers = () => {
-    if (!isAdmin) return;
+    if (!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageUsers')) return; // Check permission for current user
     setIsColorManagerOpen(true);
   };
 
@@ -225,11 +228,11 @@ export default function WeaponsTable() {
             type="button"
             onClick={handleManageUsers}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              isAdmin && hasPermission(Role.PATRON, 'canManageUsers')
+              hasAdminAccess && currentUserRole && hasPermission(currentUserRole, 'canManageUsers')
                 ? 'bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
                 : 'cursor-not-allowed bg-neutral-100 text-neutral-400 ring-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:ring-neutral-500'
             }`}
-            disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageUsers')}
+            disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageUsers')}
           >
             <UserGroupIcon className="mr-1 inline-block h-5 w-5" />
             Gérer les utilisateurs
@@ -238,11 +241,11 @@ export default function WeaponsTable() {
             type="button"
             onClick={() => setIsBaseWeaponsOpen(true)}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              isAdmin && hasPermission(Role.PATRON, 'canManageBaseWeapons')
+              hasAdminAccess && currentUserRole && hasPermission(currentUserRole, 'canManageBaseWeapons')
                 ? 'bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
                 : 'cursor-not-allowed bg-neutral-100 text-neutral-400 ring-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:ring-neutral-500'
             }`}
-            disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageBaseWeapons')}
+            disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageBaseWeapons')}
           >
             <SparklesIcon className="mr-1 inline-block h-5 w-5" />
             Gérer les armes de base
@@ -391,8 +394,8 @@ export default function WeaponsTable() {
                           <div className="flex justify-end gap-2">
                             <Button
                               onClick={() => handleEdit(weapon)}
-                              className={`text-red-600 hover:text-red-900 ${!isAdmin && 'cursor-not-allowed opacity-50'}`}
-                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageWeapons')}
+                              className={`text-red-600 hover:text-red-900 ${!hasAdminAccess && 'cursor-not-allowed opacity-50'}`}
+                              disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageWeapons')}
                               title="Modifier l'arme"
                             >
                               <span className="sr-only">Modifier l&apos;arme</span>
@@ -400,8 +403,8 @@ export default function WeaponsTable() {
                             </Button>
                             <Button
                               onClick={() => handleDelete(weapon.id)}
-                              className={`text-red-600 hover:text-red-900 ${!isAdmin && 'cursor-not-allowed opacity-50'}`}
-                              disabled={!isAdmin || !hasPermission(Role.PATRON, 'canManageWeapons')}
+                              className={`text-red-600 hover:text-red-900 ${!hasAdminAccess && 'cursor-not-allowed opacity-50'}`}
+                              disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageWeapons')}
                               title="Supprimer l'arme"
                             >
                               <span className="sr-only">Supprimer l&apos;arme</span>

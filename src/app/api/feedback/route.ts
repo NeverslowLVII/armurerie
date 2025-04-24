@@ -9,7 +9,15 @@ export async function POST(request: Request) {
     const { type, title, description, status, userId } = await request.json();
     const session = await getServerSession(authOptions);
 
-    // Only developers can set status, others default to OPEN
+    // Check if user is logged in
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized - User must be logged in to submit feedback' }, { status: 401 });
+    }
+
+    // User ID logic: Use session user ID if not explicitly provided (and ensure consistency if both exist?)
+    const finalUserId = userId ?? (session.user.id ? Number(session.user.id) : undefined);
+
+    // Only developers can set status explicitly, others default to OPEN
     const finalStatus = session?.user.role === Role.DEVELOPER ? status : 'OPEN';
 
     const feedback = await prisma.feedback.create({
@@ -18,9 +26,9 @@ export async function POST(request: Request) {
         title,
         description,
         status: finalStatus,
-        ...(userId ? { user_id: userId } : {}),
+        ...(finalUserId ? { user_id: finalUserId } : {}),
       },
-      ...(userId
+      ...(finalUserId
         ? {
             include: {
               user: true,

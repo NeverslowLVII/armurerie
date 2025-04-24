@@ -1,0 +1,59 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Structure Guide
+
+This project, **Armurerie**, is a Next.js-based inventory management application written in TypeScript. The workspace is organized as follows:
+
+## Root Configuration
+
+- [README.md](mdc:README.md): Overall project description and setup instructions.
+- [package.json](mdc:package.json): Dependencies and available scripts (`dev`, `build`, `start`, `pre-deploy:check`).
+- [next.config.js](mdc:next.config.js): Next.js configuration overrides.
+- [tsconfig.json](mdc:tsconfig.json): TypeScript compiler options.
+- [tailwind.config.js](mdc:tailwind.config.js): Tailwind CSS configuration.
+- [vitest.config.ts](mdc:vitest.config.ts) & [vitest.setup.ts](mdc:vitest.setup.ts): Testing configuration with Vitest.
+- [turbo.json](mdc:turbo.json): Turborepo setup (if using monorepo).
+- [.vercel](mdc:.vercel): Vercel deployment settings.
+- [prisma](mdc:prisma): Database schema and migrations.
+- [.cursor/rules](mdc:.cursor/rules): Cursor navigation rule files.
+
+## Source Directory (`src`)
+
+- [app](mdc:src/app): Next.js App Router files (layouts, pages, route handlers).
+- [pages](mdc:src/pages): Next.js Pages Router API routes and pages.
+- [components](mdc:src/components): Shared UI components.
+- [services](mdc:src/services): API client modules.
+- [utils](mdc:src/utils): General utility functions and helpers.
+- [hooks](mdc:src/hooks): Custom React hooks.
+- [config](mdc:src/config): Environment-specific settings and constants.
+- [context](mdc:src/context): React context providers.
+- [types](mdc:src/types): Shared TypeScript type definitions.
+- [data](mdc:src/data): Static data fixtures or mock data.
+- [lib](mdc:src/lib): Low-level libraries or adapters.
+- [redux](mdc:src/redux): Redux store configuration and slices.
+- [middleware.ts](mdc:src/middleware.ts): Next.js middleware definitions.
+
+## Public & Assets
+
+- [public](mdc:public) / [assets](mdc:src/assets): Static images, fonts, and other frontend assets.
+- [postcss.config.js](mdc:postcss.config.js): PostCSS setup for styling.
+
+## Scripts & Workflows
+
+- `npm run dev`: Launches the development server (`localhost:3000`).
+- `npm run build`: Builds the application for production.
+- `npm run start`: Starts the production server.
+- `npm run pre-deploy:check`: Runs pre-deployment validations (Knip, lint, types). Use `--skip-knip` to bypass dead code check.
+
+## Key API Routes
+
+- **App Router API**: Under `src/app/api` using Next.js route handlers.
+- **Pages Router API**: Under `src/pages/api` using traditional API route functions.
+- Predefined routes to ignore warnings: `/api/employee/info`, `/api/employee/weekly-sales`.
+
+---
+_Read this file to get familiar with the high-level structure and primary configuration points of the Armurerie codebase._
+

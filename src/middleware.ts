@@ -83,8 +83,11 @@ export default withAuth(
       return NextResponse.redirect(signInUrl);
     }
 
-    // Admin routes - require PATRON or CO_PATRON
-    if (path.startsWith('/admin') && token.role !== Role.PATRON && token.role !== Role.CO_PATRON) {
+    // Admin routes - require PATRON, CO_PATRON, or DEVELOPER
+    const isAdminRoute = path.startsWith('/admin');
+    const isAdminRole = token.role === Role.PATRON || token.role === Role.CO_PATRON || token.role === Role.DEVELOPER;
+
+    if (isAdminRoute && !isAdminRole) {
       if (isApiRoute) {
         return new NextResponse(JSON.stringify({ error: 'Access denied' }), {
           status: 403,
@@ -99,9 +102,17 @@ export default withAuth(
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    // Developer routes - require DEVELOPER
-    if (path.startsWith('/api/feedback') && token.role !== Role.DEVELOPER) {
-      if (isApiRoute) {
+    // Specific check for feedback API permissions
+    if (path.startsWith('/api/feedback')) {
+      const isPostRequest = req.method === 'POST';
+
+      // Allow POST for any logged-in user
+      if (isPostRequest && token) {
+        // No specific role check needed for POST, just needs login (handled above)
+      }
+      // Restrict GET, PATCH, DELETE to DEVELOPER role
+      else if (!isPostRequest && token.role !== Role.DEVELOPER) {
+        // Return 403 for non-POST requests by non-developers
         return new NextResponse(JSON.stringify({ error: 'Access denied' }), {
           status: 403,
           headers: {
@@ -112,7 +123,8 @@ export default withAuth(
           },
         });
       }
-      return NextResponse.redirect(new URL('/dashboard', req.url));
+      // If it's not a POST and the user is a DEVELOPER, or if it is a POST and user is logged in,
+      // execution will continue to NextResponse.next() below.
     }
 
     const response = NextResponse.next();

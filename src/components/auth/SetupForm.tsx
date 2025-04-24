@@ -9,6 +9,7 @@ import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { LoadingButton } from '@/components/ui/loading';
 
@@ -99,6 +100,7 @@ export default function SetupForm() {
           {error && (
             <AlertDialog open={!!error}>
               <AlertDialogContent>
+                <AlertDialogTitle className="sr-only">Erreur</AlertDialogTitle>
                 <AlertDialogDescription>{error}</AlertDialogDescription>
                 <Button className="mt-4" onClick={() => setError(null)}>
                   Fermer

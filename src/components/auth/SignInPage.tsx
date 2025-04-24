@@ -14,6 +14,7 @@ import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
+  AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { LoadingButton } from '@/components/ui/loading';
 import { RandomQuote } from '@/components/ui/RandomQuote';
@@ -114,6 +115,7 @@ export default function SignInPage() {
               {setup && (
                 <AlertDialog open={!!setup}>
                   <AlertDialogContent>
+                    <AlertDialogTitle className="sr-only">Succès</AlertDialogTitle>
                     <AlertDialogDescription>
                       Votre compte a été configuré avec succès. Vous pouvez maintenant vous
                       connecter.
@@ -127,6 +129,7 @@ export default function SignInPage() {
               {reset && (
                 <AlertDialog open={!!reset}>
                   <AlertDialogContent>
+                    <AlertDialogTitle className="sr-only">Succès</AlertDialogTitle>
                     <AlertDialogDescription>
                       Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous
                       connecter.
@@ -180,6 +183,7 @@ export default function SignInPage() {
                 {error && (
                   <AlertDialog open={!!error}>
                     <AlertDialogContent>
+                      <AlertDialogTitle className="sr-only">Erreur</AlertDialogTitle>
                       <AlertDialogDescription>{error}</AlertDialogDescription>
                       <Button className="mt-4" onClick={() => setError(null)}>
                         Fermer

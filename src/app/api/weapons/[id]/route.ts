@@ -25,9 +25,11 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  return withErrorHandling(async () => {
-    const [isValid, id, errorResponse] = validateId(params.id);
-    if (!isValid) return errorResponse;
+  const result = await withErrorHandling(async () => {
+    const [isValid, idOrNull, errorResponse] = validateId(params.id);
+    if (!isValid || idOrNull === null) return errorResponse;
+    
+    const id = idOrNull; // Now TypeScript knows id is not null
 
     const [data, parseError] = await parseRequestBody<any>(request);
     if (parseError) return parseError;
@@ -88,12 +90,17 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       );
     }
   });
+  
+  // Ensure we always return a Response
+  return result || NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
 }
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-  return withErrorHandling(async () => {
-    const [isValid, id, errorResponse] = validateId(params.id);
-    if (!isValid) return errorResponse;
+  const result = await withErrorHandling(async () => {
+    const [isValid, idOrNull, errorResponse] = validateId(params.id);
+    if (!isValid || idOrNull === null) return errorResponse;
+    
+    const id = idOrNull; // Now TypeScript knows id is not null
 
     console.log('Deleting weapon with ID:', id);
 
@@ -142,6 +149,8 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       try {
         const { logWeaponModification } = await import('@/utils/discord');
 
+        const userName = weapon.user ? weapon.user.name : 'Utilisateur inconnu';
+
         await logWeaponModification(
           {
             name: weapon.nom_arme,
@@ -150,7 +159,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
             cost: weapon.cout_production,
             description: weapon.serigraphie,
           },
-          weapon.user?.name || 'Utilisateur inconnu',
+          userName,
           'delete'
         );
 
@@ -162,6 +171,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     return NextResponse.json({ success: true });
   });
+  
+  // Ensure we always return a Response
+  return result || NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
 }
 
 export const dynamic = 'force-dynamic';
