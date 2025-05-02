@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
 
 interface WeeklySale {
   id: number;
@@ -48,8 +48,11 @@ export function WeeklySales() {
           <Skeleton className="h-8 w-24" />
         </div>
         <div className="mt-4 space-y-2">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="flex items-center justify-between rounded-lg p-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between rounded-lg p-3"
+            >
               <div className="space-y-2">
                 <Skeleton className="h-5 w-32" />
                 <Skeleton className="h-4 w-24" />
@@ -93,14 +96,21 @@ export function WeeklySales() {
         </span>
       </motion.div>
 
-      <motion.div variants={container} initial="hidden" animate="show" className="mt-2 space-y-2">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="mt-2 space-y-2"
+      >
         {sales.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 py-6 dark:border-neutral-700/50 dark:bg-neutral-800/30"
           >
-            <p className="text-neutral-500 dark:text-neutral-400">Aucune vente cette semaine</p>
+            <p className="text-neutral-500 dark:text-neutral-400">
+              Aucune vente cette semaine
+            </p>
             <p className="mt-1 text-sm text-neutral-400 dark:text-neutral-500">
               Les ventes apparaîtront ici
             </p>
@@ -119,7 +129,9 @@ export function WeeklySales() {
                 </p>
                 <p className="text-sm text-neutral-500 dark:text-neutral-400">
                   Sérigraphie:{' '}
-                  <span className="text-green-600 dark:text-green-400">{sale.serigraphie}</span>
+                  <span className="text-green-600 dark:text-green-400">
+                    {sale.serigraphie}
+                  </span>
                 </p>
               </div>
               <span className="font-semibold text-green-600 dark:text-green-400">

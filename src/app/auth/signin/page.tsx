@@ -1,9 +1,9 @@
 'use client';
 
-import { Suspense } from 'react';
 import SignInPage from '@/components/auth/SignInPage';
 import { FullPageSkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Suspense } from 'react';
 
 export default function Page() {
   return (

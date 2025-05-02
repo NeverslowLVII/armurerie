@@ -1,8 +1,8 @@
-import { Weapon } from '@/services/api';
+import type { Weapon } from '@/services/api';
 import {
   getMessageTemplateById,
-  getRandomSalutation,
   getRandomFormulePolitesse,
+  getRandomSalutation,
 } from './messageTemplates';
 
 // Fonction pour calculer la similarité entre deux chaînes
@@ -18,7 +18,8 @@ export const calculateSimilarity = (s1: string, s2: string): number => {
 
   // Si une chaîne est contenue entièrement dans l'autre, forte similarité
   if (str1.includes(str2) || str2.includes(str1)) {
-    const lengthRatio = Math.min(str1.length, str2.length) / Math.max(str1.length, str2.length);
+    const lengthRatio =
+      Math.min(str1.length, str2.length) / Math.max(str1.length, str2.length);
     // Plus les longueurs sont similaires, plus la similarité est élevée
     return 0.7 + lengthRatio * 0.3;
   }
@@ -27,14 +28,16 @@ export const calculateSimilarity = (s1: string, s2: string): number => {
   const set1 = new Set(str1);
   const set2 = new Set(str2);
 
-  const intersection = new Set([...set1].filter(x => set2.has(x)));
+  const intersection = new Set([...set1].filter((x) => set2.has(x)));
 
-  const jaccardSimilarity = intersection.size / (set1.size + set2.size - intersection.size);
+  const jaccardSimilarity =
+    intersection.size / (set1.size + set2.size - intersection.size);
 
   // Distance de Levenshtein (basée sur l'édition)
   const levenshteinDistance = levenshtein(str1, str2);
   const maxLength = Math.max(str1.length, str2.length);
-  const levenshteinSimilarity = maxLength === 0 ? 1 : 1 - levenshteinDistance / maxLength;
+  const levenshteinSimilarity =
+    maxLength === 0 ? 1 : 1 - levenshteinDistance / maxLength;
 
   // Similarité des n-grammes (comparer les sous-séquences)
   const ngramSimilarity = calculateNgramSimilarity(str1, str2, 2); // bigrammes
@@ -120,7 +123,7 @@ function calculateNgramSimilarity(s1: string, s2: string, n: number): number {
   const ngrams2 = getNgrams(s2, n);
 
   // Calcul de l'intersection
-  const intersection = new Set([...ngrams1].filter(x => ngrams2.has(x)));
+  const intersection = new Set([...ngrams1].filter((x) => ngrams2.has(x)));
 
   // Similarité de Dice
   return (2 * intersection.size) / (ngrams1.size + ngrams2.size);
@@ -143,16 +146,17 @@ function adjustSimilarityDistribution(similarity: number): number {
   if (similarity > 0.8) {
     // Les valeurs élevées restent élevées
     return similarity;
-  } else if (similarity > 0.6) {
+  }
+  if (similarity > 0.6) {
     // Légère réduction dans la plage moyenne-haute
     return 0.6 + (similarity - 0.6) * 0.8;
-  } else if (similarity > 0.4) {
+  }
+  if (similarity > 0.4) {
     // Réduction plus importante dans la plage moyenne
     return 0.4 + (similarity - 0.4) * 0.7;
-  } else {
-    // Les faibles valeurs sont encore réduites
-    return similarity * 0.8;
   }
+  // Les faibles valeurs sont encore réduites
+  return similarity * 0.8;
 }
 
 // Normalisation des noms de détenteurs pour la comparaison
@@ -163,7 +167,7 @@ export const normalizeDetenteur = (name: string): string => {
     .toLowerCase()
     .trim()
     .normalize('NFD') // Décomposer les caractères accentués
-    .replaceAll(/[\u0300-\u036F]/g, '') // Supprimer les accents
+    .replaceAll(/\p{M}/gu, '') // Supprimer les marques combinatoires (accents)
     .replaceAll(/[^a-z0-9]/g, ' ') // Remplacer les caractères spéciaux par des espaces
     .replaceAll(/\s+/g, ' '); // Réduire les espaces multiples
 };
@@ -181,7 +185,7 @@ export interface DetenteurGroup {
 // Fonction pour grouper les armes par détenteur en tenant compte des similarités
 export const groupWeaponsByDetenteur = (
   weapons: Weapon[],
-  similarityThreshold: number = 0.8
+  similarityThreshold = 0.8
 ): DetenteurGroup[] => {
   const groups: Record<string, DetenteurGroup> = {};
 
@@ -194,8 +198,10 @@ export const groupWeaponsByDetenteur = (
     let foundGroup = false;
     for (const key in groups) {
       if (
-        calculateSimilarity(normalizedName, normalizeDetenteur(groups[key].primaryName)) >=
-        similarityThreshold
+        calculateSimilarity(
+          normalizedName,
+          normalizeDetenteur(groups[key].primaryName)
+        ) >= similarityThreshold
       ) {
         // Ajouter au groupe existant
         if (!groups[key].names.includes(weapon.detenteur)) {
@@ -234,7 +240,7 @@ export const groupWeaponsByDetenteur = (
 };
 
 // Fonction pour générer des recommandations intelligentes basées sur l'historique d'achat
-export const generateSmartRecommendations = (
+const generateSmartRecommendations = (
   group: DetenteurGroup
 ): {
   recommendations: string[];
@@ -243,7 +249,7 @@ export const generateSmartRecommendations = (
   const { weapons, totalSpent, purchaseCount } = group;
 
   // Extraire des informations pertinentes de l'historique d'achat
-  const purchases = weapons.map(w => ({
+  const purchases = weapons.map((w) => ({
     name: w.nom_arme,
     price: w.prix,
     date: new Date(w.horodateur),
@@ -251,22 +257,24 @@ export const generateSmartRecommendations = (
   }));
 
   // Calculer la fourchette de prix habituelle
-  const priceRangeMin = Math.min(...purchases.map(p => p.price));
-  const priceRangeMax = Math.max(...purchases.map(p => p.price));
+  const priceRangeMin = Math.min(...purchases.map((p) => p.price));
+  const priceRangeMax = Math.max(...purchases.map((p) => p.price));
   const averagePrice = totalSpent / purchaseCount;
 
   // Identifier les catégories préférées
-  const categories = purchases.map(p => p.type);
+  const categories = purchases.map((p) => p.type);
   const categoryFrequency: Record<string, number> = {};
   for (const cat of categories) {
     categoryFrequency[cat] = (categoryFrequency[cat] || 0) + 1;
   }
 
   // Trouver la catégorie la plus fréquente
-  const preferredCategory = Object.entries(categoryFrequency).sort((a, b) => b[1] - a[1])[0][0];
+  const preferredCategory = Object.entries(categoryFrequency).sort(
+    (a, b) => b[1] - a[1]
+  )[0][0];
 
   // Vérifier la saisonnalité des achats
-  const purchaseMonths = purchases.map(p => p.date.getMonth());
+  const purchaseMonths = purchases.map((p) => p.date.getMonth());
   const monthFrequency: Record<number, number> = {};
   for (const month of purchaseMonths) {
     monthFrequency[month] = (monthFrequency[month] || 0) + 1;
@@ -330,8 +338,11 @@ export const generateSmartRecommendations = (
       "notre démonstration de tir avec les derniers modèles arrivés d'Europe",
       'notre vente privée réservée à nos clients distingués',
     ];
-    recommendations.push(seasonalEvents[Math.floor(Math.random() * seasonalEvents.length)]);
-    reasoning += "Client qui achète généralement durant cette période de l'année. ";
+    recommendations.push(
+      seasonalEvents[Math.floor(Math.random() * seasonalEvents.length)]
+    );
+    reasoning +=
+      "Client qui achète généralement durant cette période de l'année. ";
   }
 
   // Recommandation basée sur la diversification - plus concise
@@ -342,12 +353,15 @@ export const generateSmartRecommendations = (
       'armes gravées de notre maître armurier',
       'armes personnalisées sur mesure',
     ];
-    const rareCat = rareCategories[Math.floor(Math.random() * rareCategories.length)];
+    const rareCat =
+      rareCategories[Math.floor(Math.random() * rareCategories.length)];
     recommendations.push(`nos ${rareCat} qui enrichiraient votre collection`);
     reasoning += "Client diversifié qui possède plusieurs catégories d'armes. ";
   } else {
     // Client fidèle à une seule catégorie - formuler de façon plus concise
-    recommendations.push(`des accessoires de qualité pour vos ${preferredCategory.toLowerCase()}`);
+    recommendations.push(
+      `des accessoires de qualité pour vos ${preferredCategory.toLowerCase()}`
+    );
     reasoning += 'Client focalisé sur une seule catégorie. ';
   }
 
@@ -356,10 +370,10 @@ export const generateSmartRecommendations = (
   const MAX_RECOMMENDATION_LENGTH = 80;
   const finalRecommendations = shuffleArray(recommendations)
     .slice(0, 1) // Réduire à 1 seule recommandation pour éviter les problèmes de troncation
-    .map(rec => {
+    .map((rec) => {
       // Raccourcir les recommandations trop longues
       if (rec.length > MAX_RECOMMENDATION_LENGTH) {
-        return rec.slice(0, Math.max(0, MAX_RECOMMENDATION_LENGTH - 3)) + '...';
+        return `${rec.slice(0, Math.max(0, MAX_RECOMMENDATION_LENGTH - 3))}...`;
       }
       return rec;
     });
@@ -376,17 +390,20 @@ function categorizeWeapon(weaponName: string): string {
 
   if (lowerName.includes('pistolet') || lowerName.includes('revolver')) {
     return 'Armes de poing';
-  } else if (lowerName.includes('fusil') && !lowerName.includes('chasse')) {
-    return "Fusils d'assaut";
-  } else if (lowerName.includes('chasse') || lowerName.includes('carabine')) {
-    return 'Armes de chasse';
-  } else if (lowerName.includes('sniper') || lowerName.includes('précision')) {
-    return 'Armes de précision';
-  } else if (lowerName.includes('tactique')) {
-    return 'Équipement tactique';
-  } else {
-    return 'Autres armes';
   }
+  if (lowerName.includes('fusil') && !lowerName.includes('chasse')) {
+    return "Fusils d'assaut";
+  }
+  if (lowerName.includes('chasse') || lowerName.includes('carabine')) {
+    return 'Armes de chasse';
+  }
+  if (lowerName.includes('sniper') || lowerName.includes('précision')) {
+    return 'Armes de précision';
+  }
+  if (lowerName.includes('tactique')) {
+    return 'Équipement tactique';
+  }
+  return 'Autres armes';
 }
 
 // Fonction utilitaire pour déterminer le genre d'une arme
@@ -394,10 +411,25 @@ function getWeaponGender(weaponName: string): 'M' | 'F' {
   const lowerName = weaponName.toLowerCase();
 
   // Liste non exhaustive des noms d'armes masculins
-  const masculins = ['revolver', 'pistolet', 'fusil', 'canon', 'sabre', 'couteau', 'poignard'];
+  const masculins = [
+    'revolver',
+    'pistolet',
+    'fusil',
+    'canon',
+    'sabre',
+    'couteau',
+    'poignard',
+  ];
 
   // Liste non exhaustive des noms d'armes féminins
-  const feminins = ['carabine', 'mitraillette', 'mitrailleuse', 'épée', 'dague', 'arbalète'];
+  const feminins = [
+    'carabine',
+    'mitraillette',
+    'mitrailleuse',
+    'épée',
+    'dague',
+    'arbalète',
+  ];
 
   // Vérifier si le nom commence par un des mots de genre connu
   for (const mot of masculins) {
@@ -420,12 +452,12 @@ function capitalizeWeaponName(name: string): string {
   // Sinon, capitalise chaque mot
   return name
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
 
 // Fonction utilitaire pour correctement appliquer les articles et accords
-function getArticle(mot: string, defini: boolean = false): string {
+function getArticle(mot: string, defini = false): string {
   // Nettoyage du texte d'entrée pour éviter les problèmes
   const cleanedMot = mot.trim().replaceAll(/\s+/g, ' ');
 
@@ -433,7 +465,23 @@ function getArticle(mot: string, defini: boolean = false): string {
   const capitalizedName = capitalizeWeaponName(cleanedMot);
 
   const premiereLettre = cleanedMot.charAt(0).toLowerCase();
-  const voyelles = ['a', 'e', 'i', 'o', 'u', 'é', 'è', 'ê', 'à', 'â', 'î', 'ô', 'û', 'ù', 'h'];
+  const voyelles = [
+    'a',
+    'e',
+    'i',
+    'o',
+    'u',
+    'é',
+    'è',
+    'ê',
+    'à',
+    'â',
+    'î',
+    'ô',
+    'û',
+    'ù',
+    'h',
+  ];
   const commenceParVoyelle = voyelles.includes(premiereLettre);
   const gender = getWeaponGender(cleanedMot);
 
@@ -457,20 +505,19 @@ function getArticle(mot: string, defini: boolean = false): string {
     return gender === 'M' ? `le ${capitalizedName}` : `la ${capitalizedName}`;
   }
   // Pour un article indéfini avec "de" (d'un/d'une/de)
-  else {
-    // Pour les mots commençant par une voyelle
-    if (commenceParVoyelle) {
-      return `d'${capitalizedName}`;
-    }
 
-    // Pour les mots au pluriel
-    if (estPlurel) {
-      return `de ${capitalizedName}`;
-    }
-
-    // Pour les mots au singulier avec consonne
-    return gender === 'M' ? `de ${capitalizedName}` : `de ${capitalizedName}`;
+  // Pour les mots commençant par une voyelle
+  if (commenceParVoyelle) {
+    return `d'${capitalizedName}`;
   }
+
+  // Pour les mots au pluriel
+  if (estPlurel) {
+    return `de ${capitalizedName}`;
+  }
+
+  // Pour les mots au singulier avec consonne
+  return gender === 'M' ? `de ${capitalizedName}` : `de ${capitalizedName}`;
 }
 
 // Fonction utilitaire pour mélanger un tableau
@@ -486,13 +533,14 @@ function shuffleArray<T>(array: T[]): T[] {
 // Générer un message personnalisé pour un client dans le style de Red Dead Redemption 2
 export const generateClientMessage = (
   group: DetenteurGroup,
-  template: string = 'standard',
-  vendorName: string = 'Armurier'
+  template = 'standard',
+  vendorName = 'Armurier'
 ): string => {
-  const { primaryName, weapons, totalSpent, lastPurchase, purchaseCount } = group;
+  const { primaryName, weapons, totalSpent, lastPurchase, purchaseCount } =
+    group;
 
   // Obtenir les armes uniques
-  const uniqueWeapons = [...new Set(weapons.map(w => w.nom_arme))];
+  const uniqueWeapons = [...new Set(weapons.map((w) => w.nom_arme))];
 
   // Formater le montant total (en dollars)
   const formattedTotal = (totalSpent / 100)
@@ -510,14 +558,16 @@ export const generateClientMessage = (
 
   // Générer des recommandations intelligentes
   const smartRecommendations = generateSmartRecommendations(group);
-  const recommendations = smartRecommendations.recommendations.map(rec => {
+  const recommendations = smartRecommendations.recommendations.map((rec) => {
     // Nettoyer les recommandations pour éviter les erreurs de formatage
     return rec.replaceAll(/\s+/g, ' ').trim();
   });
 
   // Obtenir une salutation aléatoire et s'assurer qu'elle ne se termine pas par une virgule
   const rawSalutation = getRandomSalutation(primaryName);
-  const salutation = rawSalutation.endsWith(',') ? rawSalutation : `${rawSalutation}`;
+  const salutation = rawSalutation.endsWith(',')
+    ? rawSalutation
+    : `${rawSalutation}`;
 
   // Obtenir une formule de politesse aléatoire
   const formule = getRandomFormulePolitesse();
@@ -527,7 +577,8 @@ export const generateClientMessage = (
     uniqueWeapons,
     formattedTotal,
     purchaseCount,
-    daysSinceLastPurchase: daysSinceLastPurchase === 0 ? 1 : daysSinceLastPurchase, // Minimum 1 jour
+    daysSinceLastPurchase:
+      daysSinceLastPurchase === 0 ? 1 : daysSinceLastPurchase, // Minimum 1 jour
     recommendations,
   };
 
@@ -583,7 +634,7 @@ export const generateClientMessage = (
     if (needsEllipsis) {
       message += '...';
     }
-    message += '\n\n' + `${formule}\n${vendorName}`;
+    message += `\n\n${formule}\n${vendorName}`;
   }
 
   return message;

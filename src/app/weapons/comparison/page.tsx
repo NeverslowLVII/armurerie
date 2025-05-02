@@ -1,11 +1,11 @@
 'use client';
 
-import React, { Suspense } from 'react';
-import { WeaponComparison } from '@/components/weapons/WeaponComparison';
-import { WeaponOrderCalculator } from '@/components/weapons/WeaponOrderCalculator';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
+import { WeaponComparison } from '@/components/weapons/WeaponComparison';
+import { WeaponOrderCalculator } from '@/components/weapons/WeaponOrderCalculator';
+import React, { Suspense } from 'react';
 
 /**
  * Skeleton component for loading state
@@ -36,6 +36,7 @@ const WeaponOrderSkeleton = () => (
   <div className="space-y-6">
     <div className="max-h-60 space-y-2">
       {Array.from({ length: 5 }).map((_, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: <Using index for skeleton key is acceptable here>
         <div key={i} className="flex items-center space-x-2 border-b py-1">
           <Skeleton className="h-4 w-4 rounded" />
           <Skeleton className="h-5 w-full max-w-[200px]" />

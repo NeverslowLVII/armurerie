@@ -1,27 +1,27 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogPortal,
   DialogOverlay,
+  DialogPortal,
+  DialogTitle,
 } from '@/components/ui/dialog';
-import { createBaseWeapon, updateBaseWeapon } from '../services/api';
+import { Input } from '@/components/ui/input';
 import {
-  PencilIcon,
-  TrashIcon,
-  PlusIcon,
-  XMarkIcon,
-  CurrencyDollarIcon,
-  FireIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CurrencyDollarIcon,
+  FireIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useData } from '../context/DataContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState, useMemo, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { useData } from '../context/DataContext';
+import { createBaseWeapon, updateBaseWeapon } from '../services/api';
 
 interface BaseWeaponsManagerProps {
   isOpen: boolean;
@@ -121,9 +121,14 @@ const getProfitClass = (profit: number): string => {
   return 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-200';
 };
 
-export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, onClose }) => {
+export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const { baseWeapons, refreshBaseWeapons } = useData();
-  const [editingWeapon, setEditingWeapon] = useState<(typeof baseWeapons)[0] | null>(null);
+  const [editingWeapon, setEditingWeapon] = useState<
+    (typeof baseWeapons)[0] | null
+  >(null);
   const [newWeaponName, setNewWeaponName] = useState('');
   const [newWeaponPrice, setNewWeaponPrice] = useState('');
   const [newWeaponCostProduction, setNewWeaponCostProduction] = useState('');
@@ -145,13 +150,17 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
   const filteredWeapons = useMemo(() => {
     return baseWeapons
       .filter(
-        weapon =>
+        (weapon) =>
           weapon.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
           weapon.prix_defaut.toString().includes(searchQuery)
       )
       .sort((a, b) => {
-        const profitA = Number.parseFloat(calculateProfit(a.prix_defaut, a.cout_production_defaut));
-        const profitB = Number.parseFloat(calculateProfit(b.prix_defaut, b.cout_production_defaut));
+        const profitA = Number.parseFloat(
+          calculateProfit(a.prix_defaut, a.cout_production_defaut)
+        );
+        const profitB = Number.parseFloat(
+          calculateProfit(b.prix_defaut, b.cout_production_defaut)
+        );
         return profitB - profitA;
       });
   }, [baseWeapons, searchQuery]);
@@ -227,7 +236,11 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
 
   const handleDeleteWeapon = async (weaponId: number) => {
     try {
-      if (globalThis.confirm('Êtes-vous sûr de vouloir supprimer cette arme de base ?')) {
+      if (
+        globalThis.confirm(
+          'Êtes-vous sûr de vouloir supprimer cette arme de base ?'
+        )
+      ) {
         const response = await fetch(`/api/base-weapons/${weaponId}`, {
           method: 'DELETE',
         });
@@ -247,12 +260,14 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
 
   const startEditing = async (weapon: (typeof baseWeapons)[0]) => {
     setEditingWeapon(weapon);
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     setNewWeaponName(weapon.nom);
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     setNewWeaponPrice((weapon.prix_defaut / 100).toString());
-    await new Promise(resolve => setTimeout(resolve, 100));
-    setNewWeaponCostProduction((weapon.cout_production_defaut / 100).toString());
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    setNewWeaponCostProduction(
+      (weapon.cout_production_defaut / 100).toString()
+    );
   };
 
   const cancelEditing = () => {
@@ -279,7 +294,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                       type="text"
                       placeholder="Rechercher une arme..."
                       value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-64 rounded-md border border-neutral-600 bg-neutral-800 py-1.5 pl-4 pr-10 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                     />
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
@@ -289,6 +304,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
+                        <title>Icône de recherche</title>
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -333,11 +349,16 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                   )}
 
                   <form
-                    onSubmit={editingWeapon ? handleUpdateWeapon : handleAddWeapon}
+                    onSubmit={
+                      editingWeapon ? handleUpdateWeapon : handleAddWeapon
+                    }
                     className="space-y-4"
                   >
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="baseWeaponName"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Nom de l&apos;arme
                       </label>
                       <motion.div
@@ -347,9 +368,10 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                         className="block w-full"
                       >
                         <Input
+                          id="baseWeaponName"
                           type="text"
                           value={newWeaponName}
-                          onChange={e => setNewWeaponName(e.target.value)}
+                          onChange={(e) => setNewWeaponName(e.target.value)}
                           className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
                           required
                           disabled={isSubmitting}
@@ -358,7 +380,10 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="baseWeaponPrice"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Prix par défaut ($)
                       </label>
                       <motion.div
@@ -368,9 +393,10 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                         className="block w-full"
                       >
                         <Input
+                          id="baseWeaponPrice"
                           type="number"
                           value={newWeaponPrice}
-                          onChange={e => setNewWeaponPrice(e.target.value)}
+                          onChange={(e) => setNewWeaponPrice(e.target.value)}
                           className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
                           required
                           min="0"
@@ -381,7 +407,10 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="baseWeaponCost"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Coût de production ($)
                       </label>
                       <motion.div
@@ -391,9 +420,12 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                         className="block w-full"
                       >
                         <Input
+                          id="baseWeaponCost"
                           type="number"
                           value={newWeaponCostProduction}
-                          onChange={e => setNewWeaponCostProduction(e.target.value)}
+                          onChange={(e) =>
+                            setNewWeaponCostProduction(e.target.value)
+                          }
                           className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
                           required
                           min="0"
@@ -434,6 +466,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                                 fill="none"
                                 viewBox="0 0 24 24"
                               >
+                                <title>Chargement...</title>
                                 <circle
                                   className="opacity-25"
                                   cx="12"
@@ -441,12 +474,12 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                                   r="10"
                                   stroke="currentColor"
                                   strokeWidth="4"
-                                ></circle>
+                                />
                                 <path
                                   className="opacity-75"
                                   fill="currentColor"
                                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
+                                />
                               </svg>
                               {editingWeapon ? 'Mise à jour...' : 'Ajout...'}
                             </>
@@ -484,7 +517,9 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                     </h3>
                     <div className="flex items-center space-x-1 text-sm">
                       <Button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        onClick={() =>
+                          setCurrentPage((p) => Math.max(1, p - 1))
+                        }
                         disabled={currentPage === 1}
                         variant="ghost"
                         className="p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300"
@@ -495,7 +530,9 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                         {currentPage} / {totalPages}
                       </span>
                       <Button
-                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        onClick={() =>
+                          setCurrentPage((p) => Math.min(totalPages, p + 1))
+                        }
                         disabled={currentPage === totalPages}
                         variant="ghost"
                         className="p-1 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-300"
@@ -509,12 +546,16 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                 <div ref={listContainerRef} className="flex-1 overflow-y-auto">
                   <div className="divide-y divide-neutral-800">
                     <AnimatePresence mode="popLayout">
-                      {paginatedWeapons.map(weapon => (
+                      {paginatedWeapons.map((weapon) => (
                         <motion.div
                           key={weapon.id}
                           variants={listItemVariants}
                           initial="hidden"
-                          animate={editingWeapon?.id === weapon.id ? 'editing' : 'visible'}
+                          animate={
+                            editingWeapon?.id === weapon.id
+                              ? 'editing'
+                              : 'visible'
+                          }
                           exit="exit"
                           className="px-4 py-3 transition-colors duration-150 hover:bg-neutral-800"
                         >
@@ -549,7 +590,9 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({ isOpen, 
                                     {new Intl.NumberFormat('us-US', {
                                       style: 'currency',
                                       currency: 'USD',
-                                    }).format(weapon.cout_production_defaut / 100)}
+                                    }).format(
+                                      weapon.cout_production_defaut / 100
+                                    )}
                                   </span>
                                 </motion.div>
                                 <motion.div

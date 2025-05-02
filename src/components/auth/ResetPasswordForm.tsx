@@ -1,24 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
 } from '@/components/ui/alert-dialog';
-import { ArrowPathIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 export default function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get('token');
-  const [currentStep, setCurrentStep] = useState<'request' | 'reset'>(token ? 'reset' : 'request');
+  const [currentStep, setCurrentStep] = useState<'request' | 'reset'>(
+    token ? 'reset' : 'request'
+  );
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +50,9 @@ export default function ResetPasswordForm() {
       // Après avoir envoyé le lien, on reste sur la même page
       // L'utilisateur verra le message de succès
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Une erreur est survenue');
+      setError(
+        error instanceof Error ? error.message : 'Une erreur est survenue'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +63,9 @@ export default function ResetPasswordForm() {
     setError(null);
 
     if (!token) {
-      setError('Token manquant. Veuillez utiliser le lien complet envoyé par email.');
+      setError(
+        'Token manquant. Veuillez utiliser le lien complet envoyé par email.'
+      );
       return;
     }
 
@@ -92,7 +98,9 @@ export default function ResetPasswordForm() {
       // Rediriger vers la page de connexion
       router.push('/auth/signin?reset=success');
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Une erreur est survenue');
+      setError(
+        error instanceof Error ? error.message : 'Une erreur est survenue'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +127,7 @@ export default function ResetPasswordForm() {
                 type="email"
                 placeholder="nom@exemple.fr"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 required
                 className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -136,7 +144,8 @@ export default function ResetPasswordForm() {
               <AlertDialog>
                 <AlertDialogContent>
                   <AlertDialogDescription>
-                    Si un compte existe avec cet email, vous recevrez un lien de réinitialisation.
+                    Si un compte existe avec cet email, vous recevrez un lien de
+                    réinitialisation.
                   </AlertDialogDescription>
                 </AlertDialogContent>
               </AlertDialog>
@@ -145,7 +154,9 @@ export default function ResetPasswordForm() {
               disabled={isLoading}
               className="w-full dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
             >
-              {isLoading && <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading && (
+                <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />
+              )}
               Envoyer le lien de réinitialisation
             </Button>
             <Button
@@ -185,7 +196,7 @@ export default function ResetPasswordForm() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
               required
               className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -198,7 +209,7 @@ export default function ResetPasswordForm() {
               type="password"
               placeholder="••••••••"
               value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               required
               className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -215,7 +226,9 @@ export default function ResetPasswordForm() {
             disabled={isLoading}
             className="w-full dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
           >
-            {isLoading && <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading && (
+              <ArrowPathIcon className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Réinitialiser le mot de passe
           </Button>
           <Button

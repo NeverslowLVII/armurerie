@@ -1,36 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogPortal,
   DialogOverlay,
+  DialogPortal,
+  DialogTitle,
 } from '@/components/ui/dialog';
-import { useAppDispatch } from '../redux/hooks';
-import { updateUser } from '../redux/slices/userSlice';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  PencilIcon,
-  XMarkIcon,
-  PlusIcon,
-  TrashIcon,
-  DocumentArrowUpIcon,
-  ClockIcon,
-  DocumentIcon,
-  EnvelopeIcon,
-} from '@heroicons/react/24/outline';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { SelectNative } from '@/components/ui/select-native';
-import { Role, User } from '@/services/api';
-import { getCommissionRate } from '@/utils/roles';
-import { toast } from '@/components/ui/use-toast';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { SelectNative } from '@/components/ui/select-native';
+import { toast } from '@/components/ui/use-toast';
+import { Role, type User } from '@/services/api';
+import { getCommissionRate } from '@/utils/roles';
+import {
+  ClockIcon,
+  DocumentArrowUpIcon,
+  DocumentIcon,
+  EnvelopeIcon,
+  PencilIcon,
+  PlusIcon,
+  TrashIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
+import { AnimatePresence, motion } from 'framer-motion';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { useAppDispatch } from '../redux/hooks';
+import { updateUser } from '../redux/slices/userSlice';
 
 interface Props {
   open: boolean;
@@ -93,7 +94,9 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   const [isUploading, setIsUploading] = useState(false);
   const [showContractUpload, setShowContractUpload] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [isEmailSending, setIsEmailSending] = useState<Record<number, boolean>>({});
+  const [isEmailSending, setIsEmailSending] = useState<Record<number, boolean>>(
+    {}
+  );
 
   // Mettre à jour la commission lorsque le rôle change
   useEffect(() => {
@@ -109,7 +112,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
     setError(null);
 
     try {
-      const user = users.find(u => u.name === editingUser);
+      const user = users.find((u) => u.name === editingUser);
       if (!user) return;
 
       // Validation côté client
@@ -126,10 +129,14 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       }
 
       // Vérifier si le nom d'utilisateur est déjà utilisé par un autre utilisateur
-      const usernameExists = users.some(u => u.username === newUsername.trim() && u.id !== user.id);
+      const usernameExists = users.some(
+        (u) => u.username === newUsername.trim() && u.id !== user.id
+      );
 
       if (usernameExists) {
-        setError("Ce nom d'utilisateur est déjà utilisé par un autre utilisateur");
+        setError(
+          "Ce nom d'utilisateur est déjà utilisé par un autre utilisateur"
+        );
         setIsSubmitting(false);
         return;
       }
@@ -142,12 +149,6 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
         commission: tempCommission / 100, // Convertir le pourcentage en décimal pour le stockage
         email: user.email, // Conserver l'email existant
       };
-
-      console.log('Updating user:', {
-        id: user.id,
-        currentUser: user,
-        updateData,
-      });
 
       await dispatch(
         updateUser({
@@ -198,7 +199,8 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
           if (user.commission !== undefined && user.commission !== null) {
             setTempCommission(user.commission * 100); // Convertir en pourcentage pour l'affichage
           } else {
-            const defaultCommission = getCommissionRate(user.role as Role) * 100;
+            const defaultCommission =
+              getCommissionRate(user.role as Role) * 100;
             setTempCommission(defaultCommission);
           }
         }, 100);
@@ -230,7 +232,9 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Erreur lors de l'ajout de l'utilisateur");
+        throw new Error(
+          data.error || "Erreur lors de l'ajout de l'utilisateur"
+        );
       }
 
       await onUpdate();
@@ -263,7 +267,11 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   };
 
   const handleDeleteUser = async (user: User) => {
-    if (!globalThis.confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`)) {
+    if (
+      !globalThis.confirm(
+        `Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`
+      )
+    ) {
       return;
     }
 
@@ -278,12 +286,17 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 400 && data.error === 'Cannot delete user with weapons') {
+        if (
+          response.status === 400 &&
+          data.error === 'Cannot delete user with weapons'
+        ) {
           setError(
             `Impossible de supprimer ${user.name} car il possède encore ${data.weapon_count} arme(s). Veuillez d'abord transférer ou supprimer ses armes.`
           );
         } else {
-          setError(data.error || "Erreur lors de la suppression de l'utilisateur");
+          setError(
+            data.error || "Erreur lors de la suppression de l'utilisateur"
+          );
         }
         return;
       }
@@ -306,7 +319,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   };
 
   const filteredUsers = users.filter(
-    user =>
+    (user) =>
       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -320,10 +333,13 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       const formData = new FormData();
       formData.append('file', contractFile);
 
-      const response = await fetch(`/api/employees/${selectedUserId}/contract`, {
-        method: 'POST',
-        body: formData,
-      });
+      const response = await fetch(
+        `/api/employees/${selectedUserId}/contract`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
 
       if (response.ok) {
         toast({
@@ -353,7 +369,9 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
   };
 
   const deleteContract = async (userId: number) => {
-    if (!globalThis.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')) {
+    if (
+      !globalThis.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')
+    ) {
       return;
     }
 
@@ -382,7 +400,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
 
   const sendSetupEmail = async (userId: number) => {
     try {
-      setIsEmailSending(prev => ({ ...prev, [userId]: true }));
+      setIsEmailSending((prev) => ({ ...prev, [userId]: true }));
       const response = await fetch(`/api/employees/${userId}/setup`, {
         method: 'POST',
         headers: {
@@ -407,7 +425,8 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
         navigator.clipboard.writeText(data.setupLink);
         toast({
           title: 'Lien copié',
-          description: 'Le lien de configuration a été copié dans le presse-papier.',
+          description:
+            'Le lien de configuration a été copié dans le presse-papier.',
           variant: 'default',
         });
       }
@@ -415,17 +434,20 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       console.error('Error sending setup email:', error);
       toast({
         title: 'Erreur',
-        description: error instanceof Error ? error.message : "Erreur lors de l'envoi de l'email",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de l'envoi de l'email",
         variant: 'destructive',
       });
     } finally {
-      setIsEmailSending(prev => ({ ...prev, [userId]: false }));
+      setIsEmailSending((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
   const copySetupLink = async (userId: number) => {
     try {
-      setIsEmailSending(prev => ({ ...prev, [userId]: true }));
+      setIsEmailSending((prev) => ({ ...prev, [userId]: true }));
       const response = await fetch(`/api/employees/${userId}/setup`, {
         method: 'POST',
         headers: {
@@ -445,7 +467,8 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
         navigator.clipboard.writeText(data.setupLink);
         toast({
           title: 'Lien copié',
-          description: 'Le lien de configuration a été copié dans le presse-papier.',
+          description:
+            'Le lien de configuration a été copié dans le presse-papier.',
           variant: 'default',
         });
       } else {
@@ -456,11 +479,13 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       toast({
         title: 'Erreur',
         description:
-          error instanceof Error ? error.message : 'Erreur lors de la génération du lien',
+          error instanceof Error
+            ? error.message
+            : 'Erreur lors de la génération du lien',
         variant: 'destructive',
       });
     } finally {
-      setIsEmailSending(prev => ({ ...prev, [userId]: false }));
+      setIsEmailSending((prev) => ({ ...prev, [userId]: false }));
     }
   };
 
@@ -479,8 +504,8 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                   Gérer les utilisateurs
                 </DialogTitle>
                 <div className="sr-only" id="user-manager-description">
-                  Interface de gestion des utilisateurs permettant d&apos;ajouter, modifier et
-                  supprimer des utilisateurs
+                  Interface de gestion des utilisateurs permettant
+                  d&apos;ajouter, modifier et supprimer des utilisateurs
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="relative">
@@ -488,7 +513,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                       type="text"
                       placeholder="Rechercher un utilisateur..."
                       value={searchQuery}
-                      onChange={e => setSearchQuery(e.target.value)}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-64 rounded-md border border-neutral-600 bg-neutral-800 py-1.5 pl-4 pr-10 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                     />
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
@@ -498,6 +523,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                         viewBox="0 0 24 24"
                         stroke="currentColor"
                       >
+                        <title>Icône de recherche</title>
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -546,13 +572,17 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                     className="space-y-4"
                   >
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="userName"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Nom complet
                       </label>
                       <Input
+                        id="userName"
                         type="text"
                         value={newUserName}
-                        onChange={e => setNewUserName(e.target.value)}
+                        onChange={(e) => setNewUserName(e.target.value)}
                         className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
                         placeholder="John Doe"
                         required
@@ -561,13 +591,17 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="userUsername"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Nom d&apos;utilisateur
                       </label>
                       <Input
+                        id="userUsername"
                         type="text"
                         value={newUsername}
-                        onChange={e => setNewUsername(e.target.value)}
+                        onChange={(e) => setNewUsername(e.target.value)}
                         className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
                         placeholder="johndoe"
                         required
@@ -580,13 +614,17 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
 
                     {!editingUser && (
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-neutral-300">
+                        <label
+                          htmlFor="userEmail"
+                          className="mb-1 block text-sm font-medium text-neutral-300"
+                        >
                           Email
                         </label>
                         <Input
+                          id="userEmail"
                           type="email"
                           value={newUserEmail}
-                          onChange={e => setNewUserEmail(e.target.value)}
+                          onChange={(e) => setNewUserEmail(e.target.value)}
                           className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
                           placeholder="john.doe@example.com"
                           required
@@ -596,17 +634,21 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                     )}
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="userRole"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Rôle
                       </label>
                       <SelectNative
+                        id="userRole"
                         value={tempRole}
                         onChange={handleRoleChange}
                         className="w-full border-neutral-600 bg-neutral-800 text-neutral-100"
                         required
                         disabled={isSubmitting}
                       >
-                        {Object.values(Role).map(role => (
+                        {Object.values(Role).map((role) => (
                           <option key={role} value={role}>
                             {role}
                           </option>
@@ -615,29 +657,41 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="userColor"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Couleur
                       </label>
                       <Input
+                        id="userColor"
                         type="color"
                         value={tempColor}
-                        onChange={e => setTempColor(e.target.value)}
+                        onChange={(e) => setTempColor(e.target.value)}
                         className="h-10 w-full border-neutral-600 bg-neutral-800"
                         disabled={isSubmitting}
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-300">
+                      <label
+                        htmlFor="userCommission"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Commission (%)
                       </label>
                       <Input
+                        id="userCommission"
                         type="number"
                         min="0"
                         max="100"
                         step="0.1"
                         value={tempCommission}
-                        onChange={e => setTempCommission(Number.parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                          setTempCommission(
+                            Number.parseFloat(e.target.value) || 0
+                          )
+                        }
                         className="w-full border-neutral-600 bg-neutral-800 text-neutral-100"
                         placeholder="0"
                         disabled={isSubmitting}
@@ -678,6 +732,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                 fill="none"
                                 viewBox="0 0 24 24"
                               >
+                                <title>Chargement...</title>
                                 <circle
                                   className="opacity-25"
                                   cx="12"
@@ -685,12 +740,12 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                   r="10"
                                   stroke="currentColor"
                                   strokeWidth="4"
-                                ></circle>
+                                />
                                 <path
                                   className="opacity-75"
                                   fill="currentColor"
                                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
+                                />
                               </svg>
                               {editingUser ? 'Mise à jour...' : 'Ajout...'}
                             </>
@@ -730,12 +785,14 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                 <div className="flex-1 overflow-y-auto">
                   <div className="divide-y divide-neutral-800">
                     <AnimatePresence mode="popLayout">
-                      {filteredUsers.map(user => (
+                      {filteredUsers.map((user) => (
                         <motion.div
                           key={user.id}
                           variants={listItemVariants}
                           initial="hidden"
-                          animate={editingUser === user.name ? 'editing' : 'visible'}
+                          animate={
+                            editingUser === user.name ? 'editing' : 'visible'
+                          }
                           exit="exit"
                           className="px-4 py-3 transition-colors duration-150 hover:bg-neutral-800"
                         >
@@ -749,11 +806,17 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                 {user.name}
                               </p>
                               <div className="mt-2 flex items-center space-x-4 text-sm text-neutral-400">
-                                <span className="text-neutral-500">{user.email}</span>
-                                <span className="text-neutral-500">{user.role}</span>
+                                <span className="text-neutral-500">
+                                  {user.email}
+                                </span>
+                                <span className="text-neutral-500">
+                                  {user.role}
+                                </span>
                                 <div
                                   className="h-4 w-4 rounded-full"
-                                  style={{ backgroundColor: user.color || '#000000' }}
+                                  style={{
+                                    backgroundColor: user.color || '#000000',
+                                  }}
                                 />
                                 {user.contractUrl && (
                                   <span className="inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
@@ -798,7 +861,9 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                   <Button
                                     variant="ghost"
                                     className="text-blue-400 hover:bg-neutral-800 hover:text-blue-300"
-                                    disabled={isSubmitting || isEmailSending[user.id]}
+                                    disabled={
+                                      isSubmitting || isEmailSending[user.id]
+                                    }
                                     title="Options de configuration"
                                   >
                                     {isEmailSending[user.id] ? (
@@ -808,6 +873,7 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                         fill="none"
                                         viewBox="0 0 24 24"
                                       >
+                                        <title>Envoi en cours...</title>
                                         <circle
                                           className="opacity-25"
                                           cx="12"
@@ -815,12 +881,12 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                           r="10"
                                           stroke="currentColor"
                                           strokeWidth="4"
-                                        ></circle>
+                                        />
                                         <path
                                           className="opacity-75"
                                           fill="currentColor"
                                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        ></path>
+                                        />
                                       </svg>
                                     ) : (
                                       <EnvelopeIcon className="h-5 w-5" />
@@ -848,11 +914,11 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                                   >
                                     <svg
                                       className="mr-2 h-4 w-4"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
+                                      viewBox="0 0 20 20"
+                                      fill="currentColor"
                                       stroke="currentColor"
                                     >
+                                      <title>Copier le lien</title>
                                       <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -888,7 +954,10 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       </DialogPortal>
 
       {/* Dialog pour le lien de configuration */}
-      <Dialog open={isSetupLinkDialogOpen} onOpenChange={() => setIsSetupLinkDialogOpen(false)}>
+      <Dialog
+        open={isSetupLinkDialogOpen}
+        onOpenChange={() => setIsSetupLinkDialogOpen(false)}
+      >
         <DialogPortal>
           <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
           <DialogContent className="max-w-lg border border-neutral-800 bg-neutral-900 p-6 shadow-2xl">
@@ -920,8 +989,9 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                     </Button>
                   </div>
                   <p className="mt-2 text-xs text-neutral-500">
-                    Envoyez ce lien à l&apos;employé pour qu&apos;il puisse configurer son compte.
-                    Le lien est valable pendant 24 heures.
+                    Envoyez ce lien à l&apos;employé pour qu&apos;il puisse
+                    configurer son compte. Le lien est valable pendant 24
+                    heures.
                   </p>
                 </div>
                 <div className="flex justify-end">
@@ -940,7 +1010,10 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
       </Dialog>
 
       {/* Dialog pour l'upload de contrat */}
-      <Dialog open={showContractUpload} onOpenChange={() => setShowContractUpload(false)}>
+      <Dialog
+        open={showContractUpload}
+        onOpenChange={() => setShowContractUpload(false)}
+      >
         <DialogPortal>
           <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
           <DialogContent className="max-w-md border border-neutral-800 bg-neutral-900 p-5 shadow-2xl">
@@ -961,18 +1034,21 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
               <div className="space-y-4">
                 {selectedUserId && (
                   <div className="mb-4">
-                    {users.find(u => u.id === selectedUserId)?.contractUrl ? (
+                    {users.find((u) => u.id === selectedUserId)?.contractUrl ? (
                       <div className="rounded-lg border border-green-800 bg-green-900/20 p-4">
                         <div className="flex flex-col space-y-3">
                           <div className="flex items-center gap-2">
                             <DocumentIcon className="h-5 w-5 text-green-500" />
-                            <span className="text-green-400">Cet employé a déjà un contrat</span>
+                            <span className="text-green-400">
+                              Cet employé a déjà un contrat
+                            </span>
                           </div>
                           <div className="flex space-x-2">
                             <Button
                               onClick={() =>
                                 viewContract(
-                                  users.find(u => u.id === selectedUserId)?.contractUrl || ''
+                                  users.find((u) => u.id === selectedUserId)
+                                    ?.contractUrl || ''
                                 )
                               }
                               variant="outline"
@@ -989,7 +1065,8 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                             </Button>
                           </div>
                           <p className="text-xs text-neutral-400">
-                            L&apos;upload d&apos;un nouveau contrat remplacera le contrat existant.
+                            L&apos;upload d&apos;un nouveau contrat remplacera
+                            le contrat existant.
                           </p>
                         </div>
                       </div>
@@ -1010,10 +1087,14 @@ export default function UserManager({ open, onClose, users, onUpdate }: Props) {
                     <Input
                       type="file"
                       accept=".pdf,.doc,.docx"
-                      onChange={e => setContractFile(e.target.files?.[0] || null)}
+                      onChange={(e) =>
+                        setContractFile(e.target.files?.[0] || null)
+                      }
                       className="flex-1 border-neutral-700 bg-neutral-900"
                     />
-                    <p className="text-xs text-neutral-500">Formats acceptés: PDF, DOC, DOCX</p>
+                    <p className="text-xs text-neutral-500">
+                      Formats acceptés: PDF, DOC, DOCX
+                    </p>
                     <div className="flex justify-end space-x-2">
                       <Button
                         onClick={handleUploadContract}

@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/ui/loading';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 export default function SetupForm() {
   const router = useRouter();
@@ -25,11 +25,12 @@ export default function SetupForm() {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    console.log('Form submitted');
     setError(null);
 
     if (!token) {
-      setError('Token manquant. Veuillez utiliser le lien complet envoyé par email.');
+      setError(
+        'Token manquant. Veuillez utiliser le lien complet envoyé par email.'
+      );
       return;
     }
 
@@ -47,7 +48,6 @@ export default function SetupForm() {
 
     try {
       setIsLoading(true);
-      console.log('Sending request to /api/auth/setup');
       const response = await fetch('/api/auth/setup', {
         method: 'POST',
         headers: {
@@ -60,7 +60,10 @@ export default function SetupForm() {
         router.push('/auth/signin?setup=success');
       } else {
         const data = await response.json();
-        setError(data.error || 'Une erreur est survenue lors de la configuration du compte.');
+        setError(
+          data.error ||
+            'Une erreur est survenue lors de la configuration du compte.'
+        );
       }
     } catch {
       setError('Une erreur est survenue lors de la configuration du compte.');
@@ -80,7 +83,7 @@ export default function SetupForm() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
               required
             />
@@ -92,7 +95,7 @@ export default function SetupForm() {
               type="password"
               placeholder="••••••••"
               value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               disabled={isLoading}
               required
             />
@@ -109,7 +112,9 @@ export default function SetupForm() {
             </AlertDialog>
           )}
           <Button className="w-full" type="submit" disabled={isLoading}>
-            <LoadingButton loading={isLoading}>Configurer le compte</LoadingButton>
+            <LoadingButton loading={isLoading}>
+              Configurer le compte
+            </LoadingButton>
           </Button>
         </div>
       </form>

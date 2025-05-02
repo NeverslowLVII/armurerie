@@ -7,7 +7,8 @@
 
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import type React from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 interface TreeNode {
   id: string;
@@ -29,7 +30,8 @@ function useCheckboxTree(initialTree: TreeNode) {
     return checkedSet;
   }, [initialTree]);
 
-  const [checkedNodes, setCheckedNodes] = useState<Set<string>>(initialCheckedNodes);
+  const [checkedNodes, setCheckedNodes] =
+    useState<Set<string>>(initialCheckedNodes);
 
   const isChecked = useCallback(
     (node: TreeNode): boolean | 'indeterminate' => {
@@ -37,11 +39,15 @@ function useCheckboxTree(initialTree: TreeNode) {
         return checkedNodes.has(node.id);
       }
 
-      const childrenChecked = node.children.map(child => isChecked(child));
-      if (childrenChecked.every(status => status === true)) {
+      const childrenChecked = node.children.map((child) => isChecked(child));
+      if (childrenChecked.every((status) => status === true)) {
         return true;
       }
-      if (childrenChecked.some(status => status === true || status === 'indeterminate')) {
+      if (
+        childrenChecked.some(
+          (status) => status === true || status === 'indeterminate'
+        )
+      ) {
         return 'indeterminate';
       }
       return false;
@@ -59,7 +65,7 @@ function useCheckboxTree(initialTree: TreeNode) {
         } else {
           newCheckedNodes.delete(n.id);
         }
-        n.children?.forEach(child => toggleNode(child, check));
+        n.children?.forEach((child) => toggleNode(child, check));
       };
 
       const currentStatus = isChecked(node);

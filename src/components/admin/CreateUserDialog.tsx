@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export function CreateUserDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,8 +80,8 @@ export function CreateUserDialog() {
               Créer un compte utilisateur
             </DialogTitle>
             <DialogDescription className="text-neutral-700 dark:text-neutral-300">
-              Créez un nouveau compte pour un utilisateur. Un email avec ses identifiants lui sera
-              envoyé.
+              Créez un nouveau compte pour un utilisateur. Un email avec ses
+              identifiants lui sera envoyé.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -89,7 +89,13 @@ export function CreateUserDialog() {
               <Label htmlFor="name" className="dark:text-neutral-200">
                 Nom
               </Label>
-              <Input id="name" name="name" placeholder="John Doe" required disabled={isLoading} />
+              <Input
+                id="name"
+                name="name"
+                placeholder="John Doe"
+                required
+                disabled={isLoading}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email" className="dark:text-neutral-200">
@@ -108,13 +114,24 @@ export function CreateUserDialog() {
               <Label htmlFor="password" className="dark:text-neutral-200">
                 Mot de passe
               </Label>
-              <Input id="password" name="password" type="password" required disabled={isLoading} />
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                required
+                disabled={isLoading}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="color" className="dark:text-neutral-200">
                 Couleur
               </Label>
-              <Input id="color" name="color" type="color" disabled={isLoading} />
+              <Input
+                id="color"
+                name="color"
+                type="color"
+                disabled={isLoading}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="commission" className="dark:text-neutral-200">

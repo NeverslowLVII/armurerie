@@ -1,18 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 /**
  * Valide et convertit un ID de paramètre en nombre
  * @param id L'ID à valider
  * @returns Un tuple [boolean, number | null, Response | null] indiquant si l'ID est valide, l'ID converti et une éventuelle réponse d'erreur
  */
-export function validateId(id: string | undefined): [boolean, number | null, NextResponse | null] {
+export function validateId(
+  id: string | undefined
+): [boolean, number | null, NextResponse | null] {
   if (!id || id === 'null') {
-    return [false, null, NextResponse.json({ error: 'Missing ID parameter' }, { status: 400 })];
+    return [
+      false,
+      null,
+      NextResponse.json({ error: 'Missing ID parameter' }, { status: 400 }),
+    ];
   }
 
   const parsedId = Number.parseInt(id);
   if (Number.isNaN(parsedId)) {
-    return [false, null, NextResponse.json({ error: 'Invalid ID format', id }, { status: 400 })];
+    return [
+      false,
+      null,
+      NextResponse.json({ error: 'Invalid ID format', id }, { status: 400 }),
+    ];
   }
 
   return [true, parsedId, null];
@@ -23,11 +33,14 @@ export function validateId(id: string | undefined): [boolean, number | null, Nex
  * @param handler La fonction gestionnaire à exécuter
  * @returns Une fonction qui peut être utilisée comme gestionnaire de route API
  */
-export function withErrorHandling<T>(handler: () => Promise<T>): Promise<T | NextResponse> {
-  return handler().catch(error => {
+export function withErrorHandling<T>(
+  handler: () => Promise<T>
+): Promise<T | NextResponse> {
+  return handler().catch((error) => {
     console.error('API error:', error);
     const message = error instanceof Error ? error.message : String(error);
-    const details = error instanceof Error ? { name: error.name, stack: error.stack } : {};
+    const details =
+      error instanceof Error ? { name: error.name, stack: error.stack } : {};
 
     return NextResponse.json(
       {
@@ -49,7 +62,7 @@ export function withErrorHandling<T>(handler: () => Promise<T>): Promise<T | Nex
  */
 export async function handleGetById(
   params: { id: string },
-  fetchFn: (id: number) => Promise<any | null>,
+  fetchFn: (id: number) => Promise<unknown | null>,
   entityName: string
 ): Promise<NextResponse> {
   return withErrorHandling(async () => {
@@ -68,45 +81,6 @@ export async function handleGetById(
     }
 
     return NextResponse.json(entity);
-  }) as Promise<NextResponse>;
-}
-
-/**
- * Gestionnaire standard pour les requêtes DELETE d'entités par ID
- * @param params Les paramètres de la requête contenant l'ID
- * @param deleteFn La fonction pour supprimer l'entité par ID
- * @param entityName Le nom de l'entité (pour les messages d'erreur)
- * @param beforeDelete Fonction optionnelle à exécuter avant la suppression
- * @param afterDelete Fonction optionnelle à exécuter après la suppression
- * @returns Une réponse NextResponse
- */
-export async function handleDeleteById(
-  params: { id: string },
-  deleteFn: (id: number) => Promise<any>,
-  entityName: string,
-  beforeDelete?: (id: number) => Promise<boolean | void>,
-  afterDelete?: (id: number, deletedEntity: any) => Promise<void>
-): Promise<NextResponse> {
-  return withErrorHandling(async () => {
-    const [isValid, id, errorResponse] = validateId(params.id);
-    if (!isValid) return errorResponse as NextResponse;
-
-    // Exécuter la fonction avant suppression si elle existe
-    if (beforeDelete) {
-      const shouldProceed = await beforeDelete(id as number);
-      if (shouldProceed === false) {
-        return NextResponse.json({ error: `Cannot delete ${entityName}` }, { status: 403 });
-      }
-    }
-
-    const deletedEntity = await deleteFn(id as number);
-
-    // Exécuter la fonction après suppression si elle existe
-    if (afterDelete && deletedEntity) {
-      await afterDelete(id as number, deletedEntity);
-    }
-
-    return NextResponse.json({ success: true, id });
   }) as Promise<NextResponse>;
 }
 

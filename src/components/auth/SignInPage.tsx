@@ -1,23 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
 import armurerie from '@/assets/armurerie.webp';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { RandomQuote } from '@/components/ui/RandomQuote';
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { LoadingButton } from '@/components/ui/loading';
-import { RandomQuote } from '@/components/ui/RandomQuote';
+import { motion } from 'framer-motion';
+import { signIn } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 
 export default function SignInPage() {
   const router = useRouter();
@@ -49,7 +49,9 @@ export default function SignInPage() {
 
       router.push(callbackUrl);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Une erreur est survenue');
+      setError(
+        error instanceof Error ? error.message : 'Une erreur est survenue'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -115,12 +117,17 @@ export default function SignInPage() {
               {setup && (
                 <AlertDialog open={!!setup}>
                   <AlertDialogContent>
-                    <AlertDialogTitle className="sr-only">Succès</AlertDialogTitle>
+                    <AlertDialogTitle className="sr-only">
+                      Succès
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                      Votre compte a été configuré avec succès. Vous pouvez maintenant vous
-                      connecter.
+                      Votre compte a été configuré avec succès. Vous pouvez
+                      maintenant vous connecter.
                     </AlertDialogDescription>
-                    <Button className="mt-4" onClick={() => router.replace('/auth/signin')}>
+                    <Button
+                      className="mt-4"
+                      onClick={() => router.replace('/auth/signin')}
+                    >
                       Fermer
                     </Button>
                   </AlertDialogContent>
@@ -129,12 +136,17 @@ export default function SignInPage() {
               {reset && (
                 <AlertDialog open={!!reset}>
                   <AlertDialogContent>
-                    <AlertDialogTitle className="sr-only">Succès</AlertDialogTitle>
+                    <AlertDialogTitle className="sr-only">
+                      Succès
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
-                      Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous
-                      connecter.
+                      Votre mot de passe a été réinitialisé avec succès. Vous
+                      pouvez maintenant vous connecter.
                     </AlertDialogDescription>
-                    <Button className="mt-4" onClick={() => router.replace('/auth/signin')}>
+                    <Button
+                      className="mt-4"
+                      onClick={() => router.replace('/auth/signin')}
+                    >
                       Fermer
                     </Button>
                   </AlertDialogContent>
@@ -145,14 +157,16 @@ export default function SignInPage() {
                 className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900"
               >
                 <div className="space-y-2">
-                  <Label htmlFor="identifier">Email ou nom d&apos;utilisateur</Label>
+                  <Label htmlFor="identifier">
+                    Email ou nom d&apos;utilisateur
+                  </Label>
                   <Input
                     id="identifier"
                     name="identifier"
                     type="text"
                     placeholder="nom@exemple.fr"
                     value={identifier}
-                    onChange={e => setIdentifier(e.target.value)}
+                    onChange={(e) => setIdentifier(e.target.value)}
                     disabled={isLoading}
                     required
                     className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -174,7 +188,7 @@ export default function SignInPage() {
                     type="password"
                     placeholder="••••••••"
                     value={password}
-                    onChange={e => setPassword(e.target.value)}
+                    onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
                     required
                     className="dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
@@ -183,7 +197,9 @@ export default function SignInPage() {
                 {error && (
                   <AlertDialog open={!!error}>
                     <AlertDialogContent>
-                      <AlertDialogTitle className="sr-only">Erreur</AlertDialogTitle>
+                      <AlertDialogTitle className="sr-only">
+                        Erreur
+                      </AlertDialogTitle>
                       <AlertDialogDescription>{error}</AlertDialogDescription>
                       <Button className="mt-4" onClick={() => setError(null)}>
                         Fermer

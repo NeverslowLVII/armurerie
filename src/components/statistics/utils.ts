@@ -1,10 +1,10 @@
-import { DateRange } from './types';
+import type { DateRange } from './types';
 
 /**
  * Normalise un nom d'arme pour la classification
  */
 export const normalizeWeaponName = (name: string): string => {
-  name = name.toLowerCase().trim();
+  const lowerName = name.toLowerCase().trim();
   // Normaliser les noms d'armes communs
   const mapping: { [key: string]: string } = {
     scofield: 'Scofield',
@@ -20,11 +20,11 @@ export const normalizeWeaponName = (name: string): string => {
   };
 
   for (const [key, value] of Object.entries(mapping)) {
-    if (name.includes(key)) {
+    if (lowerName.includes(key)) {
       return value;
     }
   }
-  return name.charAt(0).toUpperCase() + name.slice(1);
+  return lowerName.charAt(0).toUpperCase() + lowerName.slice(1);
 };
 
 /**

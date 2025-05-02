@@ -29,18 +29,12 @@ interface EmailOptions {
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
   try {
-    console.log('Attempting to send email with Nodemailer:', {
-      from: process.env.SMTP_USER,
-      to,
-      subject,
-    });
     const info = await transporter.sendMail({
       from: process.env.SMTP_USER,
       to,
       subject,
       html,
     });
-    console.log('Nodemailer sent email:', info);
     return { success: true, data: info };
   } catch (error) {
     console.error('Error sending email with Nodemailer:', error);

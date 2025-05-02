@@ -1,10 +1,11 @@
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
+import type { Role } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { Role } from '@prisma/client';
+import type { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
-interface User {
+// Export the User interface
+export interface User {
   id: string;
   email: string;
   name: string;
@@ -24,6 +25,9 @@ declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     role: Role;
+    username?: string | null;
+    color?: string | null;
+    contractUrl?: string | null;
   }
 }
 
@@ -53,7 +57,10 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findFirst({
           where: {
-            OR: [{ email: credentials.identifier }, { username: credentials.identifier }],
+            OR: [
+              { email: credentials.identifier },
+              { username: credentials.identifier },
+            ],
           },
         });
 
@@ -61,7 +68,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Identifiants invalides');
         }
 
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
         if (!isPasswordValid) {
           throw new Error('Identifiants invalides');
         }
@@ -87,17 +97,25 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.username = user.username || null;
+        const appUser = user as User;
+        token.id = appUser.id;
+        token.role = appUser.role;
+        token.username = appUser.username || null;
+        token.color = appUser.color || null;
+        token.contractUrl = appUser.contractUrl || null;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.username = token.username || null;
+      const augmentedToken = token as import('next-auth/jwt').JWT;
+      if (augmentedToken) {
+        const augmentedUser = session.user as User;
+        augmentedUser.id = augmentedToken.id;
+        augmentedUser.role = augmentedToken.role;
+        augmentedUser.username = augmentedToken.username || null;
+        augmentedUser.color = augmentedToken.color || null;
+        augmentedUser.contractUrl = augmentedToken.contractUrl || null;
+        session.user = augmentedUser;
       }
       return session;
     },

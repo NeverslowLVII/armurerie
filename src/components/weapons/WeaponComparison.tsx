@@ -1,6 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -8,11 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import axios from 'axios';
+import { AlertCircle } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 interface WeaponStats {
   id?: string;
@@ -66,17 +72,17 @@ export function WeaponComparison() {
 
   // Memoize weapon categories for better performance
   const weaponCategories = useMemo(() => {
-    const categories = [...new Set(weapons.map(weapon => weapon.category))];
+    const categories = [...new Set(weapons.map((weapon) => weapon.category))];
     return categories.sort();
   }, [weapons]);
 
   const handleWeapon1Change = (value: string) => {
-    const selectedWeapon = weapons.find(w => w.name === value) || null;
+    const selectedWeapon = weapons.find((w) => w.name === value) || null;
     setWeapon1(selectedWeapon);
   };
 
   const handleWeapon2Change = (value: string) => {
-    const selectedWeapon = weapons.find(w => w.name === value) || null;
+    const selectedWeapon = weapons.find((w) => w.name === value) || null;
     setWeapon2(selectedWeapon);
   };
 
@@ -111,7 +117,8 @@ export function WeaponComparison() {
           <p className="font-medium">Erreur de chargement</p>
         </div>
         <p className="mt-1 text-sm">
-          Impossible de charger les données des armes. Veuillez réessayer ultérieurement.
+          Impossible de charger les données des armes. Veuillez réessayer
+          ultérieurement.
         </p>
       </div>
     );
@@ -125,19 +132,22 @@ export function WeaponComparison() {
             <CardTitle className="text-base">Arme 1</CardTitle>
           </CardHeader>
           <CardContent>
-            <Select onValueChange={handleWeapon1Change} value={weapon1?.name || ''}>
+            <Select
+              onValueChange={handleWeapon1Change}
+              value={weapon1?.name || ''}
+            >
               <SelectTrigger aria-label="Sélectionner la première arme">
                 <SelectValue placeholder="Sélectionner une arme" />
               </SelectTrigger>
               <SelectContent className="max-h-[300px] border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
-                {weaponCategories.map(category => (
+                {weaponCategories.map((category) => (
                   <div key={category}>
                     <div className="bg-neutral-50 px-2 py-1.5 text-sm font-semibold text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
                       {category}
                     </div>
                     {weapons
-                      .filter(weapon => weapon.category === category)
-                      .map(weapon => (
+                      .filter((weapon) => weapon.category === category)
+                      .map((weapon) => (
                         <SelectItem
                           key={weapon.name}
                           value={weapon.name}
@@ -158,19 +168,22 @@ export function WeaponComparison() {
             <CardTitle className="text-base">Arme 2</CardTitle>
           </CardHeader>
           <CardContent>
-            <Select onValueChange={handleWeapon2Change} value={weapon2?.name || ''}>
+            <Select
+              onValueChange={handleWeapon2Change}
+              value={weapon2?.name || ''}
+            >
               <SelectTrigger aria-label="Sélectionner la deuxième arme">
                 <SelectValue placeholder="Sélectionner une arme" />
               </SelectTrigger>
               <SelectContent className="max-h-[300px] border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
-                {weaponCategories.map(category => (
+                {weaponCategories.map((category) => (
                   <div key={category}>
                     <div className="bg-neutral-50 px-2 py-1.5 text-sm font-semibold text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
                       {category}
                     </div>
                     {weapons
-                      .filter(weapon => weapon.category === category)
-                      .map(weapon => (
+                      .filter((weapon) => weapon.category === category)
+                      .map((weapon) => (
                         <SelectItem
                           key={weapon.name}
                           value={weapon.name}
@@ -205,25 +218,25 @@ export function WeaponComparison() {
                     label="Puissance"
                     value={weapon1.puissance}
                     compareValue={weapon2?.puissance}
-                    format={v => v.toFixed(1)}
+                    format={(v) => v.toFixed(1)}
                   />
                   <StatRow
                     label="Cadence"
                     value={weapon1.cadence}
                     compareValue={weapon2?.cadence}
-                    format={v => v.toFixed(1)}
+                    format={(v) => v.toFixed(1)}
                   />
                   <StatRow
                     label="Précision"
                     value={weapon1.precision}
                     compareValue={weapon2?.precision}
-                    format={v => `${(v * 100).toFixed(0)}%`}
+                    format={(v) => `${(v * 100).toFixed(0)}%`}
                   />
                   <StatRow
                     label="Portée"
                     value={weapon1.portee}
                     compareValue={weapon2?.portee}
-                    format={v => `${v}m`}
+                    format={(v) => `${v}m`}
                   />
                   <StatRow
                     label="Capacité"
@@ -234,7 +247,7 @@ export function WeaponComparison() {
                     label="Temps de recharge"
                     value={weapon1.recharge}
                     compareValue={weapon2?.recharge}
-                    format={v => `${v.toFixed(1)}s`}
+                    format={(v) => `${v.toFixed(1)}s`}
                     isLowerBetter
                   />
                 </div>
@@ -242,7 +255,9 @@ export function WeaponComparison() {
             </Card>
           ) : (
             <Card className="flex min-h-[240px] items-center justify-center p-6 text-neutral-500 dark:text-neutral-400">
-              <p className="text-center">Sélectionnez une arme pour afficher ses statistiques</p>
+              <p className="text-center">
+                Sélectionnez une arme pour afficher ses statistiques
+              </p>
             </Card>
           )}
         </div>
@@ -264,25 +279,25 @@ export function WeaponComparison() {
                     label="Puissance"
                     value={weapon2.puissance}
                     compareValue={weapon1?.puissance}
-                    format={v => v.toFixed(1)}
+                    format={(v) => v.toFixed(1)}
                   />
                   <StatRow
                     label="Cadence"
                     value={weapon2.cadence}
                     compareValue={weapon1?.cadence}
-                    format={v => v.toFixed(1)}
+                    format={(v) => v.toFixed(1)}
                   />
                   <StatRow
                     label="Précision"
                     value={weapon2.precision}
                     compareValue={weapon1?.precision}
-                    format={v => `${(v * 100).toFixed(0)}%`}
+                    format={(v) => `${(v * 100).toFixed(0)}%`}
                   />
                   <StatRow
                     label="Portée"
                     value={weapon2.portee}
                     compareValue={weapon1?.portee}
-                    format={v => `${v}m`}
+                    format={(v) => `${v}m`}
                   />
                   <StatRow
                     label="Capacité"
@@ -293,7 +308,7 @@ export function WeaponComparison() {
                     label="Temps de recharge"
                     value={weapon2.recharge}
                     compareValue={weapon1?.recharge}
-                    format={v => `${v.toFixed(1)}s`}
+                    format={(v) => `${v.toFixed(1)}s`}
                     isLowerBetter
                   />
                 </div>
@@ -301,7 +316,9 @@ export function WeaponComparison() {
             </Card>
           ) : (
             <Card className="flex min-h-[240px] items-center justify-center p-6 text-neutral-500 dark:text-neutral-400">
-              <p className="text-center">Sélectionnez une arme pour afficher ses statistiques</p>
+              <p className="text-center">
+                Sélectionnez une arme pour afficher ses statistiques
+              </p>
             </Card>
           )}
         </div>
@@ -322,7 +339,7 @@ function StatRow({
   label,
   value,
   compareValue,
-  format = v => `${v}`,
+  format = (v) => `${v}`,
   isLowerBetter = false,
 }: StatRowProps) {
   let comparison = null;
@@ -339,8 +356,12 @@ function StatRow({
 
   return (
     <div className="flex justify-between border-b border-neutral-100 py-1.5 last:border-0 dark:border-neutral-700">
-      <span className="text-sm text-neutral-600 dark:text-neutral-300">{label}</span>
-      <span className={`text-sm font-medium tabular-nums ${textClass}`}>{format(value)}</span>
+      <span className="text-sm text-neutral-600 dark:text-neutral-300">
+        {label}
+      </span>
+      <span className={`text-sm font-medium tabular-nums ${textClass}`}>
+        {format(value)}
+      </span>
     </div>
   );
 }

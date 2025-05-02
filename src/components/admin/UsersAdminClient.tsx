@@ -1,11 +1,10 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
-import DeveloperManager from '@/components/admin/DeveloperManager';
+import { Button } from '@/components/ui/button';
 import { UserCogIcon } from 'lucide-react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface User {
   id: number;
@@ -23,7 +22,6 @@ interface Props {
 export default function UsersAdminClient({ users }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const showDevelopers = searchParams?.get('showDevelopers') === 'true';
 
   return (
     <div className="container mx-auto py-10">
@@ -32,25 +30,23 @@ export default function UsersAdminClient({ users }: Props) {
           Gestion des Utilisateurs
         </h1>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" className="flex items-center space-x-2" asChild>
-            <Link href="?showDevelopers=true">
-              <UserCogIcon className="h-4 w-4" />
-              <span>Gérer les développeurs</span>
-            </Link>
-          </Button>
           <CreateUserDialog />
         </div>
       </div>
 
       <div className="grid gap-4">
-        {users.map(user => (
+        {users.map((user) => (
           <div
             key={user.id}
             className="flex items-center justify-between rounded-lg bg-white p-4 shadow dark:bg-neutral-800"
           >
             <div>
-              <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">{user.name}</h3>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">{user.email}</p>
+              <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">
+                {user.name}
+              </h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                {user.email}
+              </p>
               <p className="text-sm text-neutral-700 dark:text-neutral-300">
                 <span
                   className="mr-2 inline-block h-3 w-3 rounded-full"
@@ -62,7 +58,11 @@ export default function UsersAdminClient({ users }: Props) {
             <div className="flex gap-2">
               {user.contractUrl && (
                 <Button asChild variant="outline" size="sm">
-                  <Link href={user.contractUrl} target="_blank" rel="noopener noreferrer">
+                  <Link
+                    href={user.contractUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Contrat
                   </Link>
                 </Button>
@@ -74,8 +74,6 @@ export default function UsersAdminClient({ users }: Props) {
           </div>
         ))}
       </div>
-
-      <DeveloperManager open={showDevelopers} onClose={() => router.push('/admin/users')} />
     </div>
   );
 }

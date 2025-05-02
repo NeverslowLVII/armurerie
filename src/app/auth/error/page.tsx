@@ -1,11 +1,11 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 function ErrorContent() {
   const searchParams = useSearchParams();
@@ -56,8 +56,12 @@ function ErrorContent() {
             aria-hidden="true"
           />
         </div>
-        <h2 className="mt-3 text-2xl font-bold text-red-600 dark:text-red-400">{errorMessage}</h2>
-        <p className="mt-2 text-neutral-600 dark:text-neutral-300">{errorDescription}</p>
+        <h2 className="mt-3 text-2xl font-bold text-red-600 dark:text-red-400">
+          {errorMessage}
+        </h2>
+        <p className="mt-2 text-neutral-600 dark:text-neutral-300">
+          {errorDescription}
+        </p>
         <div className="mt-6">
           <Link
             href="/auth/signin"

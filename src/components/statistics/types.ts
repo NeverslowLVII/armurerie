@@ -20,7 +20,8 @@ export interface WeaponStats {
   profitByType: { name: string; profit: number; count: number }[];
 }
 
-export interface BaseWeapon {
+// Define BaseWeapon here, unexported, as it's used by the Weapon interface below
+interface BaseWeapon {
   id: number;
   nom: string;
   prix_defaut: number;
@@ -73,24 +74,3 @@ export interface DateRange {
 }
 
 export type TabType = 'overview' | 'weapons' | 'employees' | 'income';
-
-export interface IncomeStatementItem {
-  period: string;
-  revenue: number;
-  productionCost: number;
-  commissions: number;
-  grossProfit: number;
-  taxes: number;
-  netProfit: number;
-  count: number;
-}
-
-export interface IncomeStatementTotals {
-  revenue: number;
-  productionCost: number;
-  commissions: number;
-  grossProfit: number;
-  taxes: number;
-  netProfit: number;
-  count: number;
-}

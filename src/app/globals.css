@@ -1,32 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --tooltip-bg: rgba(255, 255, 255, 0.8);
-    --tooltip-border: 1px solid #d1d5db;
-    --tooltip-color: #1f2937;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --tooltip-bg: rgba(38, 38, 38, 0.8);
-    --tooltip-border: 1px solid #404040;
-    --tooltip-color: #e5e5e5;
-  }
-
+  /* Basic resets or base styles can go here */
   body {
-    @apply bg-background text-foreground;
+    /* Removed background/color rules - applied directly in layout.tsx */
     margin: 0;
     min-height: 100vh;
-    font-family:
-      Inter,
-      system-ui,
-      -apple-system,
-      sans-serif;
+    font-family: Inter, system-ui, -apple-system, sans-serif; /* Consider defining font-sans in config and applying here if needed */
   }
 }

@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { generateSetupEmailHtml, sendEmail } from '@/lib/email';
 import { prisma } from '@/lib/prisma';
 import { generateSetupLink } from '@/lib/tokens';
-import { sendEmail, generateSetupEmailHtml } from '@/lib/email';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
@@ -19,7 +19,10 @@ export async function GET() {
     return NextResponse.json(users);
   } catch (error) {
     console.error('Error fetching employees:', error);
-    return NextResponse.json({ error: 'Error fetching employees' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Error fetching employees' },
+      { status: 500 }
+    );
   }
 }
 
@@ -27,7 +30,10 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
     if (!data.name || !data.email || !data.username) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
     // Vérifier si l'email existe déjà
@@ -36,7 +42,10 @@ export async function POST(request: Request) {
     });
 
     if (existingEmail) {
-      return NextResponse.json({ error: 'Cet email est déjà utilisé' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Cet email est déjà utilisé' },
+        { status: 400 }
+      );
     }
 
     // Vérifier si le nom d'utilisateur existe déjà
@@ -45,7 +54,10 @@ export async function POST(request: Request) {
     });
 
     if (existingUsername) {
-      return NextResponse.json({ error: "Ce nom d'utilisateur est déjà utilisé" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Ce nom d'utilisateur est déjà utilisé" },
+        { status: 400 }
+      );
     }
 
     // Créer l'utilisateur avec un mot de passe temporaire
@@ -64,7 +76,10 @@ export async function POST(request: Request) {
 
     // Générer le lien de configuration
     const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host = request.headers.get('host') || process.env.NEXTAUTH_URL || 'localhost:3000';
+    const host =
+      request.headers.get('host') ||
+      process.env.NEXTAUTH_URL ||
+      'localhost:3000';
     const baseUrl = `${protocol}://${host}`;
     const setupLink = generateSetupLink(user.id, user.email, baseUrl);
 
@@ -85,6 +100,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Create employee error:', error);
-    return NextResponse.json({ error: 'Failed to create employee' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to create employee' },
+      { status: 500 }
+    );
   }
 }

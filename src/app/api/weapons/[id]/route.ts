@@ -1,40 +1,97 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import {
-  handleGetById,
-  withErrorHandling,
-  validateId,
-  parseRequestBody,
   createCorsOptionsResponse,
+  handleGetById,
+  parseRequestBody,
+  validateId,
+  withErrorHandling,
 } from '@/utils/api/crud-handlers';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
-  return handleGetById(
-    params,
-    async id => {
-      return prisma.weapon.findUnique({
-        where: { id },
-        include: {
-          user: true,
-          base_weapon: true,
-        },
-      });
-    },
-    'Weapon'
-  );
+// Define interface for PUT request body
+interface WeaponUpdateBody {
+  nom_arme: string;
+  horodateur?: string;
+  detenteur?: string;
+  bp?: string | null;
+  serigraphie?: string;
+  prix?: number;
+  user_id?: string | number;
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+// Define interface for DELETE request body
+interface WeaponDeleteBody {
+  username?: string;
+  weaponData?: WeaponUpdateBody; // Can reuse or define a specific one
+}
+
+export async function GET(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const resolvedParams = await context.params;
+    const [isValid, idOrNull, errorResponse] = validateId(resolvedParams.id);
+
+    // Explicitly check for errorResponse and return it if present
+    if (!isValid || idOrNull === null) {
+      // If errorResponse is null (shouldn't happen if !isValid), return a generic error
+      return errorResponse ?? NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
+
+    const id = idOrNull; // id is guaranteed to be a number here
+
+    const weapon = await prisma.weapon.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        base_weapon: true,
+      },
+    });
+
+    if (!weapon) {
+      return NextResponse.json({ error: 'Weapon not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(weapon);
+
+  } catch (error) {
+    console.error('GET /api/weapons/[id] Error:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch weapon' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const result = await withErrorHandling(async () => {
-    const [isValid, idOrNull, errorResponse] = validateId(params.id);
-    if (!isValid || idOrNull === null) return errorResponse;
-    
+    // Await params before using it
+    const resolvedParams = await context.params;
+    const [isValid, idOrNull, errorResponse] = validateId(resolvedParams.id);
+    if (!isValid || idOrNull === null) {
+      // If errorResponse is null, return a generic error
+      return errorResponse ?? NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
+
     const id = idOrNull; // Now TypeScript knows id is not null
 
-    const [data, parseError] = await parseRequestBody<any>(request);
+    // Use defined interface for parsing request body
+    const [data, parseError] =
+      await parseRequestBody<WeaponUpdateBody>(request);
     if (parseError) return parseError;
+    // Assert data is not null after checking parseError
+    if (!data) {
+      return NextResponse.json(
+        { error: 'Invalid request body data' },
+        { status: 400 }
+      );
+    }
 
-    console.log('Update weapon data received:', data);
+    console.info('Update weapon data received:', data);
 
     try {
       const baseWeapon = await prisma.baseWeapon.findUnique({
@@ -58,7 +115,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
           ...(data.prix && { prix: data.prix }),
           ...(data.user_id && {
             user: {
-              connect: { id: Number.parseInt(data.user_id) },
+              connect: { id: Number.parseInt(String(data.user_id)) },
             },
           }),
           base_weapon: {
@@ -90,22 +147,33 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       );
     }
   });
-  
+
   // Ensure we always return a Response
-  return result || NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+  return (
+    result ||
+    NextResponse.json({ error: 'An unknown error occurred' }, { status: 500 })
+  );
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const result = await withErrorHandling(async () => {
-    const [isValid, idOrNull, errorResponse] = validateId(params.id);
-    if (!isValid || idOrNull === null) return errorResponse;
-    
+    // Await params before using it
+    const resolvedParams = await context.params;
+    const [isValid, idOrNull, errorResponse] = validateId(resolvedParams.id);
+    if (!isValid || idOrNull === null) {
+      // If errorResponse is null, return a generic error
+      return errorResponse ?? NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+    }
+
     const id = idOrNull; // Now TypeScript knows id is not null
 
-    console.log('Deleting weapon with ID:', id);
+    console.info('Deleting weapon with ID:', id);
 
-    // Récupérer les données envoyées dans le corps de la requête (si disponibles)
-    let bodyData: { username?: string; weaponData?: any } = {};
+    // Use defined interface for request body
+    let bodyData: WeaponDeleteBody = {};
     try {
       bodyData = await request.json();
     } catch {
@@ -120,7 +188,10 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     });
 
     if (!weapon) {
-      return NextResponse.json({ error: 'Weapon not found', id }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Weapon not found', id },
+        { status: 404 }
+      );
     }
 
     // Supprimer l'arme de la base de données
@@ -128,7 +199,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       where: { id },
     });
 
-    console.log('Weapon deleted successfully:', id);
+    console.info('Weapon deleted successfully:', id);
 
     // Si des données sont disponibles, envoyer une notification Discord
     if (bodyData.weaponData && bodyData.username) {
@@ -136,10 +207,19 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         // Importer la fonction de log Discord
         const { logWeaponModification } = await import('@/utils/discord');
 
-        // Envoyer la notification
-        await logWeaponModification(bodyData.weaponData, bodyData.username, 'delete');
+        // Ensure weaponData has necessary fields (adjust as needed)
+        const weaponLogData = {
+          name: bodyData.weaponData.nom_arme ?? 'Inconnu',
+          model: bodyData.weaponData.nom_arme ?? 'Inconnu',
+          price: bodyData.weaponData.prix ?? 0,
+          cost: 0, // Cost might not be in the delete request body
+          description: bodyData.weaponData.serigraphie ?? '',
+        };
 
-        console.log('Discord notification sent for weapon deletion');
+        // Envoyer la notification
+        await logWeaponModification(weaponLogData, bodyData.username, 'delete');
+
+        console.info('Discord notification sent for weapon deletion');
       } catch (discordError) {
         // Logger l'erreur mais ne pas faire échouer la suppression
         console.error('Failed to send Discord notification:', discordError);
@@ -163,17 +243,25 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
           'delete'
         );
 
-        console.log('Discord notification sent for weapon deletion (fallback data)');
+        console.info(
+          'Discord notification sent for weapon deletion (fallback data)'
+        );
       } catch (discordError) {
-        console.error('Failed to send Discord notification with fallback data:', discordError);
+        console.error(
+          'Failed to send Discord notification with fallback data:',
+          discordError
+        );
       }
     }
 
     return NextResponse.json({ success: true });
   });
-  
+
   // Ensure we always return a Response
-  return result || NextResponse.json({ error: "An unknown error occurred" }, { status: 500 });
+  return (
+    result ||
+    NextResponse.json({ error: 'An unknown error occurred' }, { status: 500 })
+  );
 }
 
 export const dynamic = 'force-dynamic';

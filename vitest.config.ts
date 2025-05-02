@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
@@ -9,7 +9,10 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: 'vitest.setup.ts',
-    include: ['src/**/*.{test,spec}.{ts,tsx}', '__tests__/**/*.{test,spec}.{ts,tsx}'],
+    include: [
+      'src/**/*.{test,spec}.{ts,tsx}',
+      '__tests__/**/*.{test,spec}.{ts,tsx}',
+    ],
     pool: 'forks',
     poolOptions: {
       forks: {
@@ -42,7 +45,7 @@ export default defineConfig({
         '**/*.mock.ts',
         '**/*.stories.{ts,tsx}',
         'src/pages/api/discord/webhook/complete.ts',
-        'src/components/ui/**'
+        'src/components/ui/**',
       ],
       include: ['src/**/*.{ts,tsx}'],
       skipFull: true,
@@ -50,9 +53,9 @@ export default defineConfig({
         statements: 0,
         branches: 0,
         functions: 0,
-        lines: 0
+        lines: 0,
       },
-      all: true
+      all: true,
     },
     testTimeout: 10_000,
   },
@@ -62,4 +65,4 @@ export default defineConfig({
       '@': `${__dirname}/src`,
     },
   },
-}); 
+});

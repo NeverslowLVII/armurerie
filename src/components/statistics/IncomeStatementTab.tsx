@@ -1,11 +1,18 @@
-import React from 'react';
-import { motion } from 'framer-motion';
 import {
-  CubeIcon,
   ArrowDownIcon,
-  BanknotesIcon,
   ArrowDownTrayIcon,
+  BanknotesIcon,
+  ChevronDownIcon,
+  CubeIcon,
+  DocumentTextIcon,
+  TableCellsIcon,
 } from '@heroicons/react/24/outline';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { motion } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import type React from 'react';
+import * as XLSX from 'xlsx';
 import StatCard from './StatCard';
 import { formatDollars } from './utils';
 
@@ -40,22 +47,21 @@ const calculatePercentage = (value: number, total: number) => {
   return (value / total) * 100;
 };
 
-const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementStats }) => {
+const IncomeStatementTab: React.FC<IncomeStatementProps> = ({
+  incomeStatementStats,
+}) => {
   const { totals } = incomeStatementStats;
 
-  // Calcul correct des taxes à 10% du bénéfice d'exploitation
-  const operatingProfit = totals.grossProfit - totals.commissions;
-  const taxesAt10Percent = Math.round(operatingProfit * 0.1); // 10% des bénéfices d'exploitation
-  const netProfitAt10Percent = operatingProfit - taxesAt10Percent;
+  // Calcul des taxes à 10% sur la Marge Brute
+  const taxesAt10Percent = Math.round(totals.grossProfit * 0.1); // 10% de la marge brute
+  // Calcul du résultat net après impôts et commissions
+  const netProfitAt10Percent =
+    totals.grossProfit - totals.commissions - taxesAt10Percent;
 
-  // Fonction pour exporter les données en CSV
-  const exportToCSV = () => {
-    // Entêtes CSV
-    const headers = ['Poste', 'Montant', '% du CA'];
-
-    // Données du tableau avec taxes à 10%
-    const data = [
-      ["Chiffre d'affaires", totals.revenue / 100, '100'],
+  // Prépare les données pour l'export
+  const getExportData = () => {
+    const dataArray = [
+      ["Chiffre d'affaires", totals.revenue / 100, 100],
       [
         'Coût de production',
         totals.productionCost / 100,
@@ -67,19 +73,14 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
         Math.round(calculatePercentage(totals.grossProfit, totals.revenue)),
       ],
       [
-        'Charges du personnel',
-        totals.commissions / 100,
-        Math.round(calculatePercentage(totals.commissions, totals.revenue)),
-      ],
-      [
-        "Bénéfice d'exploitation",
-        operatingProfit / 100,
-        Math.round(calculatePercentage(operatingProfit, totals.revenue)),
-      ],
-      [
         'Taxes (10%)',
         taxesAt10Percent / 100,
         Math.round(calculatePercentage(taxesAt10Percent, totals.revenue)),
+      ],
+      [
+        'Charges du personnel',
+        totals.commissions / 100,
+        Math.round(calculatePercentage(totals.commissions, totals.revenue)),
       ],
       [
         'Résultat net',
@@ -88,37 +89,141 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
       ],
     ];
 
-    // Création du contenu CSV
-    let csvContent = headers.join(';') + '\n';
+    // Convert array to array of objects for JSON
+    const dataObjects = dataArray.map((row) => ({
+      Poste: row[0],
+      Montant: row[1],
+      '% du CA': row[2],
+    }));
 
-    // Ajouter chaque ligne de données
-    for (const row of data) {
-      // Formatter les valeurs numériques pour le format français (virgule pour les décimales)
+    return { dataArray, dataObjects };
+  };
+
+  // Fonction pour exporter les données en CSV
+  const exportToCSV = () => {
+    const { dataArray } = getExportData();
+    const headers = ['Poste', 'Montant', '% du CA'];
+    let csvContent = `${headers.join(';')}\n`;
+
+    for (const row of dataArray) {
       const formattedRow = row.map((cell, index) => {
         if (index === 1) {
-          // Pour les montants, formatage avec 2 décimales et virgule
-          return typeof cell === 'number' ? cell.toFixed(2).replace('.', ',') : cell;
-        } else {
-          return cell;
+          return typeof cell === 'number'
+            ? cell
+                .toFixed(2)
+                .replace('.', ',') // Format français pour montant
+            : cell;
+        } else if (index === 2) {
+          return `${cell}`; // Pourcentage sans décimales
         }
+        return cell;
       });
-      csvContent += formattedRow.join(';') + '\n';
+      csvContent += `${formattedRow.join(';')}\n`;
     }
 
-    // Création du blob et téléchargement
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-
-    // Aujourd'hui au format YYYY-MM-DD
     const today = new Date().toISOString().slice(0, 10);
-
     link.setAttribute('href', url);
     link.setAttribute('download', `compte_resultat_${today}.csv`);
     link.style.visibility = 'hidden';
     document.body.append(link);
     link.click();
     link.remove();
+  };
+
+  // Fonction pour exporter les données en JSON
+  const exportToJSON = () => {
+    const { dataObjects } = getExportData();
+    const jsonString = JSON.stringify(dataObjects, null, 2); // `null, 2` pour une sortie formatée
+    const blob = new Blob([jsonString], {
+      type: 'application/json;charset=utf-8;',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const today = new Date().toISOString().slice(0, 10);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `compte_resultat_${today}.json`);
+    link.style.visibility = 'hidden';
+    document.body.append(link);
+    link.click();
+    link.remove();
+  };
+
+  // Fonction pour exporter les données en Excel (XLSX)
+  const exportToXLSX = () => {
+    const { dataArray } = getExportData();
+    // Ajout des en-têtes à dataArray pour l'export XLSX
+    const dataWithHeaders = [
+      ['Poste', 'Montant', '% du CA'],
+      ...dataArray.map((row) => [
+        row[0],
+        row[1],
+        `${row[2]}%`, // Ajouter le signe % pour l'affichage Excel
+      ]),
+    ];
+
+    const worksheet = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+
+    // Ajuster la largeur des colonnes
+    const columnWidths = [
+      { wch: 25 }, // Poste
+      { wch: 15 }, // Montant
+      { wch: 10 }, // % du CA
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Formatter la colonne Montant en devise ($)
+    // Itérer sur les lignes (sauf l'en-tête) et appliquer le format
+    dataWithHeaders.forEach((_row, index) => {
+      if (index === 0) return; // Skip header row
+      const cellRef = XLSX.utils.encode_cell({ c: 1, r: index }); // Colonne B (Montant)
+      if (worksheet[cellRef]) {
+        worksheet[cellRef].t = 'n'; // Type numérique
+        worksheet[cellRef].z = '$#,##0.00'; // Format devise
+      }
+      const percentCellRef = XLSX.utils.encode_cell({ c: 2, r: index }); // Colonne C (% du CA)
+      if (worksheet[percentCellRef]) {
+        worksheet[percentCellRef].t = 's'; // Type string pour garder le '%' ajouté manuellement
+      }
+    });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Compte de Résultat');
+    const today = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `compte_resultat_${today}.xlsx`);
+  };
+
+  // Fonction pour exporter les données en PDF
+  const exportToPDF = () => {
+    const { dataArray } = getExportData();
+    const doc = new jsPDF();
+
+    const tableColumn = ['Poste', 'Montant', '% du CA'];
+    const tableRows = dataArray.map((row) => [
+      row[0],
+      formatDollars(Number(row[1]) * 100),
+      `${row[2]}%`, // Ajouter le signe %
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 20,
+      theme: 'grid',
+      headStyles: { fillColor: [22, 163, 74] }, // Couleur d'en-tête (vert)
+      styles: { fontSize: 10 },
+      columnStyles: {
+        0: { cellWidth: 80 }, // Poste
+        1: { cellWidth: 40, halign: 'right' }, // Montant
+        2: { cellWidth: 30, halign: 'right' }, // % du CA
+      },
+    });
+
+    doc.text('Compte de Résultat Détaillé', 14, 15);
+    const today = new Date().toISOString().slice(0, 10);
+    doc.save(`compte_resultat_${today}.pdf`);
   };
 
   return (
@@ -133,13 +238,56 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
           Compte de résultat détaillé
         </h3>
 
-        <button
-          onClick={exportToCSV}
-          className="flex items-center space-x-2 rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-600"
-        >
-          <ArrowDownTrayIcon className="h-4 w-4" />
-          <span>Exporter CSV</span>
-        </button>
+        {/* Menu déroulant pour l'export */}
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button
+              type="button"
+              className="flex items-center space-x-2 rounded-lg bg-neutral-100 px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-600"
+            >
+              <ArrowDownTrayIcon className="h-4 w-4" />
+              <span>Exporter</span>
+              <ChevronDownIcon className="h-4 w-4" />
+            </button>
+          </DropdownMenu.Trigger>
+
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              className="z-50 min-w-[10rem] overflow-hidden rounded-md border border-neutral-200 bg-white p-1 text-neutral-900 shadow-md dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50"
+              sideOffset={5}
+              align="end"
+            >
+              <DropdownMenu.Item
+                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-neutral-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:hover:bg-neutral-700"
+                onSelect={exportToCSV}
+              >
+                <span className="mr-2 h-4 w-4 text-xs font-mono">CSV</span>
+                <span>Exporter CSV</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-neutral-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:hover:bg-neutral-700"
+                onSelect={exportToJSON}
+              >
+                <span className="mr-2 h-4 w-4 text-xs font-mono">{'{}'}</span>
+                <span>Exporter JSON</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-neutral-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:hover:bg-neutral-700"
+                onSelect={exportToXLSX}
+              >
+                <TableCellsIcon className="mr-2 h-4 w-4" />
+                <span>Exporter XLSX</span>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-neutral-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 dark:hover:bg-neutral-700"
+                onSelect={exportToPDF}
+              >
+                <DocumentTextIcon className="mr-2 h-4 w-4" />
+                <span>Exporter PDF</span>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -210,7 +358,10 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
                 {formatDollars(totals.productionCost)}
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-500 dark:text-neutral-400">
-                {Math.round(calculatePercentage(totals.productionCost, totals.revenue))}%
+                {Math.round(
+                  calculatePercentage(totals.productionCost, totals.revenue)
+                )}
+                %
               </td>
             </tr>
 
@@ -223,37 +374,14 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
                 {formatDollars(totals.grossProfit)}
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-900 dark:text-white">
-                {Math.round(calculatePercentage(totals.grossProfit, totals.revenue))}%
+                {Math.round(
+                  calculatePercentage(totals.grossProfit, totals.revenue)
+                )}
+                %
               </td>
             </tr>
 
-            {/* Charges du personnel (Commissions) */}
-            <tr>
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                Charges du personnel
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-500 dark:text-neutral-400">
-                {formatDollars(totals.commissions)}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-500 dark:text-neutral-400">
-                {Math.round(calculatePercentage(totals.commissions, totals.revenue))}%
-              </td>
-            </tr>
-
-            {/* Bénéfice d'exploitation */}
-            <tr className="bg-neutral-50 font-medium dark:bg-neutral-700/20">
-              <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-900 dark:text-white">
-                Bénéfice d&apos;exploitation
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-900 dark:text-white">
-                {formatDollars(operatingProfit)}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-900 dark:text-white">
-                {Math.round(calculatePercentage(operatingProfit, totals.revenue))}%
-              </td>
-            </tr>
-
-            {/* Taxes - maintenant calculées à 10% */}
+            {/* Taxes (10%) - Calculées sur la marge brute */}
             <tr>
               <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
                 Taxes (10%)
@@ -262,11 +390,30 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
                 {formatDollars(taxesAt10Percent)}
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-500 dark:text-neutral-400">
-                {Math.round(calculatePercentage(taxesAt10Percent, totals.revenue))}%
+                {Math.round(
+                  calculatePercentage(taxesAt10Percent, totals.revenue)
+                )}
+                %
               </td>
             </tr>
 
-            {/* Résultat net - recalculé avec les taxes à 10% */}
+            {/* Charges du personnel (Commissions) - Déplacé après les taxes */}
+            <tr>
+              <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">
+                Charges du personnel
+              </td>
+              <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-500 dark:text-neutral-400">
+                {formatDollars(totals.commissions)}
+              </td>
+              <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-500 dark:text-neutral-400">
+                {Math.round(
+                  calculatePercentage(totals.commissions, totals.revenue)
+                )}
+                %
+              </td>
+            </tr>
+
+            {/* Résultat net - Recalculé */}
             <tr className="bg-neutral-100 font-bold dark:bg-neutral-700/40">
               <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-900 dark:text-white">
                 Résultat net
@@ -275,7 +422,10 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
                 {formatDollars(netProfitAt10Percent)}
               </td>
               <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-neutral-900 dark:text-white">
-                {Math.round(calculatePercentage(netProfitAt10Percent, totals.revenue))}%
+                {Math.round(
+                  calculatePercentage(netProfitAt10Percent, totals.revenue)
+                )}
+                %
               </td>
             </tr>
           </tbody>
@@ -284,9 +434,10 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({ incomeStatementSta
 
       <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-800/50">
         <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          <span className="font-medium">Note:</span> Ce compte de résultat est basé sur les{' '}
-          {totals.count} ventes d&apos;armes réalisées durant la période sélectionnée. Les charges
-          de personnel représentent les commissions versées aux employés selon leur rôle.
+          <span className="font-medium">Note:</span> Ce compte de résultat est
+          basé sur les {totals.count} ventes d&apos;armes réalisées durant la
+          période sélectionnée. Les charges de personnel représentent les
+          commissions versées aux employés selon leur rôle.
         </p>
       </div>
     </motion.div>

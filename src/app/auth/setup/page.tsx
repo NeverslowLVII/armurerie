@@ -1,13 +1,13 @@
 'use client';
 
-import { Suspense } from 'react';
-import SetupForm from '@/components/auth/SetupForm';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
 import armurerie from '@/assets/armurerie.webp';
+import SetupForm from '@/components/auth/SetupForm';
+import { RandomQuote } from '@/components/ui/RandomQuote';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RandomQuote } from '@/components/ui/RandomQuote';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Suspense } from 'react';
 
 export default function SetupPage() {
   return (

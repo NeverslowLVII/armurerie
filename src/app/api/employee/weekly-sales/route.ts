@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
-import { startOfWeek, endOfWeek } from 'date-fns';
+import { prisma } from '@/lib/prisma';
+import { endOfWeek, startOfWeek } from 'date-fns';
+import { getServerSession } from 'next-auth';
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {

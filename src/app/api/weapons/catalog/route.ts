@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { NextResponse } from 'next/server';
 
 // Use global prisma instance to avoid multiple connections
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
@@ -12,6 +12,9 @@ export async function GET() {
     return NextResponse.json(weapons);
   } catch (error) {
     console.error('Error fetching weapon catalog:', error);
-    return NextResponse.json({ error: 'Failed to fetch weapon catalog' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch weapon catalog' },
+      { status: 500 }
+    );
   }
 }

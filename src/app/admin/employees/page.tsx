@@ -1,17 +1,28 @@
-import { Metadata } from 'next';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
 import UsersAdminClient from '@/components/admin/UsersAdminClient';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import type { Role } from '@prisma/client';
+import type { Metadata } from 'next';
+import { getServerSession } from 'next-auth/next';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Gestion des Utilisateurs - Armurerie',
   description: 'Administration des comptes utilisateurs',
 };
 
-async function getUsers() {
-  return (await prisma.user.findMany({
+// Define the expected user shape for this page
+interface SelectedUser {
+  id: number;
+  name: string;
+  role: Role; // Assuming Role is imported or globally available
+  color: string | null;
+  email: string;
+  contractUrl: string | null;
+}
+
+async function getUsers(): Promise<SelectedUser[]> {
+  return prisma.user.findMany({
     orderBy: { name: 'asc' },
     select: {
       id: true,
@@ -20,8 +31,8 @@ async function getUsers() {
       color: true,
       email: true,
       contractUrl: true,
-    } as any,
-  })) as any[];
+    },
+  });
 }
 
 export default async function UsersAdminPage() {

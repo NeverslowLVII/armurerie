@@ -1,13 +1,13 @@
 'use client';
 
-import { Suspense } from 'react';
-import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
 import armurerie from '@/assets/armurerie.webp';
+import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
+import { RandomQuote } from '@/components/ui/RandomQuote';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RandomQuote } from '@/components/ui/RandomQuote';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { Suspense } from 'react';
 
 export default function ResetPasswordPage() {
   return (

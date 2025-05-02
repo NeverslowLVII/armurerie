@@ -1,9 +1,8 @@
 'use client';
 
-import { cn } from '../../lib/utils';
 import { getLocalTimeZone, today } from '@internationalized/date';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
 import {
   Button,
   CalendarCell as CalendarCellRac,
@@ -16,13 +15,15 @@ import {
   RangeCalendar as RangeCalendarRac,
   composeRenderProps,
 } from 'react-aria-components';
+import { cn } from '../../lib/utils';
 
 interface BaseCalendarProps {
   className?: string;
 }
 
 type CalendarProps = ComponentProps<typeof CalendarRac> & BaseCalendarProps;
-type RangeCalendarProps = ComponentProps<typeof RangeCalendarRac> & BaseCalendarProps;
+type RangeCalendarProps = ComponentProps<typeof RangeCalendarRac> &
+  BaseCalendarProps;
 
 const CalendarHeader = () => (
   <header className="flex w-full items-center gap-1 pb-1">
@@ -48,14 +49,14 @@ const CalendarGridComponent = ({ isRange = false }: { isRange?: boolean }) => {
   return (
     <CalendarGridRac>
       <CalendarGridHeaderRac>
-        {day => (
+        {(day) => (
           <CalendarHeaderCellRac className="size-9 rounded-lg p-0 text-xs font-medium text-muted-foreground/80">
             {day}
           </CalendarHeaderCellRac>
         )}
       </CalendarGridHeaderRac>
       <CalendarGridBodyRac className="[&_td]:px-0">
-        {date => (
+        {(date) => (
           <CalendarCellRac
             date={date}
             className={cn(
@@ -83,7 +84,9 @@ const Calendar = ({ className, ...props }: CalendarProps) => {
   return (
     <CalendarRac
       {...props}
-      className={composeRenderProps(className, className => cn('w-fit', className))}
+      className={composeRenderProps(className, (className) =>
+        cn('w-fit', className)
+      )}
     >
       <CalendarHeader />
       <CalendarGridComponent />
@@ -95,7 +98,9 @@ const RangeCalendar = ({ className, ...props }: RangeCalendarProps) => {
   return (
     <RangeCalendarRac
       {...props}
-      className={composeRenderProps(className, className => cn('w-fit', className))}
+      className={composeRenderProps(className, (className) =>
+        cn('w-fit', className)
+      )}
     >
       <CalendarHeader />
       <CalendarGridComponent isRange />

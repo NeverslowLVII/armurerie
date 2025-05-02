@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       data: { user_id: toUserId },
     });
 
-    console.log('Weapons reassigned successfully:', result);
+    console.info('Weapons reassigned successfully:', result);
     return NextResponse.json({
       success: true,
       message: `${result.count} weapons reassigned from user ${fromUserId} to ${toUserId}`,
@@ -49,7 +49,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Reassign weapons error:', error);
-    return NextResponse.json({ error: 'Failed to reassign weapons' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to reassign weapons' },
+      { status: 500 }
+    );
   }
 }
 

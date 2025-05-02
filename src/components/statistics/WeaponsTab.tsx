@@ -1,20 +1,20 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { WeaponStats } from './types';
-import { chartVariants } from './utils';
+import type React from 'react';
 import {
-  AreaChart,
   Area,
-  XAxis,
-  YAxis,
+  AreaChart,
   CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
   Cell,
   Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
+import type { WeaponStats } from './types';
+import { chartVariants } from './utils';
 
 interface WeaponsTabProps {
   weaponStats: WeaponStats;
@@ -62,11 +62,16 @@ const WeaponsTab: React.FC<WeaponsTabProps> = ({ weaponStats }) => {
                 stroke="#d1d5db"
                 className="dark:stroke-neutral-600"
               />
-              <XAxis dataKey="day" stroke="#4b5563" className="dark:text-neutral-300" />
+              <XAxis
+                dataKey="day"
+                stroke="#4b5563"
+                className="dark:text-neutral-300"
+              />
               <YAxis stroke="#4b5563" className="dark:text-neutral-300" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
+                  backgroundColor:
+                    'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
                   backdropFilter: 'blur(8px)',
                   borderRadius: '8px',
                   border: 'var(--tooltip-border, 1px solid #d1d5db)',
@@ -106,20 +111,26 @@ const WeaponsTab: React.FC<WeaponsTabProps> = ({ weaponStats }) => {
                 outerRadius={100}
                 label
               >
-                {weaponStats.weaponTypes.map((_, index) => (
+                {weaponStats.weaponTypes.map((type) => (
                   <Cell
-                    key={`cell-${index}`}
+                    key={`cell-${type.name}`}
                     fill={
-                      index < 3
-                        ? `hsl(${0 + index * 16}, 85%, 55%)`
-                        : `hsl(${90 + index * 12}, 60%, ${65 - index * 2}%)`
+                      type.name === 'M4A1'
+                        ? 'hsl(150, 85%, 55%)'
+                        : type.name === 'AK-47'
+                          ? 'hsl(200, 85%, 55%)'
+                          : type.name === 'AWP'
+                            ? 'hsl(250, 85%, 55%)'
+                            : 'hsl(300, 85%, 55%)'
                     }
+                    className="focus:outline-none"
                   />
                 ))}
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
+                  backgroundColor:
+                    'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
                   backdropFilter: 'blur(8px)',
                   borderRadius: '8px',
                   border: 'var(--tooltip-border, 1px solid #d1d5db)',

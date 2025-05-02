@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { generateResetPasswordEmailHtml, sendEmail } from '@/lib/email';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/tokens';
-import bcrypt from 'bcryptjs';
 import { generateResetLink } from '@/lib/tokens';
-import { sendEmail, generateResetPasswordEmailHtml } from '@/lib/email';
+import bcrypt from 'bcryptjs';
+import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       subject: 'Réinitialisation de votre mot de passe',
       html: generateResetPasswordEmailHtml(resetLink),
     });
-    console.log('Email sending result:', emailResult);
+    console.info('Email sending result:', emailResult);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -48,7 +48,10 @@ export async function PUT(request: Request) {
     // Vérifier le token
     const payload = verifyToken(token);
     if (!payload || payload.type !== 'reset') {
-      return NextResponse.json({ error: 'Token invalide ou expiré' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Token invalide ou expiré' },
+        { status: 401 }
+      );
     }
 
     // Vérifier que l'utilisateur existe
@@ -57,7 +60,10 @@ export async function PUT(request: Request) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Utilisateur non trouvé' },
+        { status: 404 }
+      );
     }
 
     // Hasher le nouveau mot de passe

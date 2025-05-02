@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import './globals.css';
-import { Providers } from './providers';
 import { initializeApp } from '@/lib/init';
+import { Providers } from './providers';
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['400', '700'] });
 
@@ -21,10 +21,13 @@ try {
   console.error('Failed to initialize app:', error);
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: { children: React.ReactNode }) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={`${poppins.className} min-h-screen`}>
+      {/* Restore original body className if desired, or leave minimal */}
+      <body className={`${poppins.className}`}>
         <Providers>{children}</Providers>
       </body>
     </html>

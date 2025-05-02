@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // Utilitaires simples pour les tests
 const capitalize = (str: string): string => {
@@ -10,7 +10,7 @@ const truncate = (str: string, maxLength: number): string => {
   if (str === null || str === undefined) return null as unknown as string;
   if (str === '') return '';
   if (str.length <= maxLength) return str;
-  return str.substring(0, maxLength).trim() + '...';
+  return `${str.slice(0, Math.max(0, maxLength)).trim()}...`;
 };
 
 const slugify = (str: string): string => {
@@ -64,4 +64,4 @@ describe('String Utils', () => {
       expect(slugify('émilie & françois')).toBe('milie-franois');
     });
   });
-}); 
+});

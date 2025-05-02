@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { cn } from '@/lib/utils';
+import React from 'react';
 import { Skeleton } from './skeleton';
 
 /**
@@ -53,7 +53,11 @@ export function LoadingSpinner({
           variantClasses[variant]
         )}
       />
-      {text && <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">{text}</p>}
+      {text && (
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+          {text}
+        </p>
+      )}
     </div>
   );
 }
@@ -170,10 +174,12 @@ export function SkeletonLoading({
     <div className={cn('animate-pulse', className)}>
       {text && (
         <div className="mb-4 flex justify-center">
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">{text}</p>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+            {text}
+          </p>
         </div>
       )}
-      {React.Children.map(children, child => {
+      {React.Children.map(children, (child) => {
         if (React.isValidElement(child)) {
           // If it's already a Skeleton component, return it as is
           if (child.type === Skeleton) {
@@ -181,7 +187,7 @@ export function SkeletonLoading({
           }
 
           // Otherwise, replace it with a Skeleton of the same size
-          const { className: childClassName, style } = child.props;
+          const { className: childClassName, style } = child.props as any;
           return <Skeleton className={childClassName} style={style} />;
         }
         return null;
@@ -200,7 +206,9 @@ export function SkeletonButton({ className }: { className?: string }) {
 /**
  * A full page skeleton loading component
  */
-export function FullPageSkeletonLoading({ children }: { children: React.ReactNode }) {
+export function FullPageSkeletonLoading({
+  children,
+}: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-4xl">

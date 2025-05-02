@@ -2,39 +2,39 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  motion,
-  useScroll,
-  useTransform,
-  useSpring,
-  type Variants,
-  AnimatePresence,
-} from 'framer-motion';
-import { useEffect, useState, useRef } from 'react';
-import { useTheme } from 'next-themes';
-import { useSession } from 'next-auth/react';
-import { usePathname } from 'next/navigation';
-import {
-  SunIcon,
-  MoonIcon,
-  Bars3Icon,
-  XMarkIcon,
-  ArrowRightOnRectangleIcon,
-  ChartBarIcon,
-  RocketLaunchIcon,
-  UserCircleIcon,
-  UserIcon,
-  ChevronDownIcon,
-} from '@heroicons/react/24/outline';
-import { signOut } from 'next-auth/react';
-import Tilt from 'react-parallax-tilt';
-import Link from 'next/link';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import type { User as AuthUser } from '@/lib/auth';
+import {
+  ArrowRightOnRectangleIcon,
+  Bars3Icon,
+  ChartBarIcon,
+  ChevronDownIcon,
+  MoonIcon,
+  RocketLaunchIcon,
+  SunIcon,
+  UserCircleIcon,
+  UserIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 import { Role } from '@prisma/client';
+import {
+  AnimatePresence,
+  type Variants,
+  motion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
+import { signOut, useSession } from 'next-auth/react';
+import { useTheme } from 'next-themes';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import Tilt from 'react-parallax-tilt';
 
 interface NavigationItem {
   id: 'weapons' | 'statistics' | 'account' | 'comparison';
@@ -45,9 +45,24 @@ interface NavigationItem {
 }
 
 const NAVIGATION_ITEMS: NavigationItem[] = [
-  { id: 'weapons', label: 'Armes', icon: RocketLaunchIcon, href: '/dashboard/weapons' },
-  { id: 'comparison', label: 'Comparateur', icon: RocketLaunchIcon, href: '/weapons/comparison' },
-  { id: 'statistics', label: 'Statistiques', icon: ChartBarIcon, href: '/dashboard/statistics' },
+  {
+    id: 'weapons',
+    label: 'Armes',
+    icon: RocketLaunchIcon,
+    href: '/dashboard/weapons',
+  },
+  {
+    id: 'comparison',
+    label: 'Comparateur',
+    icon: RocketLaunchIcon,
+    href: '/weapons/comparison',
+  },
+  {
+    id: 'statistics',
+    label: 'Statistiques',
+    icon: ChartBarIcon,
+    href: '/dashboard/statistics',
+  },
   {
     id: 'account',
     label: 'Mon Compte',
@@ -72,7 +87,10 @@ export default function Navbar() {
 
   const rawBlur = useTransform(scrollY, [0, 50], [12, 16]);
   const smoothBlur = useSpring(rawBlur, { stiffness: 300, damping: 15 });
-  const smoothBackdrop = useTransform(smoothBlur, value => `blur(${value}px)`);
+  const smoothBackdrop = useTransform(
+    smoothBlur,
+    (value) => `blur(${value}px)`
+  );
 
   const rawScale = useTransform(scrollY, [0, 50], [1, 0.98]);
   const smoothScale = useSpring(rawScale, { stiffness: 300, damping: 15 });
@@ -81,15 +99,19 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   // Filter navigation items based on user role
-  const availableNavItems = NAVIGATION_ITEMS.filter(item => {
+  const availableNavItems = NAVIGATION_ITEMS.filter((item) => {
     if (item.id === 'statistics') {
       // Allow PATRON and DEVELOPER to see Statistics
-      return session?.user?.role === Role.PATRON || session?.user?.role === Role.DEVELOPER;
+      return (
+        session?.user?.role === Role.PATRON ||
+        session?.user?.role === Role.DEVELOPER
+      );
     }
     return !item.hideFromNav; // Keep other items not explicitly hidden
   });
 
-  const currentPage = availableNavItems.find(item => pathname === item.href)?.id || 'weapons';
+  const currentPage =
+    availableNavItems.find((item) => pathname === item.href)?.id || 'weapons';
 
   useEffect(() => {
     setHasMounted(true);
@@ -133,7 +155,10 @@ export default function Navbar() {
 
   const linkVariants: Variants = {
     initial: { scale: 1 },
-    hover: { scale: 1.05, transition: { type: 'spring', stiffness: 400, damping: 10 } },
+    hover: {
+      scale: 1.05,
+      transition: { type: 'spring', stiffness: 400, damping: 10 },
+    },
     tap: { scale: 0.95 },
   };
 
@@ -162,7 +187,10 @@ export default function Navbar() {
       className={`fixed left-0 right-0 top-0 z-50 transition-all duration-150 ${_isScrolled ? 'py-2' : 'py-4'}`}
     >
       <motion.nav
-        style={{ backdropFilter: smoothBackdrop, willChange: 'backdrop-filter' }}
+        style={{
+          backdropFilter: smoothBackdrop,
+          willChange: 'backdrop-filter',
+        }}
         className="relative mx-auto max-w-7xl rounded-2xl border border-white/20 bg-white/80 px-6 shadow-lg shadow-black/5 dark:border-neutral-800/50 dark:bg-neutral-900/80 dark:shadow-white/5"
       >
         <div className="flex h-16 items-center justify-between">
@@ -184,7 +212,7 @@ export default function Navbar() {
                   <h1 className="bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-3xl font-black text-transparent drop-shadow-sm">
                     Armurerie
                   </h1>
-                  <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 opacity-20 blur transition duration-1000 group-hover:opacity-30"></div>
+                  <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 opacity-20 blur transition duration-1000 group-hover:opacity-30" />
                 </motion.div>
               </Tilt>
             </Link>
@@ -241,56 +269,94 @@ export default function Navbar() {
 
           {/* Right side buttons */}
           <div className="hidden items-center space-x-4 md:flex">
-            {session?.user && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="flex items-center gap-2 rounded-lg px-3 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-                  >
-                    <UserCircleIcon className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
-                    <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                      {session.user.username || session.user.name}
-                    </span>
-                    <ChevronDownIcon className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <Link href="/employee/account" passHref>
-                    <DropdownMenuItem
-                      className={`cursor-pointer ${currentPage === 'account' ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400' : ''}`}
-                    >
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Mon compte</span>
-                    </DropdownMenuItem>
-                  </Link>
-                  <DropdownMenuItem
-                    onClick={() => signOut({ redirect: true, callbackUrl: '/auth/signin' })}
-                    className="cursor-pointer text-red-500 dark:text-red-400"
-                  >
-                    <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
-                    <span>Déconnexion</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              className="rounded-lg p-2 transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-              aria-label={`Switch to ${resolvedTheme === 'dark' ? 'light' : 'dark'} mode`}
-            >
+            {/* Theme Toggle and User Dropdown */}
+            <div className="ml-auto flex items-center space-x-4">
+              {/* ---- Theme Toggle START ---- */}
+              {/* Only render the theme toggle button after the component has mounted on the client */}
               {hasMounted && (
-                resolvedTheme === 'dark' ? (
-                  <SunIcon className="h-5 w-5 text-amber-500" />
-                ) : (
-                  <MoonIcon className="h-5 w-5 text-blue-500" />
-                )
+                <motion.button
+                  key={resolvedTheme} // Add key to ensure re-render on theme change if needed
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() =>
+                    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
+                  }
+                  className="hidden items-center rounded-lg p-2 transition-colors duration-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 md:flex"
+                  aria-label={
+                    resolvedTheme === 'dark'
+                      ? 'Switch to light mode'
+                      : 'Switch to dark mode'
+                  }
+                >
+                  {resolvedTheme === 'dark' ? (
+                    <SunIcon className="h-5 w-5 text-yellow-400" />
+                  ) : (
+                    <MoonIcon className="h-5 w-5 text-neutral-600" />
+                  )}
+                </motion.button>
               )}
-              {!hasMounted && <div className="h-5 w-5" />}
-            </motion.button>
+              {/* Show a placeholder on the server / before mount to prevent layout shifts */}
+              {!hasMounted && (
+                <div
+                  className="hidden h-9 w-9 items-center justify-center rounded-lg p-2 md:flex"
+                  aria-hidden="true"
+                /> // Placeholder with same size
+              )}
+              {/* ---- Theme Toggle END ---- */}
+
+              {/* User Dropdown */}
+              {session?.user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="hidden cursor-pointer items-center space-x-2 md:flex"
+                    >
+                      <Button
+                        variant="ghost"
+                        className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800/50"
+                      >
+                        <UserCircleIcon
+                          className="h-6 w-6"
+                          style={{
+                            color:
+                              (session.user as AuthUser).color ?? undefined,
+                          }}
+                        />
+                        <span>{session.user.name}</span>
+                        <ChevronDownIcon className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="mt-2 w-48 rounded-xl border border-white/20 bg-white/90 p-1 shadow-lg backdrop-blur-md dark:border-neutral-800/50 dark:bg-neutral-900/90"
+                  >
+                    <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800/50">
+                      <Link
+                        href="/employee/account"
+                        className="flex w-full items-center"
+                      >
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Mon Compte
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => signOut()}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                    >
+                      <ArrowRightOnRectangleIcon className="mr-2 h-4 w-4" />
+                      Déconnexion
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link href="/auth/signin">
+                  <Button className="hidden md:flex">Connexion</Button>
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -342,24 +408,22 @@ export default function Navbar() {
 
               {/* User section */}
               {session?.user && (
-                <>
-                  <div className="border-t border-neutral-200 pt-2 dark:border-neutral-800">
-                    <Link href="/employee/account" passHref>
-                      <Button
-                        variant="ghost"
-                        className={`w-full justify-start gap-2 ${
-                          currentPage === 'account'
-                            ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
-                            : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white'
-                        }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <UserIcon className="h-4 w-4" />
-                        Mon compte
-                      </Button>
-                    </Link>
-                  </div>
-                </>
+                <div className="border-t border-neutral-200 pt-2 dark:border-neutral-800">
+                  <Link href="/employee/account" passHref>
+                    <Button
+                      variant="ghost"
+                      className={`w-full justify-start gap-2 ${
+                        currentPage === 'account'
+                          ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
+                          : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white'
+                      }`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <UserIcon className="h-4 w-4" />
+                      Mon compte
+                    </Button>
+                  </Link>
+                </div>
               )}
 
               {/* Theme toggle and sign out */}
@@ -373,8 +437,8 @@ export default function Navbar() {
                     variant="ghost"
                     className="w-full justify-start gap-2"
                   >
-                    {hasMounted && (
-                      resolvedTheme === 'dark' ? (
+                    {hasMounted &&
+                      (resolvedTheme === 'dark' ? (
                         <>
                           <SunIcon className="h-4 w-4 text-amber-500" />
                           Mode clair
@@ -384,14 +448,15 @@ export default function Navbar() {
                           <MoonIcon className="h-4 w-4 text-blue-500" />
                           Mode sombre
                         </>
-                      )
-                    )}
+                      ))}
                     {!hasMounted && <div className="h-4 w-4" />}
                   </Button>
                 </motion.div>
                 <motion.div variants={linkVariants}>
                   <Button
-                    onClick={() => signOut({ redirect: true, callbackUrl: '/auth/signin' })}
+                    onClick={() =>
+                      signOut({ redirect: true, callbackUrl: '/auth/signin' })
+                    }
                     variant="ghost"
                     className="w-full justify-start gap-2 text-red-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30"
                   >

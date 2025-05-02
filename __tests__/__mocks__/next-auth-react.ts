@@ -10,9 +10,11 @@ export const signIn = vi.fn();
 export const signOut = vi.fn();
 export const getSession = vi.fn();
 
-export default {
+const NextAuthReactMock = {
   useSession,
   signIn,
   signOut,
   getSession,
-}; 
+};
+
+export default NextAuthReactMock;

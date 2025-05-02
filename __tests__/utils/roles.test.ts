@@ -1,12 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import { Role } from '@prisma/client';
 import {
-  isValidRole,
   getCommissionRate,
-  hasPermission,
   getRoleName,
+  hasPermission,
+  isValidRole,
   roleConfigurations, // Importer pour vérifier les valeurs
 } from '@/utils/roles';
+import { Role } from '@prisma/client';
+import { describe, expect, it } from 'vitest';
 
 describe('Roles Utils', () => {
   // Test pour isValidRole
@@ -18,20 +18,26 @@ describe('Roles Utils', () => {
       expect(isValidRole(Role.DEVELOPER)).toBe(true);
     });
 
-    it('should return false for invalid roles', () => {
+    it('should return false for invalid inputs', () => {
       expect(isValidRole('INVALID_ROLE')).toBe(false);
       expect(isValidRole('')).toBe(false);
-      expect(isValidRole(null as any)).toBe(false);
-      expect(isValidRole(undefined as any)).toBe(false);
+      expect(isValidRole(null as unknown as string)).toBe(false);
+      expect(isValidRole(undefined as unknown as string)).toBe(false);
     });
   });
 
   // Test pour getCommissionRate
   describe('getCommissionRate', () => {
     it('should return the correct commission rate for each role', () => {
-      expect(getCommissionRate(Role.EMPLOYEE)).toBe(roleConfigurations.EMPLOYEE.commissionRate);
-      expect(getCommissionRate(Role.CO_PATRON)).toBe(roleConfigurations.CO_PATRON.commissionRate);
-      expect(getCommissionRate(Role.PATRON)).toBe(roleConfigurations.PATRON.commissionRate);
+      expect(getCommissionRate(Role.EMPLOYEE)).toBe(
+        roleConfigurations.EMPLOYEE.commissionRate
+      );
+      expect(getCommissionRate(Role.CO_PATRON)).toBe(
+        roleConfigurations.CO_PATRON.commissionRate
+      );
+      expect(getCommissionRate(Role.PATRON)).toBe(
+        roleConfigurations.PATRON.commissionRate
+      );
       // Développeur a un taux de 0
       expect(getCommissionRate(Role.DEVELOPER)).toBe(0);
     });
@@ -58,7 +64,7 @@ describe('Roles Utils', () => {
       expect(hasPermission(Role.EMPLOYEE, 'canManageUsers')).toBe(false);
       expect(hasPermission(Role.CO_PATRON, 'canManageFeedback')).toBe(false);
     });
-    
+
     it('should handle the isSystemAdmin permission check directly', () => {
       expect(hasPermission(Role.DEVELOPER, 'isSystemAdmin')).toBe(true);
       expect(hasPermission(Role.PATRON, 'isSystemAdmin')).toBe(false);
@@ -80,4 +86,4 @@ describe('Roles Utils', () => {
       expect(getRoleName(unknownRole)).toBe('FUTURE_ROLE');
     });
   });
-}); 
+});

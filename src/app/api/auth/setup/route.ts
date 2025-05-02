@@ -1,36 +1,42 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/tokens';
 import bcrypt from 'bcryptjs';
+import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    console.log('Setup API called');
+    console.info('Setup API called');
     const { token, password } = await request.json();
-    console.log('Received token and password');
+    console.info('Received token and password');
 
     // Vérifier le token
     const payload = verifyToken(token);
-    console.log('Token verification result:', payload);
+    console.info('Token verification result:', payload);
 
     if (!payload || payload.type !== 'setup') {
-      console.log('Invalid token or wrong type');
-      return NextResponse.json({ error: 'Token invalide ou expiré' }, { status: 401 });
+      console.info('Invalid token or wrong type');
+      return NextResponse.json(
+        { error: 'Token invalide ou expiré' },
+        { status: 401 }
+      );
     }
 
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
     });
-    console.log('User found:', !!user);
+    console.info('User found:', !!user);
 
     if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Utilisateur non trouvé' },
+        { status: 404 }
+      );
     }
 
     // Hasher le nouveau mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('Password hashed');
+    console.info('Password hashed');
 
     // Mettre à jour l'utilisateur
     await prisma.user.update({
@@ -40,7 +46,7 @@ export async function POST(request: Request) {
         lastLogin: new Date(),
       },
     });
-    console.log('User updated successfully');
+    console.info('User updated successfully');
 
     return NextResponse.json({ success: true });
   } catch (error) {

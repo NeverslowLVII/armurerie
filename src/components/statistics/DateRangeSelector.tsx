@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { DateRange } from './types';
+import type React from 'react';
+import type { DateRange } from './types';
 import { formatDateForInput, getPresets } from './utils';
 
 interface DateRangeSelectorProps {
@@ -46,6 +46,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
         <div className="flex flex-wrap gap-2">
           {presets.map((preset, index) => (
             <button
+              type="button"
               key={preset.label}
               onClick={() => onPresetClick(index)}
               className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
@@ -61,10 +62,14 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 
         <div className="flex w-full flex-col items-center space-y-2 sm:w-auto sm:flex-row sm:space-x-4 sm:space-y-0">
           <div className="flex w-full items-center space-x-2 sm:w-auto">
-            <label className="whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
+            <label
+              htmlFor="startDate"
+              className="whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400"
+            >
               Du:
             </label>
             <input
+              id="startDate"
               type="date"
               value={formatDateForInput(dateRange.startDate)}
               onChange={handleStartDateChange}
@@ -73,10 +78,14 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
           </div>
 
           <div className="flex w-full items-center space-x-2 sm:w-auto">
-            <label className="whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400">
+            <label
+              htmlFor="endDate"
+              className="whitespace-nowrap text-sm text-neutral-600 dark:text-neutral-400"
+            >
               Au:
             </label>
             <input
+              id="endDate"
               type="date"
               value={formatDateForInput(dateRange.endDate)}
               onChange={handleEndDateChange}

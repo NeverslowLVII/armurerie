@@ -1,19 +1,20 @@
-import React, { useState, useMemo } from 'react';
 import { Tab } from '@headlessui/react';
-import { TabType, Weapon, DateRange } from './types';
-import { AnimatePresence } from 'framer-motion';
-import { formatDate, getPresets, normalizeWeaponName } from './utils';
-import OverviewTab from './OverviewTab';
-import WeaponsTab from './WeaponsTab';
-import EmployeesTab from './EmployeesTab';
-import IncomeStatementTab from './IncomeStatementTab';
-import DateRangeSelector from './DateRangeSelector';
 import {
   ChartBarIcon,
-  UsersIcon,
-  CurrencyDollarIcon,
   CheckCircleIcon,
+  CurrencyDollarIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
+import { AnimatePresence } from 'framer-motion';
+import type React from 'react';
+import { useMemo, useState } from 'react';
+import DateRangeSelector from './DateRangeSelector';
+import EmployeesTab from './EmployeesTab';
+import IncomeStatementTab from './IncomeStatementTab';
+import OverviewTab from './OverviewTab';
+import WeaponsTab from './WeaponsTab';
+import type { DateRange, TabType, Weapon } from './types';
+import { formatDate, getPresets, normalizeWeaponName } from './utils';
 
 interface StatisticsProps {
   weapons: Weapon[];
@@ -50,9 +51,11 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
 
   // Filtrer les armes en fonction de la plage de dates sélectionnée
   const filteredWeapons = useMemo(() => {
-    return weapons.filter(weapon => {
+    return weapons.filter((weapon) => {
       const weaponDate = new Date(weapon.horodateur);
-      return weaponDate >= dateRange.startDate && weaponDate <= dateRange.endDate;
+      return (
+        weaponDate >= dateRange.startDate && weaponDate <= dateRange.endDate
+      );
     });
   }, [weapons, dateRange]);
 
@@ -79,7 +82,10 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
 
     // Calculate totals
     const totalWeapons = filteredWeapons.length;
-    const totalValue = filteredWeapons.reduce((sum, weapon) => sum + weapon.prix, 0);
+    const totalValue = filteredWeapons.reduce(
+      (sum, weapon) => sum + weapon.prix,
+      0
+    );
     const totalCostProduction = filteredWeapons.reduce((sum, weapon) => {
       return sum + (weapon.base_weapon?.cout_production_defaut ?? 0);
     }, 0);
@@ -90,7 +96,9 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
 
     // Calculate averages
     const averagePrice = Math.round(totalValue / totalWeapons);
-    const averageCostProduction = Math.round(totalCostProduction / totalWeapons);
+    const averageCostProduction = Math.round(
+      totalCostProduction / totalWeapons
+    );
     const averageProfit = Math.round(totalProfit / totalWeapons);
     const profitMargin = totalValue > 0 ? (totalProfit / totalValue) * 100 : 0;
 
@@ -118,9 +126,13 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
     // Calculate profit by weapon type
     const profitByType = Object.entries(weaponsByType)
       .map(([name, typeWeapons]) => {
-        const totalTypeValue = typeWeapons.reduce((sum, weapon) => sum + weapon.prix, 0);
+        const totalTypeValue = typeWeapons.reduce(
+          (sum, weapon) => sum + weapon.prix,
+          0
+        );
         const totalTypeCost = typeWeapons.reduce(
-          (sum, weapon) => sum + (weapon.base_weapon?.cout_production_defaut || 0),
+          (sum, weapon) =>
+            sum + (weapon.base_weapon?.cout_production_defaut || 0),
           0
         );
         const typeProfit = totalTypeValue - totalTypeCost;
@@ -148,14 +160,20 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
 
         acc[day].totalValue += weapon.prix;
         acc[day].totalCost += weapon.base_weapon?.cout_production_defaut ?? 0;
-        acc[day].totalProfit += weapon.prix - (weapon.base_weapon?.cout_production_defaut ?? 0);
+        acc[day].totalProfit +=
+          weapon.prix - (weapon.base_weapon?.cout_production_defaut ?? 0);
         acc[day].count += 1;
 
         return acc;
       },
       {} as Record<
         string,
-        { totalValue: number; totalCost: number; totalProfit: number; count: number }
+        {
+          totalValue: number;
+          totalCost: number;
+          totalProfit: number;
+          count: number;
+        }
       >
     );
 
@@ -220,9 +238,13 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
     // Calculate profits by employee
     const employeeProfits = Object.entries(employeeWeapons)
       .map(([name, empWeapons]) => {
-        const totalValue = empWeapons.reduce((sum, weapon) => sum + weapon.prix, 0);
+        const totalValue = empWeapons.reduce(
+          (sum, weapon) => sum + weapon.prix,
+          0
+        );
         const totalCost = empWeapons.reduce(
-          (sum, weapon) => sum + (weapon.base_weapon?.cout_production_defaut ?? 0),
+          (sum, weapon) =>
+            sum + (weapon.base_weapon?.cout_production_defaut ?? 0),
           0
         );
         const profit = totalValue - totalCost;
@@ -271,7 +293,10 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
   // Calculate income statement statistics
   const incomeStatementStats = useMemo(() => {
     // Créer un compte de résultat pour la période sélectionnée
-    const revenue = filteredWeapons.reduce((sum, weapon) => sum + weapon.prix, 0);
+    const revenue = filteredWeapons.reduce(
+      (sum, weapon) => sum + weapon.prix,
+      0
+    );
     const productionCost = filteredWeapons.reduce(
       (sum, weapon) => sum + (weapon.base_weapon?.cout_production_defaut ?? 0),
       0
@@ -280,7 +305,8 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
 
     // Calculer les commissions en utilisant le taux stocké dans weapon.user.commission
     const commissions = filteredWeapons.reduce((sum, weapon) => {
-      const weaponProfit = weapon.prix - (weapon.base_weapon?.cout_production_defaut ?? 0);
+      const weaponProfit =
+        weapon.prix - (weapon.base_weapon?.cout_production_defaut ?? 0);
       const commissionRate = weapon.user?.commission ?? 0.1; // Default 10% if not set
       return sum + weaponProfit * commissionRate;
     }, 0);
@@ -326,7 +352,9 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
   return (
     <div className="space-y-6">
       <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
-        <h2 className="mb-6 text-2xl font-bold text-neutral-900 dark:text-white">Statistiques</h2>
+        <h2 className="mb-6 text-2xl font-bold text-neutral-900 dark:text-white">
+          Statistiques
+        </h2>
 
         {/* Date Range Selector */}
         <DateRangeSelector
@@ -344,11 +372,11 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
           </div>
         ) : (
           <Tab.Group
-            selectedIndex={tabs.findIndex(tab => tab.key === selectedTab)}
-            onChange={index => setSelectedTab(tabs[index].key as TabType)}
+            selectedIndex={tabs.findIndex((tab) => tab.key === selectedTab)}
+            onChange={(index) => setSelectedTab(tabs[index].key as TabType)}
           >
             <Tab.List className="flex space-x-2 overflow-x-auto rounded-xl bg-neutral-100 p-1 dark:bg-neutral-700">
-              {tabs.map(tab => (
+              {tabs.map((tab) => (
                 <Tab
                   key={tab.key}
                   className={({ selected }) =>
@@ -367,14 +395,22 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
 
             <Tab.Panels className="mt-6">
               <AnimatePresence mode="wait">
-                {selectedTab === 'overview' && <OverviewTab weaponStats={weaponStats} />}
+                {selectedTab === 'overview' && (
+                  <OverviewTab weaponStats={weaponStats} />
+                )}
 
-                {selectedTab === 'weapons' && <WeaponsTab weaponStats={weaponStats} />}
+                {selectedTab === 'weapons' && (
+                  <WeaponsTab weaponStats={weaponStats} />
+                )}
 
-                {selectedTab === 'employees' && <EmployeesTab employeeStats={employeeStats} />}
+                {selectedTab === 'employees' && (
+                  <EmployeesTab employeeStats={employeeStats} />
+                )}
 
                 {selectedTab === 'income' && (
-                  <IncomeStatementTab incomeStatementStats={incomeStatementStats} />
+                  <IncomeStatementTab
+                    incomeStatementStats={incomeStatementStats}
+                  />
                 )}
               </AnimatePresence>
             </Tab.Panels>

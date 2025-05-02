@@ -4,7 +4,18 @@ interface RequestData {
   orderName: string;
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+// Define a basic interface for the expected message structure
+interface DiscordMessage {
+  id: string;
+  content: string;
+  embeds: Array<{ title?: string; description?: string }>;
+  author: { bot?: boolean };
+}
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -22,7 +33,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const channelId = process.env.DISCORD_CHANNEL_ID;
 
     if (!webhookUrl) {
-      return res.status(500).json({ error: 'Discord webhook URL not configured' });
+      return res
+        .status(500)
+        .json({ error: 'Discord webhook URL not configured' });
     }
 
     // Si nous avons un token de bot et un ID de canal, essayer de trouver et supprimer le message de commande
@@ -43,10 +56,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           const messages = await messagesResponse.json();
 
           // Chercher le message contenant "Commande validée" et le nom de la commande
-          const targetMessage = messages.find((msg: any) => {
+          const targetMessage = messages.find((msg: DiscordMessage) => {
             const content = msg.content.toLowerCase();
             return (
-              content.includes('commande validée') && content.includes(orderName.toLowerCase())
+              content.includes('commande validée') &&
+              content.includes(orderName.toLowerCase())
             );
           });
 
@@ -63,24 +77,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             );
 
             if (deleteResponse.ok) {
-              console.log(`Message de commande "${orderName}" supprimé avec succès`);
             } else {
               console.error(
-                `Erreur lors de la suppression du message:`,
+                'Erreur lors de la suppression du message:',
                 await deleteResponse.text()
               );
             }
           } else {
-            console.log(`Aucun message correspondant à la commande "${orderName}" n'a été trouvé`);
           }
         } else {
           console.error(
-            `Erreur lors de la récupération des messages:`,
+            'Erreur lors de la récupération des messages:',
             await messagesResponse.text()
           );
         }
       } catch (error) {
-        console.error('Erreur lors de la recherche/suppression du message Discord:', error);
+        console.error(
+          'Erreur lors de la recherche/suppression du message Discord:',
+          error
+        );
       }
     }
 
@@ -100,9 +115,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Discord webhook error:', errorText);
-      return res
-        .status(500)
-        .json({ error: 'Failed to send Discord notification', details: errorText });
+      return res.status(500).json({
+        error: 'Failed to send Discord notification',
+        details: errorText,
+      });
     }
 
     return res.status(200).json({ success: true });

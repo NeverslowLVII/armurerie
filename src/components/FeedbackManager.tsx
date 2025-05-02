@@ -1,60 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Dialog } from '@headlessui/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { SelectNative } from '@/components/ui/select-native';
 import { Role } from '@/services/api';
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
+import type React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   userId?: number | undefined;
 }
-
-const modalVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.95,
-    y: 20,
-  },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: {
-      type: 'spring',
-      duration: 0.3,
-      bounce: 0.25,
-    },
-  },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    y: 20,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      duration: 0.2,
-    },
-  },
-  exit: {
-    opacity: 0,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
 
 const listItemVariants = {
   hidden: {
@@ -132,7 +97,9 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'BUG' | 'FEATURE_REQUEST'>('BUG');
-  const [status, setStatus] = useState<'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED'>('OPEN');
+  const [status, setStatus] = useState<
+    'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED'
+  >('OPEN');
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -244,7 +211,7 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
   };
 
   const filteredFeedbacks = feedbacks.filter(
-    feedback =>
+    (feedback) =>
       feedback.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       feedback.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       feedback.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -255,25 +222,18 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
 
   return (
     <>
-      <AnimatePresence>
-        <Dialog open={open} onClose={onClose} className="fixed inset-0 z-[60] overflow-hidden">
-          <div className="flex min-h-screen items-center justify-center p-2">
-            <motion.div variants={overlayVariants} initial="hidden" animate="visible" exit="exit">
-              <div className="fixed inset-0 bg-neutral-500 bg-opacity-75 backdrop-blur-sm transition-opacity dark:bg-neutral-900 dark:bg-opacity-75" />
-            </motion.div>
-
-            <motion.div
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="relative flex h-[85vh] w-full max-w-7xl flex-col rounded-lg bg-white shadow-xl dark:bg-neutral-800"
-            >
-              <div className="border-b border-neutral-200 p-3 dark:border-neutral-700">
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogPortal>
+          <DialogOverlay className="bg-black/30 backdrop-blur-sm dark:bg-neutral-900/40" />
+          <DialogContent className="h-[85vh] max-w-[95vw] border border-neutral-800 bg-neutral-900 p-0 shadow-2xl xl:max-w-[90vw] 2xl:max-w-[85vw]">
+            <div className="flex h-full flex-col">
+              <div className="border-b border-neutral-700 p-3">
                 <div className="flex items-center justify-between">
-                  <Dialog.Title className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-                    {isDeveloper ? 'Gestionnaire de retours' : 'Soumettre un retour'}
-                  </Dialog.Title>
+                  <DialogTitle className="text-xl font-semibold text-neutral-100">
+                    {isDeveloper
+                      ? 'Gestionnaire de retours'
+                      : 'Soumettre un retour'}
+                  </DialogTitle>
                   <div className="flex items-center space-x-4">
                     {isDeveloper && (
                       <div className="relative">
@@ -281,16 +241,17 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                           type="text"
                           placeholder="Rechercher un retour..."
                           value={searchQuery}
-                          onChange={e => setSearchQuery(e.target.value)}
-                          className="w-64 rounded-md border border-neutral-300 py-1.5 pl-4 pr-10 text-sm focus:border-red-500 focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400"
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-64 rounded-md border border-neutral-600 bg-neutral-800 py-1.5 pl-4 pr-10 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                         />
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                           <svg
-                            className="h-4 w-4 text-neutral-400 dark:text-neutral-300"
+                            className="h-4 w-4 text-neutral-500"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                           >
+                            <title>Icône de recherche</title>
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -303,7 +264,8 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                     )}
                     <Button
                       onClick={onClose}
-                      className="inline-flex items-center rounded-md border border-transparent bg-neutral-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 dark:bg-neutral-700 dark:hover:bg-neutral-600"
+                      variant="outline"
+                      className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
                     >
                       Fermer
                     </Button>
@@ -318,12 +280,12 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                 <div
                   className={
                     isDeveloper
-                      ? 'w-1/3 overflow-y-auto border-r border-neutral-200 p-4 dark:border-neutral-700'
+                      ? 'w-1/3 overflow-y-auto border-r border-neutral-700 bg-neutral-900 p-4'
                       : 'w-full max-w-lg p-4'
                   }
                 >
                   {error && (
-                    <div className="mb-3 rounded border-l-4 border-red-500 bg-red-100 p-2 text-sm text-red-700 dark:border-red-700 dark:bg-red-900 dark:text-red-200">
+                    <div className="mb-3 rounded border-l-4 border-red-700 bg-red-900/50 p-2 text-sm text-red-300">
                       {error}
                     </div>
                   )}
@@ -334,7 +296,7 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                       animate="visible"
                       exit="exit"
                       variants={successVariants}
-                      className="mb-3 rounded border-l-4 border-green-500 bg-green-100 p-2 text-sm text-green-700 dark:border-green-700 dark:bg-green-900 dark:text-green-200"
+                      className="mb-3 rounded border-l-4 border-emerald-700 bg-emerald-900/50 p-2 text-sm text-emerald-300"
                     >
                       {success}
                     </motion.div>
@@ -342,44 +304,60 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
 
                   <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      <label
+                        htmlFor="feedbackType"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Type
                       </label>
                       <SelectNative
+                        id="feedbackType"
                         value={type}
-                        onChange={e => setType(e.target.value as 'BUG' | 'FEATURE_REQUEST')}
-                        className="block w-full rounded-md border-neutral-300 shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white sm:text-sm"
+                        onChange={(e) =>
+                          setType(e.target.value as 'BUG' | 'FEATURE_REQUEST')
+                        }
+                        className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 pl-4 pr-10 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                         required
                         disabled={isSubmitting}
                       >
                         <option value="BUG">Bug</option>
-                        <option value="FEATURE_REQUEST">Nouvelle fonctionnalité</option>
+                        <option value="FEATURE_REQUEST">
+                          Nouvelle fonctionnalité
+                        </option>
                       </SelectNative>
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      <label
+                        htmlFor="feedbackTitle"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Titre
                       </label>
                       <Input
+                        id="feedbackTitle"
                         type="text"
                         value={title}
-                        onChange={e => setTitle(e.target.value)}
-                        className="block w-full rounded-md border-neutral-300 shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400 sm:text-sm"
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 px-4 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                         required
                         disabled={isSubmitting}
                       />
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                      <label
+                        htmlFor="feedbackDescription"
+                        className="mb-1 block text-sm font-medium text-neutral-300"
+                      >
                         Description
                       </label>
                       <textarea
+                        id="feedbackDescription"
                         value={description}
-                        onChange={e => setDescription(e.target.value)}
+                        onChange={(e) => setDescription(e.target.value)}
                         rows={4}
-                        className="block w-full rounded-md border-neutral-300 shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:placeholder-neutral-400 sm:text-sm"
+                        className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 px-4 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                         required
                         disabled={isSubmitting}
                       />
@@ -387,17 +365,25 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
 
                     {isDeveloper && (
                       <div>
-                        <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        <label
+                          htmlFor="feedbackStatus"
+                          className="mb-1 block text-sm font-medium text-neutral-300"
+                        >
                           Statut
                         </label>
                         <SelectNative
+                          id="feedbackStatus"
                           value={status}
-                          onChange={e =>
+                          onChange={(e) =>
                             setStatus(
-                              e.target.value as 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'REJECTED'
+                              e.target.value as
+                                | 'OPEN'
+                                | 'IN_PROGRESS'
+                                | 'RESOLVED'
+                                | 'REJECTED'
                             )
                           }
-                          className="block w-full rounded-md border-neutral-300 shadow-sm focus:border-red-500 focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white sm:text-sm"
+                          className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 pl-4 pr-10 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                           required
                           disabled={isSubmitting}
                         >
@@ -412,10 +398,10 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                     <div className="pt-2">
                       <Button
                         type="submit"
-                        className={`inline-flex w-full items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm ${
+                        className={`flex w-full items-center justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm ${
                           isSubmitting
-                            ? 'bg-red-400 dark:bg-red-500'
-                            : 'bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600'
+                            ? 'bg-red-500/50'
+                            : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500'
                         } focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2`}
                         disabled={isSubmitting}
                       >
@@ -427,6 +413,7 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                               fill="none"
                               viewBox="0 0 24 24"
                             >
+                              <title>Chargement...</title>
                               <circle
                                 className="opacity-25"
                                 cx="12"
@@ -434,12 +421,12 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                                 r="10"
                                 stroke="currentColor"
                                 strokeWidth="4"
-                              ></circle>
+                              />
                               <path
                                 className="opacity-75"
                                 fill="currentColor"
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
+                              />
                             </svg>
                             Soumission...
                           </>
@@ -456,12 +443,12 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
 
                 {/* Feedback List - Only visible to developers */}
                 {isDeveloper && (
-                  <div className="flex min-h-0 flex-1 flex-col">
-                    <div className="border-b border-neutral-200 bg-neutral-50 px-4 py-2 dark:border-neutral-700 dark:bg-neutral-800">
+                  <div className="flex min-h-0 flex-1 flex-col bg-neutral-900">
+                    <div className="border-b border-neutral-700 bg-neutral-800 px-4 py-2">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                        <h3 className="text-sm font-medium text-neutral-100">
                           Retours existants
-                          <span className="ml-2 text-xs text-neutral-500 dark:text-neutral-400">
+                          <span className="ml-2 text-xs text-neutral-400">
                             ({filteredFeedbacks.length} résultats)
                           </span>
                         </h3>
@@ -471,7 +458,7 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                     <div className="flex-1 overflow-y-auto">
                       <div className="space-y-2 p-4">
                         <AnimatePresence mode="popLayout">
-                          {filteredFeedbacks.map(feedback => (
+                          {filteredFeedbacks.map((feedback) => (
                             <motion.div
                               key={feedback.id}
                               variants={listItemVariants}
@@ -479,23 +466,28 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                               animate="visible"
                               exit="exit"
                               layout
-                              className="rounded-lg border border-neutral-200 p-4 transition-colors duration-150 hover:bg-neutral-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
+                              className="rounded-lg border border-neutral-700 bg-neutral-800/50 p-4 transition-colors duration-150 hover:bg-neutral-800"
                             >
                               <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                   <div className="flex flex-col">
-                                    <span className="text-lg font-medium text-red-600 dark:text-red-400">
+                                    <span className="text-lg font-medium text-red-400">
                                       {feedback.title}
                                     </span>
-                                    <span className="text-sm text-neutral-500 dark:text-neutral-400">
-                                      {feedback.user ? `Par ${feedback.user.name}` : 'Anonyme'} -{' '}
-                                      {new Date(feedback.createdAt).toLocaleDateString()}
+                                    <span className="text-sm text-neutral-400">
+                                      {feedback.user
+                                        ? `Par ${feedback.user.name}`
+                                        : 'Anonyme'}{' '}
+                                      -{' '}
+                                      {new Date(
+                                        feedback.createdAt
+                                      ).toLocaleDateString()}
                                     </span>
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <SelectNative
                                       value={feedback.status}
-                                      onChange={e =>
+                                      onChange={(e) =>
                                         handleStatusChange(
                                           feedback.id,
                                           e.target.value as
@@ -505,23 +497,26 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                                             | 'REJECTED'
                                         )
                                       }
-                                      className="rounded-md border-neutral-300 text-sm focus:border-red-500 focus:ring-red-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white"
+                                      className="rounded-md border border-neutral-600 bg-neutral-700 py-1 pl-2 pr-8 text-xs text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                                     >
                                       <option value="OPEN">Ouvert</option>
-                                      <option value="IN_PROGRESS">En cours</option>
+                                      <option value="IN_PROGRESS">
+                                        En cours
+                                      </option>
                                       <option value="RESOLVED">Résolu</option>
                                       <option value="REJECTED">Rejeté</option>
                                     </SelectNative>
                                     <Button
                                       onClick={() => handleDelete(feedback.id)}
-                                      className="rounded-full p-1 text-neutral-400 hover:bg-red-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:text-neutral-300 dark:hover:bg-red-900 dark:hover:text-red-400"
+                                      variant="ghost"
+                                      className="rounded-full p-1 text-red-400 hover:bg-neutral-700 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:ring-offset-neutral-900"
                                     >
                                       <TrashIcon className="h-5 w-5" />
                                     </Button>
                                   </div>
                                 </div>
 
-                                <p className="text-sm text-neutral-600 dark:text-neutral-300">
+                                <p className="text-sm text-neutral-300">
                                   {feedback.description}
                                 </p>
 
@@ -529,7 +524,9 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                                   <span
                                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getTypeColor(feedback.type)}`}
                                   >
-                                    {feedback.type === 'BUG' ? 'Bug' : 'Nouvelle fonctionnalité'}
+                                    {feedback.type === 'BUG'
+                                      ? 'Bug'
+                                      : 'Nouvelle fonctionnalité'}
                                   </span>
                                   <span
                                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(feedback.status)}`}
@@ -541,15 +538,25 @@ export default function FeedbackManager({ open, onClose, userId }: Props) {
                             </motion.div>
                           ))}
                         </AnimatePresence>
+                        {filteredFeedbacks.length === 0 && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="p-4 text-center text-neutral-400"
+                          >
+                            Aucun retour trouvé
+                          </motion.div>
+                        )}
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-            </motion.div>
-          </div>
-        </Dialog>
-      </AnimatePresence>
+            </div>
+          </DialogContent>
+        </DialogPortal>
+      </Dialog>
     </>
   );
 }

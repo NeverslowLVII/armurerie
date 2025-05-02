@@ -1,6 +1,6 @@
+// import { Role } from '@prisma/client';
 import { withAuth } from 'next-auth/middleware';
 import { NextResponse } from 'next/server';
-import { Role } from '@prisma/client';
 
 // Define public routes that don't require authentication
 const publicRoutes = [
@@ -30,14 +30,14 @@ export default withAuth(
 
     // Check if the route is public
     if (
-      publicRoutes.some(route => {
+      publicRoutes.some((route) => {
         // Exact match for paths like /auth/reset
         if (path === route) return true;
         // Prefix match for paths like /_next/...
         if (
           route.endsWith('/')
             ? path.startsWith(route)
-            : path.startsWith(route + '/') || path === route
+            : path.startsWith(`${route}/`) || path === route
         )
           return true;
         return false;
@@ -65,15 +65,18 @@ export default withAuth(
         });
       }
 
-      return new NextResponse(JSON.stringify({ error: 'Authentication required' }), {
-        status: 401,
-        headers: {
-          'content-type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        },
-      });
+      return new NextResponse(
+        JSON.stringify({ error: 'Authentication required' }),
+        {
+          status: 401,
+          headers: {
+            'content-type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          },
+        }
+      );
     }
 
     // Protected routes - require auth
@@ -85,7 +88,10 @@ export default withAuth(
 
     // Admin routes - require PATRON, CO_PATRON, or DEVELOPER
     const isAdminRoute = path.startsWith('/admin');
-    const isAdminRole = token.role === Role.PATRON || token.role === Role.CO_PATRON || token.role === Role.DEVELOPER;
+    const isAdminRole =
+      token.role === 'PATRON' ||
+      token.role === 'CO_PATRON' ||
+      token.role === 'DEVELOPER';
 
     if (isAdminRoute && !isAdminRole) {
       if (isApiRoute) {
@@ -111,7 +117,7 @@ export default withAuth(
         // No specific role check needed for POST, just needs login (handled above)
       }
       // Restrict GET, PATCH, DELETE to DEVELOPER role
-      else if (!isPostRequest && token.role !== Role.DEVELOPER) {
+      else if (!isPostRequest && token.role !== 'DEVELOPER') {
         // Return 403 for non-POST requests by non-developers
         return new NextResponse(JSON.stringify({ error: 'Access denied' }), {
           status: 403,
@@ -131,8 +137,14 @@ export default withAuth(
 
     // Add CORS headers to all responses
     response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS'
+    );
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization'
+    );
 
     return response;
   },
@@ -146,9 +158,13 @@ export default withAuth(
   }
 );
 
-// Update matcher to exclude more static paths
+// Restore config export to explicitly define public paths for the middleware
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/|auth/reset|auth/setup|api/auth/setup).*)',
+    // Apply middleware to all paths EXCEPT:
+    // - API routes for auth itself
+    // - Static files (_next/static, _next/image, favicon.ico, etc.)
+    // - Specific public auth pages (reset, setup)
+    '/((?!api/auth/|auth/reset|auth/setup|_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/).*)',
   ],
 };

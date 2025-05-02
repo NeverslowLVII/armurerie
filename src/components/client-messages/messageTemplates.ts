@@ -5,20 +5,20 @@
  * pour générer des messages personnalisés pour les clients.
  */
 
-export interface MessageSections {
+interface MessageSections {
   intro: string;
   body: string;
   recommendation: string;
   closing: string;
 }
 
-export interface MessageTemplateConfig {
+interface MessageTemplateConfig {
   id: string;
   name: string;
   template: (data: MessageTemplateData) => MessageSections;
 }
 
-export interface MessageTemplateData {
+interface MessageTemplateData {
   uniqueWeapons: string[];
   formattedTotal: string;
   purchaseCount: number;
@@ -27,16 +27,16 @@ export interface MessageTemplateData {
 }
 
 // Salutations possibles pour les messages - strictement neutres
-export const SALUTATIONS = [
+const SALUTATIONS = [
   (name: string) => `${name},`,
   (name: string) => `Bonjour ${name},`,
   (name: string) => `Salutations distinguées ${name},`,
   (name: string) => `Bien le bonjour ${name},`,
-  (name: string) => `À l'attention de ${name},`,
+  (name: string) => `À l\'attention de ${name},`,
 ];
 
 // Formules de politesse pour la fin des messages
-export const FORMULES_POLITESSE = [
+const FORMULES_POLITESSE = [
   'Avec mes salutations distinguées,',
   'Bien à vous,',
   'Au plaisir de vous revoir bientôt à Saint-Denis,',
@@ -45,12 +45,13 @@ export const FORMULES_POLITESSE = [
 ];
 
 // Templates de messages disponibles
-export const MESSAGE_TEMPLATES: MessageTemplateConfig[] = [
+const MESSAGE_TEMPLATES: MessageTemplateConfig[] = [
   {
     id: 'standard',
     name: 'Standard',
     template: (data: MessageTemplateData): MessageSections => ({
-      intro: `Votre satisfaction demeure la priorité absolue de notre établissement, qui sert fièrement la ville de Saint-Denis depuis près de vingt années.`,
+      intro:
+        'Votre satisfaction demeure la priorité absolue de notre établissement, qui sert fièrement la ville de Saint-Denis depuis près de vingt années.',
       body:
         data.uniqueWeapons.length > 0
           ? `Le ${data.uniqueWeapons[0]} que vous avez choisi fait la fierté de notre collection et procure généralement une grande satisfaction à sa possession. Cette arme est particulièrement renommée pour sa fiabilité exemplaire, même par temps humide comme nous en connaissons souvent dans notre belle région de Lemoyne.`
@@ -71,7 +72,7 @@ export const MESSAGE_TEMPLATES: MessageTemplateConfig[] = [
       recommendation:
         data.recommendations.length > 0
           ? `Vous pourriez trouver un intérêt particulier pour ${data.recommendations[0]} récemment arrivé dans nos rayons. Ces pièces d'exception ont été sélectionnées avec le plus grand soin.`
-          : `De nouvelles pièces attendent patiemment dans nos vitrines fraîchement astiquées. Chaque arme a été minutieusement inspectée et certaines évoquent immédiatement vos précédents choix.`,
+          : 'De nouvelles pièces attendent patiemment dans nos vitrines fraîchement astiquées. Chaque arme a été minutieusement inspectée et certaines évoquent immédiatement vos précédents choix.',
       closing: `Votre présence serait particulièrement appréciée dans notre boutique de la rue principale. Comme toujours, le café sera chaud et le whisky parfaitement frais, prêts à vous être servis comme vous l'appréciez.`,
     }),
   },
@@ -102,7 +103,10 @@ export const MESSAGE_TEMPLATES: MessageTemplateConfig[] = [
 
 // Fonction pour obtenir un template de message par son ID
 export const getMessageTemplateById = (id: string): MessageTemplateConfig => {
-  return MESSAGE_TEMPLATES.find(template => template.id === id) || MESSAGE_TEMPLATES[0];
+  return (
+    MESSAGE_TEMPLATES.find((template) => template.id === id) ||
+    MESSAGE_TEMPLATES[0]
+  );
 };
 
 // Fonction pour obtenir une salutation aléatoire

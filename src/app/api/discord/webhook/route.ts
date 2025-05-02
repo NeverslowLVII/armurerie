@@ -3,7 +3,14 @@ import { NextResponse } from 'next/server';
 /**
  * Configuration pour le webhook Discord
  */
-const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+// Remove top-level const
+// const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+
+// Define a simple interface for order items
+interface WebhookItem {
+  quantity: number;
+  name: string;
+}
 
 /**
  * POST /api/discord/webhook
@@ -11,9 +18,14 @@ const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
  * Endpoint pour envoyer une notification Discord via webhook
  */
 export async function POST(request: Request) {
+  // Read the environment variable inside the function
+  const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+
   // Vérifier que l'URL du webhook est configurée
   if (!DISCORD_WEBHOOK_URL) {
-    console.error("DISCORD_WEBHOOK_URL n'est pas configuré dans les variables d'environnement");
+    console.error(
+      "DISCORD_WEBHOOK_URL n'est pas configuré dans les variables d'environnement"
+    );
     return NextResponse.json(
       { success: false, error: 'Webhook URL not configured' },
       { status: 500 }
@@ -26,7 +38,10 @@ export async function POST(request: Request) {
 
     // Valider que les données nécessaires sont présentes
     if (!data.orderData || !data.username) {
-      return NextResponse.json({ success: false, error: 'Missing required data' }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: 'Missing required data' },
+        { status: 400 }
+      );
     }
 
     const { orderData, username } = data;
@@ -35,7 +50,7 @@ export async function POST(request: Request) {
     let orderSummary = '';
     if (orderData.items && Array.isArray(orderData.items)) {
       orderSummary = orderData.items
-        .map((item: any) => `- ${item.quantity}x ${item.name}`)
+        .map((item: WebhookItem) => `- ${item.quantity}x ${item.name}`)
         .join('\n');
     }
 
@@ -47,8 +62,8 @@ export async function POST(request: Request) {
         {
           title: 'Nouvelle commande validée',
           description: `Une commande a été validée par ${username}`,
-          // La couleur verte (en décimal)
-          color: Number.parseInt('2ECC71', 16),
+          // Use hexadecimal literal for color
+          color: 0x2ecc71,
           timestamp: new Date().toISOString(),
           fields: [
             {
@@ -86,12 +101,18 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Erreur lors de l'envoi du webhook Discord:", errorText);
-      return NextResponse.json({ success: false, error: errorText }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: errorText },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Exception lors de l'envoi du webhook Discord:", error);
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: String(error) },
+      { status: 500 }
+    );
   }
 }

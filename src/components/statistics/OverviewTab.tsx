@@ -1,8 +1,8 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { WeaponStats } from './types';
-import StatCard from './StatCard';
 import { CurrencyDollarIcon, FireIcon } from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion';
+import type React from 'react';
+import StatCard from './StatCard';
+import type { WeaponStats } from './types';
 import { formatDollars } from './utils';
 
 interface OverviewTabProps {

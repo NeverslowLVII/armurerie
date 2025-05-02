@@ -1,35 +1,35 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
   CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
+import { notifyOrderValidation } from '@/utils/discord';
+import axios from 'axios';
 import {
   AlertCircle,
-  Search,
-  X,
-  Plus,
-  Minus,
-  FileSpreadsheet,
   BarChart4,
   Check,
+  FileSpreadsheet,
+  Minus,
+  Plus,
+  Search,
+  X,
 } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import axios from 'axios';
-import { notifyOrderValidation } from '@/utils/discord';
 import { useSession } from 'next-auth/react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 interface WeaponComponent {
   id?: string;
@@ -121,7 +121,7 @@ export function WeaponOrderCalculator() {
       if (!categorized.has(weapon.category)) {
         categorized.set(weapon.category, []);
       }
-      categorized.get(weapon.category)!.push(weapon);
+      categorized.get(weapon.category)?.push(weapon);
     }
 
     // Convert to array of [category, weapons] pairs and sort alphabetically
@@ -134,21 +134,24 @@ export function WeaponOrderCalculator() {
 
     const term = searchTerm.toLowerCase();
     return weapons.filter(
-      weapon =>
-        weapon.name.toLowerCase().includes(term) || weapon.category.toLowerCase().includes(term)
+      (weapon) =>
+        weapon.name.toLowerCase().includes(term) ||
+        weapon.category.toLowerCase().includes(term)
     );
   }, [weapons, searchTerm]);
 
   const handleCheckboxChange = (weapon: WeaponComponent, checked: boolean) => {
     if (checked) {
-      setSelectedWeapons(prev => [...prev, { weapon, quantity: 1 }]);
+      setSelectedWeapons((prev) => [...prev, { weapon, quantity: 1 }]);
       toast({
         title: 'Arme ajoutée',
         description: `${weapon.name} a été ajouté à la commande`,
         duration: 2000,
       });
     } else {
-      setSelectedWeapons(prev => prev.filter(item => item.weapon.name !== weapon.name));
+      setSelectedWeapons((prev) =>
+        prev.filter((item) => item.weapon.name !== weapon.name)
+      );
       toast({
         title: 'Arme retirée',
         description: `${weapon.name} a été retiré de la commande`,
@@ -161,16 +164,18 @@ export function WeaponOrderCalculator() {
     // Valider et limiter la quantité
     const validQuantity = Math.max(1, Math.min(999, quantity));
 
-    setSelectedWeapons(prev =>
-      prev.map(item =>
-        item.weapon.name === weaponName ? { ...item, quantity: validQuantity } : item
+    setSelectedWeapons((prev) =>
+      prev.map((item) =>
+        item.weapon.name === weaponName
+          ? { ...item, quantity: validQuantity }
+          : item
       )
     );
   };
 
   const incrementQuantity = (weaponName: string) => {
-    setSelectedWeapons(prev =>
-      prev.map(item =>
+    setSelectedWeapons((prev) =>
+      prev.map((item) =>
         item.weapon.name === weaponName
           ? { ...item, quantity: Math.min(999, item.quantity + 1) }
           : item
@@ -179,8 +184,8 @@ export function WeaponOrderCalculator() {
   };
 
   const decrementQuantity = (weaponName: string) => {
-    setSelectedWeapons(prev =>
-      prev.map(item =>
+    setSelectedWeapons((prev) =>
+      prev.map((item) =>
         item.weapon.name === weaponName && item.quantity > 1
           ? { ...item, quantity: item.quantity - 1 }
           : item
@@ -256,7 +261,8 @@ export function WeaponOrderCalculator() {
       toast({
         variant: 'destructive',
         title: 'Erreur',
-        description: 'Veuillez sélectionner au moins une arme pour valider la commande.',
+        description:
+          'Veuillez sélectionner au moins une arme pour valider la commande.',
         duration: 3000,
       });
       return;
@@ -267,7 +273,7 @@ export function WeaponOrderCalculator() {
     try {
       // Préparer les données pour la commande
       const orderData = {
-        items: selectedWeapons.map(item => ({
+        items: selectedWeapons.map((item) => ({
           name: item.weapon.name,
           quantity: item.quantity,
           price: item.weapon.vente,
@@ -299,7 +305,8 @@ export function WeaponOrderCalculator() {
       // await axios.post('/api/orders', orderData);
 
       // Envoyer une notification Discord
-      const username = session?.user?.name || session?.user?.email || 'Utilisateur inconnu';
+      const username =
+        session?.user?.name || session?.user?.email || 'Utilisateur inconnu';
       await notifyOrderValidation(orderData, username);
 
       // Réinitialiser la commande après soumission
@@ -330,12 +337,18 @@ export function WeaponOrderCalculator() {
     return (
       <div className="space-y-6">
         <div className="max-h-60 space-y-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center space-x-2 border-b py-1">
-              <Skeleton className="h-4 w-4 rounded" />
-              <Skeleton className="h-5 w-full max-w-[200px]" />
-            </div>
-          ))}
+          {
+            // biome-ignore lint/suspicious/noArrayIndexKey: <Index is acceptable for static skeleton keys>
+            Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center space-x-2 border-b py-1"
+              >
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-5 w-full max-w-[200px]" />
+              </div>
+            ))
+          }
         </div>
         <Skeleton className="h-[320px] w-full rounded-md" />
       </div>
@@ -351,7 +364,8 @@ export function WeaponOrderCalculator() {
           <p className="font-medium">Erreur de chargement</p>
         </div>
         <p className="mt-1 text-sm">
-          Impossible de charger le catalogue d&apos;armes. Veuillez réessayer ultérieurement.
+          Impossible de charger le catalogue d&apos;armes. Veuillez réessayer
+          ultérieurement.
         </p>
       </div>
     );
@@ -366,11 +380,12 @@ export function WeaponOrderCalculator() {
           type="text"
           placeholder="Rechercher une arme..."
           value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10 pr-10"
         />
         {searchTerm && (
           <button
+            type="button"
             onClick={() => setSearchTerm('')}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 transition-colors hover:text-neutral-700 dark:hover:text-neutral-300"
             aria-label="Effacer la recherche"
@@ -384,7 +399,9 @@ export function WeaponOrderCalculator() {
         {/* Weapon selection list */}
         <Card>
           <CardHeader className="flex items-center justify-between pb-3">
-            <CardTitle className="text-lg font-semibold">Catalogue d&apos;Armes</CardTitle>
+            <CardTitle className="text-lg font-semibold">
+              Catalogue d&apos;Armes
+            </CardTitle>
             {selectedWeapons.length > 0 && (
               <Button
                 variant="ghost"
@@ -418,17 +435,18 @@ export function WeaponOrderCalculator() {
                     ) : (
                       <>
                         <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                          {filteredWeapons.length} résultat{filteredWeapons.length > 1 ? 's' : ''}
+                          {filteredWeapons.length} résultat
+                          {filteredWeapons.length > 1 ? 's' : ''}
                         </p>
-                        {filteredWeapons.map(weapon => (
+                        {filteredWeapons.map((weapon) => (
                           <WeaponListItem
                             key={weapon.name}
                             weapon={weapon}
                             isSelected={selectedWeapons.some(
-                              item => item.weapon.name === weapon.name
+                              (item) => item.weapon.name === weapon.name
                             )}
                             selectedItem={selectedWeapons.find(
-                              item => item.weapon.name === weapon.name
+                              (item) => item.weapon.name === weapon.name
                             )}
                             onCheckboxChange={handleCheckboxChange}
                             onQuantityChange={handleQuantityChange}
@@ -452,15 +470,15 @@ export function WeaponOrderCalculator() {
                         </Badge>
                       </div>
                       <div className="space-y-1.5">
-                        {categoryWeapons.map(weapon => (
+                        {categoryWeapons.map((weapon) => (
                           <WeaponListItem
                             key={weapon.name}
                             weapon={weapon}
                             isSelected={selectedWeapons.some(
-                              item => item.weapon.name === weapon.name
+                              (item) => item.weapon.name === weapon.name
                             )}
                             selectedItem={selectedWeapons.find(
-                              item => item.weapon.name === weapon.name
+                              (item) => item.weapon.name === weapon.name
                             )}
                             onCheckboxChange={handleCheckboxChange}
                             onQuantityChange={handleQuantityChange}
@@ -487,7 +505,8 @@ export function WeaponOrderCalculator() {
               </CardTitle>
               {selectedWeapons.length > 0 && (
                 <CardDescription>
-                  {totals.total_items} arme{totals.total_items > 1 ? 's' : ''} sélectionnée
+                  {totals.total_items} arme{totals.total_items > 1 ? 's' : ''}{' '}
+                  sélectionnée
                   {totals.total_items > 1 ? 's' : ''}
                 </CardDescription>
               )}
@@ -499,19 +518,30 @@ export function WeaponOrderCalculator() {
                   <FileSpreadsheet className="h-7 w-7 text-neutral-400 dark:text-neutral-500" />
                 </div>
                 <p className="text-center text-sm text-neutral-500 dark:text-neutral-400">
-                  Sélectionnez des armes pour calculer les ressources nécessaires
+                  Sélectionnez des armes pour calculer les ressources
+                  nécessaires
                 </p>
               </CardContent>
             ) : (
               <>
                 <CardContent className="pt-0">
-                  <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <Tabs
+                    defaultValue={activeTab}
+                    onValueChange={setActiveTab}
+                    className="w-full"
+                  >
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="components" className="flex items-center">
+                      <TabsTrigger
+                        value="components"
+                        className="flex items-center"
+                      >
                         <FileSpreadsheet className="mr-1.5 h-3.5 w-3.5" />
                         Composants
                       </TabsTrigger>
-                      <TabsTrigger value="financial" className="flex items-center">
+                      <TabsTrigger
+                        value="financial"
+                        className="flex items-center"
+                      >
                         <BarChart4 className="mr-1.5 h-3.5 w-3.5" />
                         Finances
                       </TabsTrigger>
@@ -526,20 +556,38 @@ export function WeaponOrderCalculator() {
                             </h4>
                             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                               {[
-                                { name: 'Canon de précision', value: totals.canon_precision },
-                                { name: 'Canon long', value: totals.canon_long },
+                                {
+                                  name: 'Canon de précision',
+                                  value: totals.canon_precision,
+                                },
+                                {
+                                  name: 'Canon long',
+                                  value: totals.canon_long,
+                                },
                                 { name: 'Canon', value: totals.canon },
-                                { name: 'Canon court', value: totals.canon_court },
+                                {
+                                  name: 'Canon court',
+                                  value: totals.canon_court,
+                                },
                                 { name: 'Ressort', value: totals.ressort },
                                 { name: 'Mire', value: totals.mire },
                                 { name: 'Détente', value: totals.detente },
                                 { name: 'Chien', value: totals.chien },
-                                { name: 'Armature légère', value: totals.armature_legere },
+                                {
+                                  name: 'Armature légère',
+                                  value: totals.armature_legere,
+                                },
                                 { name: 'Armature', value: totals.armature },
-                                { name: 'Armature lourde', value: totals.armature_lourde },
-                                { name: 'Armature de précision', value: totals.armature_precision },
+                                {
+                                  name: 'Armature lourde',
+                                  value: totals.armature_lourde,
+                                },
+                                {
+                                  name: 'Armature de précision',
+                                  value: totals.armature_precision,
+                                },
                                 { name: 'Crosse', value: totals.crosse },
-                              ].map(item => (
+                              ].map((item) => (
                                 <div
                                   key={item.name}
                                   className="flex items-center justify-between rounded-md bg-neutral-50 px-3 py-1.5 dark:bg-neutral-900"
@@ -547,7 +595,10 @@ export function WeaponOrderCalculator() {
                                   <span className="text-neutral-700 dark:text-neutral-300">
                                     {item.name}
                                   </span>
-                                  <Badge variant="secondary" className="tabular-nums">
+                                  <Badge
+                                    variant="secondary"
+                                    className="tabular-nums"
+                                  >
                                     {item.value}
                                   </Badge>
                                 </div>
@@ -602,7 +653,9 @@ export function WeaponOrderCalculator() {
                                   <span className="text-sm text-neutral-700 dark:text-neutral-300">
                                     {weapon.name}
                                   </span>
-                                  <Badge variant="secondary">× {quantity}</Badge>
+                                  <Badge variant="secondary">
+                                    × {quantity}
+                                  </Badge>
                                 </div>
                               ))}
                             </div>
@@ -671,9 +724,14 @@ export function WeaponOrderCalculator() {
                                   <CardContent className="p-3">
                                     <div className="flex items-start justify-between">
                                       <div>
-                                        <p className="text-sm font-medium">{weapon.name}</p>
+                                        <p className="text-sm font-medium">
+                                          {weapon.name}
+                                        </p>
                                         <div className="mt-1 flex items-center text-xs">
-                                          <Badge variant="secondary" className="text-xs">
+                                          <Badge
+                                            variant="secondary"
+                                            className="text-xs"
+                                          >
                                             × {quantity}
                                           </Badge>
                                           <span className="mx-1.5 text-neutral-300 dark:text-neutral-600">
@@ -686,10 +744,16 @@ export function WeaponOrderCalculator() {
                                       </div>
                                       <div className="text-right">
                                         <p className="text-sm font-medium tabular-nums">
-                                          {(weapon.vente * quantity).toFixed(2)}$
+                                          {(weapon.vente * quantity).toFixed(2)}
+                                          $
                                         </p>
                                         <p className="mt-1 text-xs tabular-nums text-green-600 dark:text-green-500">
-                                          +{((weapon.vente - weapon.cout) * quantity).toFixed(2)}$
+                                          +
+                                          {(
+                                            (weapon.vente - weapon.cout) *
+                                            quantity
+                                          ).toFixed(2)}
+                                          $
                                         </p>
                                       </div>
                                     </div>
@@ -705,7 +769,11 @@ export function WeaponOrderCalculator() {
                 </CardContent>
 
                 <CardFooter className="flex justify-between border-t border-neutral-200 dark:border-neutral-800">
-                  <Button variant="ghost" size="sm" onClick={handleClearSelection}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearSelection}
+                  >
                     Réinitialiser
                   </Button>
 
@@ -764,10 +832,15 @@ function WeaponListItem({
       <Checkbox
         id={`order-${weaponId}`}
         checked={isSelected}
-        onCheckedChange={checked => onCheckboxChange(weapon, checked === true)}
+        onCheckedChange={(checked) =>
+          onCheckboxChange(weapon, checked === true)
+        }
         className="border-neutral-300 dark:border-neutral-600"
       />
-      <label htmlFor={`order-${weaponId}`} className="min-w-0 flex-grow cursor-pointer">
+      <label
+        htmlFor={`order-${weaponId}`}
+        className="min-w-0 flex-grow cursor-pointer"
+      >
         <div className="flex items-center gap-2 text-sm font-medium text-neutral-800 dark:text-neutral-200">
           <span className="truncate">{weapon.name}</span>
           {showCategory && (
@@ -802,8 +875,9 @@ function WeaponListItem({
             min={1}
             max={999}
             value={selectedItem?.quantity || 1}
-            onChange={e => {
-              const value = e.target.value === '' ? 1 : Number.parseInt(e.target.value);
+            onChange={(e) => {
+              const value =
+                e.target.value === '' ? 1 : Number.parseInt(e.target.value);
               if (!Number.isNaN(value)) {
                 onQuantityChange(weapon.name, value);
               }

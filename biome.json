@@ -3,6 +3,31 @@
   "organizeImports": {
     "enabled": true
   },
+  "files": {
+    "ignore": [
+      ".next",
+      "node_modules",
+      "coverage",
+      "dist",
+      "public",
+      "**/*.d.ts",
+      ".husky",
+      ".cursor",
+      ".vercel",
+      "html",
+      "**/*.md",
+      "**/*.mdc",
+      "**/*.txt",
+      "**/*.png",
+      "**/*.ico",
+      "**/*.svg",
+      "**/*.gz",
+      "**/*.sh",
+      ".cursorignore",
+      ".repomixignore",
+      "package-lock.json"
+    ]
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -33,7 +58,7 @@
   "javascript": {
     "formatter": {
       "quoteStyle": "single",
-      "trailingComma": "es5",
+      "trailingCommas": "es5",
       "semicolons": "always"
     }
   }

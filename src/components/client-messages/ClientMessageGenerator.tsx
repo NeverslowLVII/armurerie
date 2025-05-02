@@ -1,34 +1,40 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useData } from '../../context/DataContext';
 import {
-  DetenteurGroup,
-  groupWeaponsByDetenteur,
-  normalizeDetenteur,
-  calculateSimilarity,
-  generateClientMessage,
-} from './utils';
-import { Dialog, DialogContent, DialogPortal, DialogOverlay } from '../ui/dialog';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { SelectNative } from '../ui/select-native';
-import { useSession } from 'next-auth/react';
-import {
-  MagnifyingGlassIcon,
   ArrowPathIcon,
-  IdentificationIcon,
-  CurrencyDollarIcon,
-  EnvelopeIcon,
-  ClipboardDocumentCheckIcon,
-  ClipboardDocumentIcon,
+  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ClipboardDocumentCheckIcon,
+  ClipboardDocumentIcon,
+  CurrencyDollarIcon,
+  EnvelopeIcon,
   FunnelIcon,
+  IdentificationIcon,
+  MagnifyingGlassIcon,
   XMarkIcon,
-  CheckIcon,
 } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { useData } from '../../context/DataContext';
+import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+} from '../ui/dialog';
+import { Input } from '../ui/input';
+import { SelectNative } from '../ui/select-native';
+import { Textarea } from '../ui/textarea';
+import {
+  type DetenteurGroup,
+  calculateSimilarity,
+  generateClientMessage,
+  groupWeaponsByDetenteur,
+  normalizeDetenteur,
+} from './utils';
 
 // Maximum de caractères pour un message
 const MAX_MESSAGE_LENGTH = 750;
@@ -38,7 +44,7 @@ function getInitials(name: string) {
   if (!name) return '?';
   return name
     .split(/\s+/)
-    .map(word => word[0]?.toUpperCase() || '')
+    .map((word) => word[0]?.toUpperCase() || '')
     .slice(0, 2)
     .join('');
 }
@@ -104,19 +110,26 @@ const sortOptions = [
   { id: 'achats-asc', name: "Nombre d'achats ↑" },
 ];
 
+// Define the SortByType based on select options
+type SortByType = 'totalAmount' | 'purchaseCount' | 'lastPurchaseDate' | 'name';
+
 export function ClientMessageGenerator() {
   const { weapons } = useData();
   const { data: session } = useSession();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState<DetenteurGroup | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<DetenteurGroup | null>(
+    null
+  );
   const [message, setMessage] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [messageTemplate, setMessageTemplate] = useState('standard');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState<'informations' | 'achats'>('informations');
+  const [activeTab, setActiveTab] = useState<'informations' | 'achats'>(
+    'informations'
+  );
   const itemsPerPage = 10;
   const [sortBy, setSortBy] = useState('recent');
   const [showFilters, setShowFilters] = useState(false);
@@ -171,7 +184,8 @@ export function ClientMessageGenerator() {
     if (detenteurGroups.length === 0) return;
 
     // Comparer chaque nom avec tous les autres
-    const duplicates: { name1: string; name2: string; similarity: number }[] = [];
+    const duplicates: { name1: string; name2: string; similarity: number }[] =
+      [];
 
     // Trier par similarité décroissante
     duplicates.sort((a, b) => b.similarity - a.similarity);
@@ -184,11 +198,12 @@ export function ClientMessageGenerator() {
 
     if (searchTerm.trim()) {
       const normalizedSearch = normalizeDetenteur(searchTerm);
-      result = result.filter(group => {
+      result = result.filter((group) => {
         return group.names.some(
-          name =>
+          (name) =>
             normalizeDetenteur(name).includes(normalizedSearch) ||
-            calculateSimilarity(normalizeDetenteur(name), normalizedSearch) >= 0.6
+            calculateSimilarity(normalizeDetenteur(name), normalizedSearch) >=
+              0.6
         );
       });
     }
@@ -196,27 +211,33 @@ export function ClientMessageGenerator() {
     // Appliquer les filtres supplémentaires
     if (minAmount) {
       const min = Number.parseFloat(minAmount) * 100;
-      result = result.filter(group => group.totalSpent >= min);
+      result = result.filter((group) => group.totalSpent >= min);
     }
 
     if (maxAmount) {
       const max = Number.parseFloat(maxAmount) * 100;
-      result = result.filter(group => group.totalSpent <= max);
+      result = result.filter((group) => group.totalSpent <= max);
     }
 
     if (minPurchases) {
       const min = Number.parseInt(minPurchases, 10);
-      result = result.filter(group => group.purchaseCount >= min);
+      result = result.filter((group) => group.purchaseCount >= min);
     }
 
     // Trier les résultats
     return result.sort((a, b) => {
       switch (sortBy) {
         case 'recent': {
-          return new Date(b.lastPurchase).getTime() - new Date(a.lastPurchase).getTime();
+          return (
+            new Date(b.lastPurchase).getTime() -
+            new Date(a.lastPurchase).getTime()
+          );
         }
         case 'ancien': {
-          return new Date(a.lastPurchase).getTime() - new Date(b.lastPurchase).getTime();
+          return (
+            new Date(a.lastPurchase).getTime() -
+            new Date(b.lastPurchase).getTime()
+          );
         }
         case 'montant': {
           return b.totalSpent - a.totalSpent;
@@ -249,6 +270,7 @@ export function ClientMessageGenerator() {
   }, [filteredGroups, itemsPerPage]);
 
   // Reset pagination lorsque les filtres changent
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <Filters are the logical trigger for resetting page>
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, sortBy, minAmount, maxAmount, minPurchases]);
@@ -263,7 +285,9 @@ export function ClientMessageGenerator() {
     // Récupérer le nom de l'utilisateur connecté
     const currentUserName = session?.user?.name || 'Armurier';
 
-    setMessage(generateClientMessage(selectedGroup, messageTemplate, currentUserName));
+    setMessage(
+      generateClientMessage(selectedGroup, messageTemplate, currentUserName)
+    );
   }, [selectedGroup, messageTemplate, session?.user?.name]);
 
   // Calculer la classe CSS du compteur de caractères basée sur la longueur
@@ -276,11 +300,11 @@ export function ClientMessageGenerator() {
 
   // Fonctions de pagination
   const goToPreviousPage = () => {
-    setCurrentPage(prev => Math.max(1, prev - 1));
+    setCurrentPage((prev) => Math.max(1, prev - 1));
   };
 
   const goToNextPage = () => {
-    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+    setCurrentPage((prev) => Math.min(totalPages, prev + 1));
   };
 
   // Rafraîchir le message
@@ -290,7 +314,9 @@ export function ClientMessageGenerator() {
     // Récupérer le nom de l'utilisateur connecté
     const currentUserName = session?.user?.name || 'Armurier';
 
-    setMessage(generateClientMessage(selectedGroup, messageTemplate, currentUserName));
+    setMessage(
+      generateClientMessage(selectedGroup, messageTemplate, currentUserName)
+    );
   };
 
   // Réinitialiser les filtres
@@ -317,7 +343,7 @@ export function ClientMessageGenerator() {
           setIsSubmitting(false);
         }, 2000);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Erreur lors de la copie du message:', error);
         toast.error('Impossible de copier le message');
         setIsSubmitting(false);
@@ -341,7 +367,9 @@ export function ClientMessageGenerator() {
             <div className="flex h-full flex-col overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-neutral-800 bg-black px-5 py-4">
-                <h2 className="text-xl font-semibold text-white">Communication clients</h2>
+                <DialogTitle className="text-xl font-semibold text-white">
+                  Communication clients
+                </DialogTitle>
                 <div className="flex items-center gap-3">
                   <div className="relative w-72">
                     <Input
@@ -349,7 +377,7 @@ export function ClientMessageGenerator() {
                       type="text"
                       placeholder="Rechercher un client... (Ctrl+F)"
                       value={searchTerm}
-                      onChange={e => setSearchTerm(e.target.value)}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full rounded-md border-neutral-800 bg-neutral-900 py-1.5 pl-4 pr-10 text-sm text-white focus:border-red-500 focus:ring-red-500"
                     />
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
@@ -381,13 +409,21 @@ export function ClientMessageGenerator() {
                 <div className="border-b border-neutral-800 bg-neutral-900 p-3">
                   <div className="flex flex-wrap items-center gap-4">
                     <div>
-                      <label className="mb-1.5 block text-xs text-neutral-400">Trier par</label>
+                      <label
+                        htmlFor="sortOrder"
+                        className="mb-1.5 block text-xs text-neutral-400"
+                      >
+                        Trier par
+                      </label>
                       <SelectNative
+                        id="sortOrder"
                         value={sortBy}
-                        onChange={e => setSortBy(e.target.value)}
+                        onChange={(e) =>
+                          setSortBy(e.target.value as SortByType)
+                        }
                         className="w-40 rounded-md border-neutral-700 bg-neutral-900 py-1 text-sm text-white"
                       >
-                        {sortOptions.map(option => (
+                        {sortOptions.map((option) => (
                           <option key={option.id} value={option.id}>
                             {option.name}
                           </option>
@@ -395,33 +431,47 @@ export function ClientMessageGenerator() {
                       </SelectNative>
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs text-neutral-400">
+                      <label
+                        htmlFor="minAmount"
+                        className="mb-1.5 block text-xs text-neutral-400"
+                      >
                         Montant min ($)
                       </label>
                       <Input
+                        id="minAmount"
                         type="number"
                         value={minAmount}
-                        onChange={e => setMinAmount(e.target.value)}
+                        onChange={(e) => setMinAmount(e.target.value)}
                         className="w-32 rounded-md border-neutral-700 bg-neutral-900 py-1 text-sm text-white"
                       />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs text-neutral-400">
+                      <label
+                        htmlFor="maxAmount"
+                        className="mb-1.5 block text-xs text-neutral-400"
+                      >
                         Montant max ($)
                       </label>
                       <Input
+                        id="maxAmount"
                         type="number"
                         value={maxAmount}
-                        onChange={e => setMaxAmount(e.target.value)}
+                        onChange={(e) => setMaxAmount(e.target.value)}
                         className="w-32 rounded-md border-neutral-700 bg-neutral-900 py-1 text-sm text-white"
                       />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-xs text-neutral-400">Achats min</label>
+                      <label
+                        htmlFor="minPurchases"
+                        className="mb-1.5 block text-xs text-neutral-400"
+                      >
+                        Achats min
+                      </label>
                       <Input
+                        id="minPurchases"
                         type="number"
                         value={minPurchases}
-                        onChange={e => setMinPurchases(e.target.value)}
+                        onChange={(e) => setMinPurchases(e.target.value)}
                         className="w-32 rounded-md border-neutral-700 bg-neutral-900 py-1 text-sm text-white"
                       />
                     </div>
@@ -459,7 +509,10 @@ export function ClientMessageGenerator() {
                         <div className="text-center">
                           <MagnifyingGlassIcon className="mx-auto mb-3 h-10 w-10 text-neutral-700" />
                           <p>Aucun client trouvé</p>
-                          {(searchTerm || minAmount || maxAmount || minPurchases) && (
+                          {(searchTerm ||
+                            minAmount ||
+                            maxAmount ||
+                            minPurchases) && (
                             <Button
                               onClick={resetFilters}
                               variant="outline"
@@ -473,19 +526,20 @@ export function ClientMessageGenerator() {
                       </div>
                     ) : (
                       <div className="divide-y divide-neutral-800">
-                        {paginatedGroups.map(group => (
-                          <div
+                        {paginatedGroups.map((group) => (
+                          <button
+                            type="button"
                             key={group.primaryName}
-                            className={`flex cursor-pointer items-center px-4 py-2.5 transition-colors duration-150 hover:bg-neutral-800 ${
-                              selectedGroup === group
-                                ? 'border-l-2 border-red-500 bg-neutral-800 pl-[14px]'
-                                : ''
-                            }`}
+                            className="flex w-full cursor-pointer items-center justify-between px-3 py-2.5 text-left hover:bg-neutral-800 focus:bg-neutral-800 focus:outline-none"
                             onClick={() => setSelectedGroup(group)}
                           >
                             <div
                               className="mr-3 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-                              style={{ backgroundColor: getColorFromName(group.primaryName) }}
+                              style={{
+                                backgroundColor: getColorFromName(
+                                  group.primaryName
+                                ),
+                              }}
                             >
                               {getInitials(group.primaryName)}
                             </div>
@@ -495,7 +549,8 @@ export function ClientMessageGenerator() {
                               </p>
                               <div className="mt-1 flex items-center text-xs text-neutral-400">
                                 <span>
-                                  {group.purchaseCount} achat{group.purchaseCount > 1 ? 's' : ''}
+                                  {group.purchaseCount} achat
+                                  {group.purchaseCount > 1 ? 's' : ''}
                                 </span>
                                 <span className="mx-1.5">•</span>
                                 <span>{formatCurrency(group.totalSpent)}</span>
@@ -504,7 +559,7 @@ export function ClientMessageGenerator() {
                             {selectedGroup === group && (
                               <CheckIcon className="ml-2 h-4 w-4 text-red-500" />
                             )}
-                          </div>
+                          </button>
                         ))}
                       </div>
                     )}
@@ -545,7 +600,11 @@ export function ClientMessageGenerator() {
                       <div className="flex items-center border-b border-neutral-800 px-4 py-2">
                         <div
                           className="mr-3 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold text-white"
-                          style={{ backgroundColor: getColorFromName(selectedGroup.primaryName) }}
+                          style={{
+                            backgroundColor: getColorFromName(
+                              selectedGroup.primaryName
+                            ),
+                          }}
                         >
                           {getInitials(selectedGroup.primaryName)}
                         </div>
@@ -554,7 +613,8 @@ export function ClientMessageGenerator() {
                             {selectedGroup.primaryName}
                           </h3>
                           <p className="text-xs text-neutral-400">
-                            Dernier achat: {formatDate(selectedGroup.lastPurchase)}
+                            Dernier achat:{' '}
+                            {formatDate(selectedGroup.lastPurchase)}
                           </p>
                         </div>
                       </div>
@@ -566,8 +626,9 @@ export function ClientMessageGenerator() {
                           {/* Tabs */}
                           <div className="mb-3 flex border-b border-neutral-800">
                             <button
+                              type="button"
                               onClick={() => setActiveTab('informations')}
-                              className={`relative px-4 py-2 text-sm font-medium ${
+                              className={`border-b-2 px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none ${
                                 activeTab === 'informations'
                                   ? 'text-white'
                                   : 'text-neutral-400 hover:text-neutral-200'
@@ -575,7 +636,7 @@ export function ClientMessageGenerator() {
                             >
                               Informations
                               {activeTab === 'informations' && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500"></div>
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-500" />
                               )}
                             </button>
                           </div>
@@ -593,9 +654,9 @@ export function ClientMessageGenerator() {
                                     </h4>
                                   </div>
                                   <div className="flex flex-wrap gap-1.5">
-                                    {selectedGroup.names.map((name, i) => (
+                                    {selectedGroup.names.map((name) => (
                                       <Badge
-                                        key={i}
+                                        key={name}
                                         className="rounded-md bg-neutral-800 px-1.5 py-0.5 text-xs text-neutral-200 hover:bg-neutral-700"
                                       >
                                         {name}
@@ -609,27 +670,38 @@ export function ClientMessageGenerator() {
                               <div>
                                 <div className="mb-2 flex items-center">
                                   <CurrencyDollarIcon className="mr-1.5 h-3.5 w-3.5 text-red-500" />
-                                  <h4 className="text-xs font-medium text-neutral-200">Finances</h4>
+                                  <h4 className="text-xs font-medium text-neutral-200">
+                                    Finances
+                                  </h4>
                                 </div>
                                 <div className="overflow-hidden rounded-lg bg-neutral-900 text-sm shadow-sm">
                                   <div className="grid grid-cols-3">
                                     <div className="border-r border-neutral-800 p-2">
-                                      <p className="text-xs text-neutral-500">Total</p>
+                                      <p className="text-xs text-neutral-500">
+                                        Total
+                                      </p>
                                       <p className="font-semibold text-white">
-                                        {formatCurrency(selectedGroup.totalSpent)}
+                                        {formatCurrency(
+                                          selectedGroup.totalSpent
+                                        )}
                                       </p>
                                     </div>
                                     <div className="border-r border-neutral-800 p-2">
-                                      <p className="text-xs text-neutral-500">Achats</p>
+                                      <p className="text-xs text-neutral-500">
+                                        Achats
+                                      </p>
                                       <p className="font-semibold text-white">
                                         {selectedGroup.purchaseCount}
                                       </p>
                                     </div>
                                     <div className="p-2">
-                                      <p className="text-xs text-neutral-500">Moyenne</p>
+                                      <p className="text-xs text-neutral-500">
+                                        Moyenne
+                                      </p>
                                       <p className="font-semibold text-white">
                                         {formatCurrency(
-                                          selectedGroup.totalSpent / selectedGroup.purchaseCount
+                                          selectedGroup.totalSpent /
+                                            selectedGroup.purchaseCount
                                         )}
                                       </p>
                                     </div>
@@ -643,14 +715,18 @@ export function ClientMessageGenerator() {
                         {/* Message area - now taking 70% of the height - MAIN FOCUS */}
                         <div className="flex h-[70%] flex-col overflow-hidden bg-neutral-900/30 p-4">
                           <div className="mb-3 flex items-center justify-between">
-                            <h4 className="text-base font-medium text-white">Modèle de message</h4>
+                            <h4 className="text-base font-medium text-white">
+                              Modèle de message
+                            </h4>
                             <div className="flex items-center gap-2">
                               <SelectNative
                                 value={messageTemplate}
-                                onChange={e => setMessageTemplate(e.target.value)}
+                                onChange={(e) =>
+                                  setMessageTemplate(e.target.value)
+                                }
                                 className="rounded-md border-neutral-700 bg-neutral-900 py-1 text-sm text-white"
                               >
-                                {messageTemplates.map(template => (
+                                {messageTemplates.map((template) => (
                                   <option key={template.id} value={template.id}>
                                     {template.name}
                                   </option>
@@ -673,7 +749,7 @@ export function ClientMessageGenerator() {
                             <div className="relative">
                               <Textarea
                                 value={message}
-                                onChange={e => setMessage(e.target.value)}
+                                onChange={(e) => setMessage(e.target.value)}
                                 className="min-h-[200px] flex-1 resize-none rounded-md border-neutral-800 bg-neutral-900 text-white focus:border-red-500 focus:ring-red-500"
                                 placeholder="Sélectionnez un client pour générer un message..."
                               />
@@ -687,7 +763,9 @@ export function ClientMessageGenerator() {
                             <Button
                               onClick={handleCopyMessage}
                               disabled={
-                                !message || isSubmitting || message.length > MAX_MESSAGE_LENGTH
+                                !message ||
+                                isSubmitting ||
+                                message.length > MAX_MESSAGE_LENGTH
                               }
                               className="mt-4 w-full bg-red-600 py-2.5 font-medium text-white transition-colors duration-150 hover:bg-red-700"
                               title="Copier le message (Ctrl+C)"
@@ -699,6 +777,7 @@ export function ClientMessageGenerator() {
                                     fill="none"
                                     viewBox="0 0 24 24"
                                   >
+                                    <title>Envoi en cours...</title>
                                     <circle
                                       className="opacity-25"
                                       cx="12"
@@ -706,12 +785,12 @@ export function ClientMessageGenerator() {
                                       r="10"
                                       stroke="currentColor"
                                       strokeWidth="4"
-                                    ></circle>
+                                    />
                                     <path
                                       className="opacity-75"
                                       fill="currentColor"
                                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
+                                    />
                                   </svg>
                                   <span>Copie en cours...</span>
                                 </div>
@@ -726,11 +805,11 @@ export function ClientMessageGenerator() {
                                     {(() => {
                                       if (isCopied) {
                                         return 'Message copié !';
-                                      } else if (message.length > MAX_MESSAGE_LENGTH) {
-                                        return 'Message trop long';
-                                      } else {
-                                        return 'Copier le message';
                                       }
+                                      if (message.length > MAX_MESSAGE_LENGTH) {
+                                        return 'Message trop long';
+                                      }
+                                      return 'Copier le message';
                                     })()}
                                   </span>
                                 </div>
@@ -747,8 +826,8 @@ export function ClientMessageGenerator() {
                         Sélectionnez un client
                       </h3>
                       <p className="max-w-md text-sm text-neutral-500">
-                        Choisissez un client dans la liste pour générer un message personnalisé basé
-                        sur ses achats
+                        Choisissez un client dans la liste pour générer un
+                        message personnalisé basé sur ses achats
                       </p>
                     </div>
                   )}

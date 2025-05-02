@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import { Role } from '@prisma/client';
-import { put, del } from '@vercel/blob';
+import { del, put } from '@vercel/blob';
+import { getServerSession } from 'next-auth';
+import { NextResponse, NextRequest } from 'next/server';
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -18,8 +21,18 @@ export async function POST(request: Request, { params }: { params: { id: string 
       where: { email: session.user.email },
     });
 
-    if (!currentUser || (currentUser.role !== Role.PATRON && currentUser.role !== Role.CO_PATRON)) {
-      return new NextResponse('Non autorisé - Accès réservé aux patrons', { status: 403 });
+    if (
+      !currentUser ||
+      (currentUser.role !== Role.PATRON &&
+        currentUser.role !== Role.CO_PATRON &&
+        currentUser.role !== Role.DEVELOPER)
+    ) {
+      return new NextResponse(
+        'Non autorisé - Accès réservé aux administrateurs',
+        {
+          status: 403,
+        }
+      );
     }
 
     const formData = await request.formData();
@@ -29,7 +42,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return new NextResponse('Fichier manquant', { status: 400 });
     }
 
-    const userId = Number.parseInt(params.id);
+    // Await params resolution *after* handling formData
+    const resolvedParams = await context.params;
+    const userId = Number.parseInt(resolvedParams.id);
+    if (Number.isNaN(userId)) {
+      console.error('Invalid user ID format:', resolvedParams.id);
+      return new NextResponse('Invalid user ID format', { status: 400 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, name: true },
@@ -61,7 +81,10 @@ export async function POST(request: Request, { params }: { params: { id: string 
   }
 }
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -69,7 +92,14 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       return new NextResponse('Non autorisé', { status: 401 });
     }
 
-    const userId = Number.parseInt(params.id);
+    // Await params
+    const resolvedParams = await context.params;
+    const userId = Number.parseInt(resolvedParams.id);
+    if (Number.isNaN(userId)) {
+      console.error('Invalid user ID format:', resolvedParams.id);
+      return new NextResponse('Invalid user ID format', { status: 400 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { contractUrl: true },
@@ -86,7 +116,10 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   }
 }
 
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -99,11 +132,28 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
       where: { email: session.user.email },
     });
 
-    if (!currentUser || (currentUser.role !== Role.PATRON && currentUser.role !== Role.CO_PATRON)) {
-      return new NextResponse('Non autorisé - Accès réservé aux patrons', { status: 403 });
+    if (
+      !currentUser ||
+      (currentUser.role !== Role.PATRON &&
+        currentUser.role !== Role.CO_PATRON &&
+        currentUser.role !== Role.DEVELOPER)
+    ) {
+      return new NextResponse(
+        'Non autorisé - Accès réservé aux administrateurs',
+        {
+          status: 403,
+        }
+      );
     }
 
-    const userId = Number.parseInt(params.id);
+    // Await params resolution
+    const resolvedParams = await context.params;
+    const userId = Number.parseInt(resolvedParams.id);
+    if (Number.isNaN(userId)) {
+      console.error('Invalid user ID format:', resolvedParams.id);
+      return new NextResponse('Invalid user ID format', { status: 400 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { contractUrl: true },
@@ -120,7 +170,10 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
       // Supprimer le fichier de Vercel Blob Storage
       await del(blobUrl);
     } catch (error) {
-      console.error('Erreur lors de la suppression du fichier dans Vercel Blob:', error);
+      console.error(
+        'Erreur lors de la suppression du fichier dans Vercel Blob:',
+        error
+      );
       // Continuer même si la suppression du blob échoue
     }
 

@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Weapon } from '../services/api';
-import UserManager from './UserManager';
-import AddWeaponForm from './AddWeaponForm';
-import EditWeaponForm from './EditWeaponForm';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { SkeletonLoading } from '@/components/ui/loading';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Role } from '@/services/api';
+import { getTextColorForBackground } from '@/utils/colors';
+import { getRoleName, hasPermission } from '@/utils/roles';
 import {
   MagnifyingGlassIcon,
   PencilIcon,
+  SparklesIcon,
   TrashIcon,
   UserGroupIcon,
-  SparklesIcon,
 } from '@heroicons/react/24/outline';
-import { BaseWeaponsManager } from './BaseWeaponsManager';
-import { useData, useShouldDisplayLoading } from '../context/DataContext';
-import { hasPermission, getRoleName } from '@/utils/roles';
-import { getTextColorForBackground } from '@/utils/colors';
-import { Role } from '@/services/api';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
-import { SkeletonLoading } from '@/components/ui/loading';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useData, useShouldDisplayLoading } from '../context/DataContext';
+import type { Weapon } from '../services/api';
+import AddWeaponForm from './AddWeaponForm';
+import { BaseWeaponsManager } from './BaseWeaponsManager';
+import EditWeaponForm from './EditWeaponForm';
+import UserManager from './UserManager';
 import { ClientMessageGenerator } from './client-messages';
 
 const tableVariants = {
@@ -40,7 +40,14 @@ const rowVariants = {
 };
 
 export default function WeaponsTable() {
-  const { weapons, users, loading, error: apiError, refreshWeapons, refreshUsers } = useData();
+  const {
+    weapons,
+    users,
+    loading,
+    error: apiError,
+    refreshWeapons,
+    refreshUsers,
+  } = useData();
   const shouldDisplayLoading = useShouldDisplayLoading();
   const { data: session } = useSession();
   const [isColorManagerOpen, setIsColorManagerOpen] = useState(false);
@@ -53,7 +60,10 @@ export default function WeaponsTable() {
   const [itemsPerPage] = useState(10);
 
   // Include DEVELOPER in the check
-  const hasAdminAccess = session?.user.role === Role.PATRON || session?.user.role === Role.CO_PATRON || session?.user.role === Role.DEVELOPER;
+  const hasAdminAccess =
+    session?.user.role === Role.PATRON ||
+    session?.user.role === Role.CO_PATRON ||
+    session?.user.role === Role.DEVELOPER;
   const currentUserRole = session?.user.role as Role | undefined; // Get current user's role
 
   const handleEdit = (weapon: Weapon) => {
@@ -63,11 +73,18 @@ export default function WeaponsTable() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageWeapons')) return; // Check permission for current user
+    if (
+      !hasAdminAccess ||
+      !currentUserRole ||
+      !hasPermission(currentUserRole, 'canManageWeapons')
+    )
+      return; // Check permission for current user
     try {
-      if (globalThis.confirm('Êtes-vous sûr de vouloir supprimer cette arme ?')) {
+      if (
+        globalThis.confirm('Êtes-vous sûr de vouloir supprimer cette arme ?')
+      ) {
         // Récupérer les informations de l'arme avant de la supprimer pour le log
-        const weaponToDelete = weapons.find(w => w.id === id);
+        const weaponToDelete = weapons.find((w) => w.id === id);
         if (!weaponToDelete) {
           toast.error('Arme introuvable');
           return;
@@ -104,11 +121,16 @@ export default function WeaponsTable() {
   };
 
   const handleManageUsers = () => {
-    if (!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageUsers')) return; // Check permission for current user
+    if (
+      !hasAdminAccess ||
+      !currentUserRole ||
+      !hasPermission(currentUserRole, 'canManageUsers')
+    )
+      return; // Check permission for current user
     setIsColorManagerOpen(true);
   };
 
-  const filteredWeapons = weapons.filter(weapon => {
+  const filteredWeapons = weapons.filter((weapon) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       weapon.user.name.toLowerCase().includes(searchLower) ||
@@ -119,13 +141,17 @@ export default function WeaponsTable() {
   });
 
   const sortedAndFilteredWeapons = filteredWeapons.sort(
-    (a, b) => new Date(b.horodateur).getTime() - new Date(a.horodateur).getTime()
+    (a, b) =>
+      new Date(b.horodateur).getTime() - new Date(a.horodateur).getTime()
   );
 
   // Get current items
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedAndFilteredWeapons.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = sortedAndFilteredWeapons.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
   // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
@@ -159,7 +185,7 @@ export default function WeaponsTable() {
                   <table className="min-w-full divide-y divide-neutral-300 dark:divide-neutral-700">
                     <thead>
                       <tr>
-                        {[1, 2, 3, 4, 5, 6, 7].map(i => (
+                        {[1, 2, 3, 4, 5, 6, 7].map((i) => (
                           <th key={i} className="px-3 py-3.5">
                             <Skeleton className="h-6 w-full" />
                           </th>
@@ -167,10 +193,13 @@ export default function WeaponsTable() {
                       </tr>
                     </thead>
                     <tbody>
-                      {[1, 2, 3, 4, 5].map(row => (
+                      {[1, 2, 3, 4, 5].map((row) => (
                         <tr key={row}>
-                          {[1, 2, 3, 4, 5, 6, 7].map(cell => (
-                            <td key={cell} className="whitespace-nowrap px-3 py-4">
+                          {[1, 2, 3, 4, 5, 6, 7].map((cell) => (
+                            <td
+                              key={cell}
+                              className="whitespace-nowrap px-3 py-4"
+                            >
                               <Skeleton className="h-6 w-full" />
                             </td>
                           ))}
@@ -228,11 +257,17 @@ export default function WeaponsTable() {
             type="button"
             onClick={handleManageUsers}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              hasAdminAccess && currentUserRole && hasPermission(currentUserRole, 'canManageUsers')
+              hasAdminAccess &&
+              currentUserRole &&
+              hasPermission(currentUserRole, 'canManageUsers')
                 ? 'bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
                 : 'cursor-not-allowed bg-neutral-100 text-neutral-400 ring-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:ring-neutral-500'
             }`}
-            disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageUsers')}
+            disabled={
+              !hasAdminAccess ||
+              !currentUserRole ||
+              !hasPermission(currentUserRole, 'canManageUsers')
+            }
           >
             <UserGroupIcon className="mr-1 inline-block h-5 w-5" />
             Gérer les utilisateurs
@@ -241,11 +276,17 @@ export default function WeaponsTable() {
             type="button"
             onClick={() => setIsBaseWeaponsOpen(true)}
             className={`block rounded-md px-3 py-2 text-sm font-semibold shadow-sm ring-1 ring-inset transition-colors duration-200 ${
-              hasAdminAccess && currentUserRole && hasPermission(currentUserRole, 'canManageBaseWeapons')
+              hasAdminAccess &&
+              currentUserRole &&
+              hasPermission(currentUserRole, 'canManageBaseWeapons')
                 ? 'bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
                 : 'cursor-not-allowed bg-neutral-100 text-neutral-400 ring-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:ring-neutral-500'
             }`}
-            disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageBaseWeapons')}
+            disabled={
+              !hasAdminAccess ||
+              !currentUserRole ||
+              !hasPermission(currentUserRole, 'canManageBaseWeapons')
+            }
           >
             <SparklesIcon className="mr-1 inline-block h-5 w-5" />
             Gérer les armes de base
@@ -269,14 +310,17 @@ export default function WeaponsTable() {
       >
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <MagnifyingGlassIcon className="h-5 w-5 text-neutral-400" aria-hidden="true" />
+            <MagnifyingGlassIcon
+              className="h-5 w-5 text-neutral-400"
+              aria-hidden="true"
+            />
           </div>
           <Input
             type="text"
             className="block w-full rounded-lg border-0 bg-white py-2 pl-10 pr-3 text-neutral-900 ring-1 ring-inset ring-neutral-300 transition-all duration-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-red-600 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:placeholder:text-neutral-500 sm:text-sm sm:leading-6"
             placeholder="Rechercher une arme, un détenteur, un employé..."
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </motion.div>
@@ -335,14 +379,17 @@ export default function WeaponsTable() {
                     >
                       Prix
                     </th>
-                    <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                    <th
+                      scope="col"
+                      className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                    >
                       <span className="sr-only">Actions</span>
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-800">
                   <AnimatePresence>
-                    {currentItems.map(weapon => (
+                    {currentItems.map((weapon) => (
                       <motion.tr
                         key={weapon.id}
                         variants={rowVariants}
@@ -362,7 +409,11 @@ export default function WeaponsTable() {
                                 ? `${getTextColorForBackground(weapon.user.color)}`
                                 : 'bg-neutral-100 text-neutral-900'
                             }`}
-                            style={weapon.user.color ? { backgroundColor: weapon.user.color } : {}}
+                            style={
+                              weapon.user.color
+                                ? { backgroundColor: weapon.user.color }
+                                : {}
+                            }
                           >
                             {weapon.user.name}
                             {weapon.user.role !== Role.EMPLOYEE && (
@@ -395,20 +446,44 @@ export default function WeaponsTable() {
                             <Button
                               onClick={() => handleEdit(weapon)}
                               className={`text-red-600 hover:text-red-900 ${!hasAdminAccess && 'cursor-not-allowed opacity-50'}`}
-                              disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageWeapons')}
+                              disabled={
+                                !hasAdminAccess ||
+                                !currentUserRole ||
+                                !hasPermission(
+                                  currentUserRole,
+                                  'canManageWeapons'
+                                )
+                              }
                               title="Modifier l'arme"
                             >
-                              <span className="sr-only">Modifier l&apos;arme</span>
-                              <PencilIcon className="h-5 w-5" aria-hidden="true" />
+                              <span className="sr-only">
+                                Modifier l&apos;arme
+                              </span>
+                              <PencilIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
                             </Button>
                             <Button
                               onClick={() => handleDelete(weapon.id)}
                               className={`text-red-600 hover:text-red-900 ${!hasAdminAccess && 'cursor-not-allowed opacity-50'}`}
-                              disabled={!hasAdminAccess || !currentUserRole || !hasPermission(currentUserRole, 'canManageWeapons')}
+                              disabled={
+                                !hasAdminAccess ||
+                                !currentUserRole ||
+                                !hasPermission(
+                                  currentUserRole,
+                                  'canManageWeapons'
+                                )
+                              }
                               title="Supprimer l'arme"
                             >
-                              <span className="sr-only">Supprimer l&apos;arme</span>
-                              <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                              <span className="sr-only">
+                                Supprimer l&apos;arme
+                              </span>
+                              <TrashIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
                             </Button>
                           </div>
                         </td>
@@ -450,12 +525,20 @@ export default function WeaponsTable() {
           </Button>
 
           {(() => {
-            const totalPages = Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage);
+            const totalPages = Math.ceil(
+              sortedAndFilteredWeapons.length / itemsPerPage
+            );
             const maxVisiblePages = 5; // Nombre maximum de boutons de page à afficher
 
             // Calculer les pages à afficher
-            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-            const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            let startPage = Math.max(
+              1,
+              currentPage - Math.floor(maxVisiblePages / 2)
+            );
+            const endPage = Math.min(
+              totalPages,
+              startPage + maxVisiblePages - 1
+            );
 
             // Ajuster si on est proche de la fin
             if (endPage - startPage + 1 < maxVisiblePages) {
@@ -477,7 +560,10 @@ export default function WeaponsTable() {
               );
               if (startPage > 2) {
                 pages.push(
-                  <span key="ellipsis-1" className="px-2 text-neutral-700 dark:text-neutral-300">
+                  <span
+                    key="ellipsis-1"
+                    className="px-2 text-neutral-700 dark:text-neutral-300"
+                  >
                     ...
                   </span>
                 );
@@ -505,7 +591,10 @@ export default function WeaponsTable() {
             if (endPage < totalPages) {
               if (endPage < totalPages - 1) {
                 pages.push(
-                  <span key="ellipsis-2" className="px-2 text-neutral-700 dark:text-neutral-300">
+                  <span
+                    key="ellipsis-2"
+                    className="px-2 text-neutral-700 dark:text-neutral-300"
+                  >
                     ...
                   </span>
                 );
@@ -526,9 +615,13 @@ export default function WeaponsTable() {
 
           <Button
             onClick={() => paginate(currentPage + 1)}
-            disabled={currentPage === Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)}
+            disabled={
+              currentPage ===
+              Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)
+            }
             className={`rounded-md px-3 py-1 ${
-              currentPage === Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)
+              currentPage ===
+              Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)
                 ? 'cursor-not-allowed bg-neutral-100 text-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
                 : 'border bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700'
             }`}
@@ -560,7 +653,10 @@ export default function WeaponsTable() {
         onWeaponUpdated={refreshWeapons}
       />
 
-      <BaseWeaponsManager isOpen={isBaseWeaponsOpen} onClose={() => setIsBaseWeaponsOpen(false)} />
+      <BaseWeaponsManager
+        isOpen={isBaseWeaponsOpen}
+        onClose={() => setIsBaseWeaponsOpen(false)}
+      />
     </div>
   );
 }

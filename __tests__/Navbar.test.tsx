@@ -1,8 +1,10 @@
-import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import * as nextAuth from 'next-auth/react';
 import { Role } from '@prisma/client';
+import { render, screen } from '@testing-library/react';
+import type { Session } from 'next-auth';
+import * as nextAuth from 'next-auth/react';
+import type { SessionContextValue } from 'next-auth/react';
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Composant simplifié pour les tests
 const MockNavbar = ({ role }: { role: Role }) => {
@@ -22,11 +24,11 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('@/components/Navbar', () => ({
-  default: ({ children, ...props }: any) => {
+  default: () => {
     // Récupérer le rôle de l'utilisateur à partir de useSession
     const { data } = nextAuth.useSession();
     const role = data?.user?.role || Role.EMPLOYEE;
-    
+
     // Utiliser notre composant simplifié
     return <MockNavbar role={role} />;
   },
@@ -47,11 +49,13 @@ describe('Navbar', () => {
           username: 'patron',
           role: Role.PATRON,
         },
-      },
+        expires: 'never',
+      } as Session,
       status: 'authenticated',
-    } as any);
+      update: vi.fn(),
+    } as SessionContextValue);
 
-    const { container } = render(<MockNavbar role={Role.PATRON} />);
+    const { container: _container } = render(<MockNavbar role={Role.PATRON} />);
     expect(screen.getByText('Statistiques')).toBeDefined();
   });
 
@@ -65,11 +69,15 @@ describe('Navbar', () => {
           username: 'employee',
           role: Role.EMPLOYEE,
         },
-      },
+        expires: 'never',
+      } as Session,
       status: 'authenticated',
-    } as any);
+      update: vi.fn(),
+    } as SessionContextValue);
 
-    const { container } = render(<MockNavbar role={Role.EMPLOYEE} />);
+    const { container: _container2 } = render(
+      <MockNavbar role={Role.EMPLOYEE} />
+    );
     expect(screen.queryByText('Statistiques')).toBeNull();
   });
-}); 
+});

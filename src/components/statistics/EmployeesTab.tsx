@@ -1,17 +1,17 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { EmployeeStats } from './types';
-import { chartVariants, cardVariants, formatDollars } from './utils';
+import type React from 'react';
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from 'recharts';
+import type { EmployeeStats } from './types';
+import { cardVariants, chartVariants, formatDollars } from './utils';
 
 interface EmployeesTabProps {
   employeeStats: EmployeeStats;
@@ -39,7 +39,7 @@ const EmployeesTab: React.FC<EmployeesTabProps> = ({ employeeStats }) => {
     >
       {/* Employee Profits Summary Cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {employeeStats.employeeProfits.map(employee => (
+        {employeeStats.employeeProfits.map((employee) => (
           <motion.div
             key={employee.name}
             variants={cardVariants}
@@ -56,7 +56,9 @@ const EmployeesTab: React.FC<EmployeesTabProps> = ({ employeeStats }) => {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-neutral-600 dark:text-neutral-400">Bénéfice</span>
+                  <span className="text-neutral-600 dark:text-neutral-400">
+                    Bénéfice
+                  </span>
                   <span className="bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-lg font-bold text-transparent">
                     {formatDollars(employee.profit)}
                   </span>
@@ -97,11 +99,16 @@ const EmployeesTab: React.FC<EmployeesTabProps> = ({ employeeStats }) => {
                 stroke="#E5E7EB"
                 className="dark:stroke-neutral-600"
               />
-              <XAxis dataKey="name" stroke="#6B7280" className="dark:text-neutral-300" />
+              <XAxis
+                dataKey="name"
+                stroke="#6B7280"
+                className="dark:text-neutral-300"
+              />
               <YAxis stroke="#6B7280" className="dark:text-neutral-300" />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: 'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
+                  backgroundColor:
+                    'var(--tooltip-bg, rgba(255, 255, 255, 0.8))',
                   backdropFilter: 'blur(8px)',
                   borderRadius: '8px',
                   border: 'var(--tooltip-border, 1px solid #E5E7EB)',

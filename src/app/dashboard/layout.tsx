@@ -1,12 +1,15 @@
 'use client';
 
-import Navbar from '@/components/Navbar';
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import FeedbackManager from '@/components/FeedbackManager';
+import Navbar from '@/components/Navbar';
+import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
+import type React from 'react';
+import { useState } from 'react';
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: { children: React.ReactNode }) {
   const [isFeedbackManagerOpen, setIsFeedbackManagerOpen] = useState(false);
   const { data: session } = useSession();
 

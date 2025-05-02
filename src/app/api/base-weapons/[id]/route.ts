@@ -1,10 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
+    // Await params
+    const resolvedParams = await context.params;
+    const paramId = resolvedParams.id;
+
     // Try to find by ID first
-    const numericId = Number.parseInt(params.id, 10);
+    const numericId = Number.parseInt(paramId, 10);
     if (!Number.isNaN(numericId)) {
       const baseWeapon = await prisma.baseWeapon.findUnique({
         where: { id: numericId },
@@ -15,25 +22,38 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     }
 
     // If not found by ID, try to find by name
-    const baseWeapon = await prisma.baseWeapon.findUnique({
-      where: { nom: params.id },
+    const baseWeaponByName = await prisma.baseWeapon.findUnique({
+      where: { nom: paramId },
     });
 
-    if (!baseWeapon) {
-      return NextResponse.json({ error: 'Base weapon not found', id: params.id }, { status: 404 });
+    if (!baseWeaponByName) {
+      return NextResponse.json(
+        { error: 'Base weapon not found', id: paramId },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(baseWeapon);
+    return NextResponse.json(baseWeaponByName);
   } catch (error) {
     console.error('Get base weapon error:', error);
-    return NextResponse.json({ error: 'Failed to fetch base weapon' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch base weapon' },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
+    // Await params resolution
+    const resolvedParams = await context.params;
+    const paramId = resolvedParams.id;
+
     // Try to find by ID first
-    const numericId = Number.parseInt(params.id, 10);
+    const numericId = Number.parseInt(paramId, 10);
     if (!Number.isNaN(numericId)) {
       const baseWeapon = await prisma.baseWeapon.findUnique({
         where: { id: numericId },
@@ -53,17 +73,20 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     }
 
     // If not found by ID, try to find by name
-    const baseWeapon = await prisma.baseWeapon.findUnique({
-      where: { nom: params.id },
+    const baseWeaponByName = await prisma.baseWeapon.findUnique({
+      where: { nom: paramId },
     });
 
-    if (!baseWeapon) {
-      return NextResponse.json({ error: 'Base weapon not found', id: params.id }, { status: 404 });
+    if (!baseWeaponByName) {
+      return NextResponse.json(
+        { error: 'Base weapon not found', id: paramId },
+        { status: 404 }
+      );
     }
 
     const data = await request.json();
-    const updated = await prisma.baseWeapon.update({
-      where: { id: baseWeapon.id },
+    const updatedByName = await prisma.baseWeapon.update({
+      where: { id: baseWeaponByName.id },
       data: {
         nom: data.nom,
         prix_defaut: data.prix_defaut,
@@ -71,19 +94,29 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       },
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json(updatedByName);
   } catch (error) {
     console.error('Update base weapon error:', error);
-    return NextResponse.json({ error: 'Failed to update base weapon' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to update base weapon' },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    console.log('Deleting base weapon with ID/name:', params.id);
+    // Await params resolution
+    const resolvedParams = await context.params;
+    const paramId = resolvedParams.id;
+
+    console.info('Deleting base weapon with ID/name:', paramId);
 
     // Try to find by ID first
-    const numericId = Number.parseInt(params.id, 10);
+    const numericId = Number.parseInt(paramId, 10);
     if (!Number.isNaN(numericId)) {
       const baseWeapon = await prisma.baseWeapon.findUnique({
         where: { id: numericId },
@@ -92,25 +125,28 @@ export async function DELETE(_request: NextRequest, { params }: { params: { id: 
         await prisma.baseWeapon.delete({
           where: { id: numericId },
         });
-        console.log('Base weapon deleted by ID:', numericId);
+        console.info('Base weapon deleted by ID:', numericId);
         return NextResponse.json({ success: true });
       }
     }
 
     // If not found by ID, try to find by name
-    const baseWeapon = await prisma.baseWeapon.findUnique({
-      where: { nom: params.id },
+    const baseWeaponByName = await prisma.baseWeapon.findUnique({
+      where: { nom: paramId },
     });
 
-    if (!baseWeapon) {
-      return NextResponse.json({ error: 'Base weapon not found', id: params.id }, { status: 404 });
+    if (!baseWeaponByName) {
+      return NextResponse.json(
+        { error: 'Base weapon not found', id: paramId },
+        { status: 404 }
+      );
     }
 
     await prisma.baseWeapon.delete({
-      where: { id: baseWeapon.id },
+      where: { id: baseWeaponByName.id },
     });
 
-    console.log('Base weapon deleted by name:', params.id);
+    console.info('Base weapon deleted by name:', paramId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Delete base weapon error:', error);

@@ -1,13 +1,21 @@
-/**
- * Discord Webhook Utilities
- *
- * Ce fichier contient des fonctions utilitaires pour envoyer des notifications
- * via des webhooks Discord.
- */
-
-// Webhook URL pour les logs de modifications d'armes
 const WEAPON_LOGS_WEBHOOK_URL =
   'https://discordapp.com/api/webhooks/1358560402925162617/9AjQcFgVWsX3f4CxBhMDSTZ9Ys0b8yIuFfoxUwgBhzKvXUjp7PaXqfTZRyFb5lNO_zhJ';
+
+// Define interfaces for the function parameters
+interface DiscordCommandData {
+  items?: { quantity: number; name: string }[];
+  total?: number;
+  profit?: number;
+}
+
+interface DiscordWeaponData {
+  name: string;
+  model?: string; // Assuming model might be present
+  price: number;
+  cost?: number;
+  description?: string;
+  // Add other expected fields if necessary
+}
 
 /**
  * Envoie une notification de validation de commande via l'API
@@ -16,7 +24,10 @@ const WEAPON_LOGS_WEBHOOK_URL =
  * @param username Le nom d'utilisateur qui a validé la commande
  * @returns Promise<boolean> Indique si l'envoi a réussi
  */
-export async function notifyOrderValidation(commandData: any, username: string): Promise<boolean> {
+export async function notifyOrderValidation(
+  commandData: DiscordCommandData,
+  username: string
+): Promise<boolean> {
   try {
     const response = await fetch('/api/discord/webhook', {
       method: 'POST',
@@ -30,7 +41,10 @@ export async function notifyOrderValidation(commandData: any, username: string):
     });
 
     if (!response.ok) {
-      console.error("Erreur lors de l'envoi du webhook Discord:", await response.text());
+      console.error(
+        "Erreur lors de l'envoi du webhook Discord:",
+        await response.text()
+      );
       return false;
     }
 
@@ -52,10 +66,10 @@ export async function notifyOrderValidation(commandData: any, username: string):
  * @returns Promise<boolean> Indique si l'envoi a réussi
  */
 export async function logWeaponModification(
-  weaponData: any,
+  weaponData: DiscordWeaponData,
   username: string,
   action: 'create' | 'update' | 'delete',
-  previousData?: any
+  previousData?: DiscordWeaponData
 ): Promise<boolean> {
   try {
     // Déterminer la couleur en fonction de l'action
@@ -117,26 +131,28 @@ export async function logWeaponModification(
     if (action === 'update' && previousData) {
       const changes = [];
 
-      // Comparer les champs importants et noter les différences
-      const fieldsToCompare = ['name', 'model', 'description'];
-      for (const field of fieldsToCompare) {
-        if (weaponData[field] !== previousData[field]) {
-          changes.push(
-            `**${field}**: ${previousData[field] || 'Non défini'} → ${weaponData[field] || 'Non défini'}`
-          );
-        }
-      }
-
-      // Traitement spécial pour les champs numériques (prix, coût)
-      if (weaponData.price !== previousData.price) {
+      // Comparer les champs importants explicitement
+      if (weaponData.name !== previousData.name) {
         changes.push(
-          `**price**: ${formatPrice(previousData.price)} → ${formatPrice(weaponData.price)}`
+          `**Nom**: ${previousData.name || 'N/A'} → ${weaponData.name || 'N/A'}`
         );
       }
-
+      if (weaponData.model !== previousData.model) {
+        changes.push(
+          `**Modèle**: ${previousData.model || 'N/A'} → ${weaponData.model || 'N/A'}`
+        );
+      }
+      if (weaponData.description !== previousData.description) {
+        changes.push('**Description**: Changée'); // Keep it simple for potentially long descriptions
+      }
+      if (weaponData.price !== previousData.price) {
+        changes.push(
+          `**Prix**: ${formatPrice(previousData.price)} → ${formatPrice(weaponData.price)}`
+        );
+      }
       if (weaponData.cost !== previousData.cost) {
         changes.push(
-          `**cost**: ${formatPrice(previousData.cost)} → ${formatPrice(weaponData.cost)}`
+          `**Coût**: ${formatPrice(previousData.cost)} → ${formatPrice(weaponData.cost)}`
         );
       }
 

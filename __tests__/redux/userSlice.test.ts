@@ -1,16 +1,20 @@
-import { describe, it, expect } from 'vitest';
 import userReducer, {
   fetchUsers,
   updateUser,
   deleteUser,
   mergeUsers,
   setInitialized,
-  type EmployeeState as UserState,
   type User,
 } from '@/redux/slices/userSlice';
 import { Role } from '@prisma/client';
+import { describe, expect, it } from 'vitest';
 
-const initialState: UserState = {
+const initialState: {
+  users: Record<string, User>;
+  loading: boolean;
+  error: string | null;
+  initialized: boolean;
+} = {
   users: {},
   loading: false,
   error: null,
@@ -60,7 +64,10 @@ describe('userSlice Reducers', () => {
 
       expect(state.loading).toBe(false);
       expect(state.initialized).toBe(true);
-      expect(state.users).toEqual({ [mockUser1.name]: mockUser1, [mockUser2.name]: mockUser2 });
+      expect(state.users).toEqual({
+        [mockUser1.name]: mockUser1,
+        [mockUser2.name]: mockUser2,
+      });
       expect(state.error).toBeNull();
     });
 
@@ -85,13 +92,21 @@ describe('userSlice Reducers', () => {
   // Tests pour updateUser
   describe('updateUser extraReducers', () => {
     it('should handle updateUser.pending', () => {
-      const state = userReducer(initialState, updateUser.pending('', { data: {} }));
+      const state = userReducer(
+        initialState,
+        updateUser.pending('', { data: {} })
+      );
       expect(state.loading).toBe(true);
       expect(state.error).toBeNull();
     });
 
     it('should handle updateUser.fulfilled (update existing)', () => {
-      const initialStateWithUser: UserState = {
+      const initialStateWithUser: {
+        users: Record<string, User>;
+        loading: boolean;
+        error: string | null;
+        initialized: boolean;
+      } = {
         ...initialState,
         users: { [mockUser1.name]: mockUser1 },
       };
@@ -103,7 +118,7 @@ describe('userSlice Reducers', () => {
       expect(state.users[mockUser1.name]).toEqual(updatedUser);
       expect(state.error).toBeNull();
     });
-    
+
     it('should handle updateUser.fulfilled (add new)', () => {
       const action = { type: updateUser.fulfilled.type, payload: mockUser1 };
       const state = userReducer(initialState, action);
@@ -123,13 +138,21 @@ describe('userSlice Reducers', () => {
 
   // Tests pour deleteUser
   describe('deleteUser extraReducers', () => {
-    const initialStateWithUsers: UserState = {
+    const initialStateWithUsers: {
+      users: Record<string, User>;
+      loading: boolean;
+      error: string | null;
+      initialized: boolean;
+    } = {
       ...initialState,
       users: { [mockUser1.name]: mockUser1, [mockUser2.name]: mockUser2 },
     };
 
     it('should handle deleteUser.pending', () => {
-      const state = userReducer(initialStateWithUsers, deleteUser.pending('', mockUser1.id));
+      const state = userReducer(
+        initialStateWithUsers,
+        deleteUser.pending('', mockUser1.id)
+      );
       expect(state.loading).toBe(true);
       expect(state.error).toBeNull();
     });
@@ -141,8 +164,11 @@ describe('userSlice Reducers', () => {
       // Ceci expose une faiblesse potentielle dans le reducer actuel si les noms ne sont pas uniques
       // ou si on supprime par ID et non par nom.
       // Pour le test, on suppose que la logique trouve le bon nom.
-      const userToDeleteName = mockUser1.name; 
-      const action = { type: deleteUser.fulfilled.type, payload: userToDeleteName }; 
+      const userToDeleteName = mockUser1.name;
+      const action = {
+        type: deleteUser.fulfilled.type,
+        payload: userToDeleteName,
+      };
       const state = userReducer(initialStateWithUsers, action);
 
       expect(state.loading).toBe(false);
@@ -154,7 +180,10 @@ describe('userSlice Reducers', () => {
     it('should handle deleteUser.rejected', () => {
       const error = new Error('Delete failed');
       const action = { type: deleteUser.rejected.type, error };
-      const state = userReducer({ ...initialStateWithUsers, loading: true }, action);
+      const state = userReducer(
+        { ...initialStateWithUsers, loading: true },
+        action
+      );
 
       expect(state.loading).toBe(false);
       expect(state.error).toBe('Delete failed');
@@ -164,16 +193,31 @@ describe('userSlice Reducers', () => {
 
   // Tests pour mergeUsers
   describe('mergeUsers extraReducers', () => {
-    const initialStateWithUsers: UserState = {
+    const initialStateWithUsers: {
+      users: Record<string, User>;
+      loading: boolean;
+      error: string | null;
+      initialized: boolean;
+    } = {
       ...initialState,
       users: {
-        'Alice': mockUser1, // ID 1
-        'Bob': mockUser2,   // ID 2
-        'Charlie': { ...mockUser1, id: 3, name: 'Charlie', email: 'charlie@example.com' }, // ID 3
+        Alice: mockUser1, // ID 1
+        Bob: mockUser2, // ID 2
+        Charlie: {
+          ...mockUser1,
+          id: 3,
+          name: 'Charlie',
+          email: 'charlie@example.com',
+        }, // ID 3
       },
     };
     const mergedUserName = 'Charlie';
-    const targetUser: User = { ...mockUser1, id: 3, name: mergedUserName, color: 'yellow' }; 
+    const targetUser: User = {
+      ...mockUser1,
+      id: 3,
+      name: mergedUserName,
+      color: 'yellow',
+    };
     const usersToMergeNames = ['Alice', 'Bob'];
 
     it('should handle mergeUsers.fulfilled', () => {
@@ -181,24 +225,29 @@ describe('userSlice Reducers', () => {
       const action = { type: mergeUsers.fulfilled.type, payload };
       const state = userReducer(initialStateWithUsers, action);
 
-      expect(state.users['Alice']).toBeUndefined();
-      expect(state.users['Bob']).toBeUndefined();
-      expect(state.users['Charlie']).toEqual(targetUser);
+      expect(state.users.Alice).toBeUndefined();
+      expect(state.users.Bob).toBeUndefined();
+      expect(state.users.Charlie).toEqual(targetUser);
       expect(Object.keys(state.users).length).toBe(1);
     });
-    
+
     it('should handle mergeUsers.fulfilled when targetUser is null or undefined (should not happen ideally)', () => {
       const payload = { names: usersToMergeNames, targetUser: null }; // Simuler un retour API inattendu
-      const action = { type: mergeUsers.fulfilled.type, payload: payload as any }; // Cast pour le test
+      // Define a type for the expected payload structure
+      type MergeFulfilledPayload = { names: string[]; targetUser: User | null };
+      const action = {
+        type: mergeUsers.fulfilled.type,
+        payload: payload as MergeFulfilledPayload, // Use the defined type
+      };
       const state = userReducer(initialStateWithUsers, action);
 
-      expect(state.users['Alice']).toBeUndefined();
-      expect(state.users['Bob']).toBeUndefined();
-      expect(state.users['Charlie']).toBeDefined(); // L'utilisateur original Charlie reste
+      expect(state.users.Alice).toBeUndefined();
+      expect(state.users.Bob).toBeUndefined();
+      expect(state.users.Charlie).toBeDefined();
       expect(Object.keys(state.users).length).toBe(1);
     });
 
-    // Note: Les cas pending/rejected pour mergeUsers ne sont pas définis dans le slice, 
+    // Note: Les cas pending/rejected pour mergeUsers ne sont pas définis dans le slice,
     // donc pas besoin de les tester explicitement ici (ils ne feraient rien).
   });
-}); 
+});

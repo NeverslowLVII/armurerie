@@ -1,16 +1,23 @@
 'use client';
 
+import { LoadingOverlay } from '@/components/ui/loading';
+import { useSession } from 'next-auth/react';
 import React, {
   createContext,
   useContext,
   useState,
   useEffect,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from 'react';
-import { getWeapons, getUsers, getBaseWeapons, Weapon, User, BaseWeapon } from '../services/api';
-import { useSession } from 'next-auth/react';
-import { LoadingOverlay } from '@/components/ui/loading';
+import {
+  type BaseWeapon,
+  type User,
+  type Weapon,
+  getBaseWeapons,
+  getUsers,
+  getWeapons,
+} from '../services/api';
 
 interface DataContextType {
   weapons: Weapon[];
@@ -27,7 +34,7 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // This context controls whether components should show their own loading indicators
-export const LoadingDisplayContext = createContext<boolean>(true);
+const LoadingDisplayContext = createContext<boolean>(true);
 
 export function DataProvider({
   children,
@@ -82,7 +89,11 @@ export function DataProvider({
     setLoading(true);
     setError(null);
     try {
-      await Promise.all([refreshWeapons(), refreshUsers(), refreshBaseWeapons()]);
+      await Promise.all([
+        refreshWeapons(),
+        refreshUsers(),
+        refreshBaseWeapons(),
+      ]);
     } catch (error) {
       console.error('Error refreshing data:', error);
       setError('Error refreshing data');
@@ -93,7 +104,7 @@ export function DataProvider({
 
   useEffect(() => {
     refreshAll();
-  }, [refreshAll, status]);
+  }, [refreshAll]);
 
   const content = (
     <DataContext.Provider

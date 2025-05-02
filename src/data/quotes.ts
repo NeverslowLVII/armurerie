@@ -4,7 +4,7 @@ interface Quote {
   year?: string;
 }
 
-export const quotes: Quote[] = [
+const quotes: Quote[] = [
   {
     text: "La meilleure armurerie de Saint-Denis, en même temps c'est la seule",
     author: 'Theodore Roosevelt',
@@ -82,20 +82,12 @@ export const quotes: Quote[] = [
   },
 ];
 
-export const getRandomQuote = (): Quote => {
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  return quotes[randomIndex];
-};
-
-// Fonction pour obtenir une citation basée sur un ID stable
 export const getQuoteByStableId = (id: string): Quote => {
-  // Convertir l'ID en un nombre en additionnant les codes de caractères
   let sum = 0;
   for (let i = 0; i < id.length; i++) {
     sum += id.codePointAt(i) || 0;
   }
 
-  // Utiliser le modulo pour obtenir un index dans la plage du tableau
   const index = sum % quotes.length;
   return quotes[index];
 };

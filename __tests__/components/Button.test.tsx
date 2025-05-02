@@ -1,6 +1,6 @@
-import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import type React from 'react';
+import { describe, expect, it, vi } from 'vitest';
 
 // Composant Button simple pour tests
 interface ButtonProps {
@@ -20,7 +20,8 @@ const Button: React.FC<ButtonProps> = ({
   type = 'button',
   className = '',
 }) => {
-  const baseClasses = 'px-4 py-2 rounded font-medium focus:outline-none transition-colors';
+  const baseClasses =
+    'px-4 py-2 rounded font-medium focus:outline-none transition-colors';
   const variantClasses = {
     primary: 'bg-blue-500 text-white hover:bg-blue-600',
     secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
@@ -77,19 +78,23 @@ describe('Button Component', () => {
     const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Clickable Button</Button>);
     const button = screen.getByText('Clickable Button');
-    
+
     fireEvent.click(button);
-    
+
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
   it('does not call onClick when disabled and clicked', () => {
     const handleClick = vi.fn();
-    render(<Button onClick={handleClick} disabled>Disabled Clickable Button</Button>);
+    render(
+      <Button onClick={handleClick} disabled>
+        Disabled Clickable Button
+      </Button>
+    );
     const button = screen.getByText('Disabled Clickable Button');
-    
+
     fireEvent.click(button);
-    
+
     expect(handleClick).not.toHaveBeenCalled();
   });
 
@@ -98,4 +103,4 @@ describe('Button Component', () => {
     const button = screen.getByText('Submit Button');
     expect(button).toHaveAttribute('type', 'submit');
   });
-}); 
+});

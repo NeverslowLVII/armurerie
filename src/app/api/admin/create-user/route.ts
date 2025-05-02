@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
-import { Role } from '@/services/api';
-import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+import { Role } from '@/services/api';
+import bcrypt from 'bcryptjs';
+import { getServerSession } from 'next-auth/next';
+import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
@@ -16,20 +16,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, email, password, color, contractUrl, commission } = await request.json();
+    const { name, email, password, color, contractUrl, commission } =
+      await request.json();
 
     // Validation des données
     if (!name || !email || !password) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
     // Vérifier si l'email existe déjà
     const existingUser = await prisma.user.findUnique({
-      where: { email } as any,
+      where: { email },
     });
 
     if (existingUser) {
-      return NextResponse.json({ error: 'Email already exists' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Email already exists' },
+        { status: 400 }
+      );
     }
 
     // Hasher le mot de passe
@@ -45,7 +52,7 @@ export async function POST(request: Request) {
         contractUrl,
         commission: commission || 0,
         role: Role.EMPLOYEE,
-      } as any,
+      },
     });
 
     return NextResponse.json({
@@ -53,14 +60,17 @@ export async function POST(request: Request) {
       user: {
         id: user.id,
         name: user.name,
-        email: (user as any).email,
+        email: user.email,
         role: user.role,
-        contractUrl: (user as any).contractUrl,
-        commission: (user as any).commission,
+        contractUrl: user.contractUrl,
+        commission: user.commission,
       },
     });
   } catch (error) {
     console.error('Create user error:', error);
-    return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to create user account' },
+      { status: 500 }
+    );
   }
 }

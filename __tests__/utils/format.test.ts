@@ -1,16 +1,12 @@
-import { describe, it, expect } from 'vitest';
-import {
-  formatCurrency,
-  formatDate,
-  formatPercentage,
-} from '@/utils/format';
+import { formatCurrency, formatDate, formatPercentage } from '@/utils/format';
+import { describe, expect, it } from 'vitest';
 
 describe('Formatting Utils', () => {
   // Test pour formatCurrency
   describe('formatCurrency', () => {
     it('should format positive cents into USD correctly (based on system locale)', () => {
       // eslint-disable-next-line no-magic-numbers
-      expect(formatCurrency(12345)).toBe('123,45\u00A0USD');
+      expect(formatCurrency(12_345)).toBe('123,45\u00A0USD');
       // eslint-disable-next-line no-magic-numbers
       expect(formatCurrency(100)).toBe('1,00\u00A0USD');
       // eslint-disable-next-line no-magic-numbers
@@ -28,7 +24,9 @@ describe('Formatting Utils', () => {
 
     it('should handle large numbers correctly (based on system locale)', () => {
       // eslint-disable-next-line no-magic-numbers
-      expect(formatCurrency(123456789)).toBe('1\u202F234\u202F567,89\u00A0USD');
+      expect(formatCurrency(123_456_789)).toBe(
+        '1\u202F234\u202F567,89\u00A0USD'
+      );
     });
   });
 
@@ -70,9 +68,9 @@ describe('Formatting Utils', () => {
 
     it('should handle rounding correctly to one decimal place (based on system locale)', () => {
       // eslint-disable-next-line no-magic-numbers
-      expect(formatPercentage(0.12345)).toBe('12,3\u00A0%');
+      expect(formatPercentage(0.123_45)).toBe('12,3\u00A0%');
       // eslint-disable-next-line no-magic-numbers
       expect(formatPercentage(0.9876)).toBe('98,8\u00A0%');
     });
   });
-}); 
+});

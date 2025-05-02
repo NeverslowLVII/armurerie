@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogPortal,
   DialogOverlay,
+  DialogPortal,
+  DialogTitle,
 } from '@/components/ui/dialog';
-import { Weapon, updateWeapon } from '../services/api';
-import { useData } from '../context/DataContext';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { SelectNative } from '@/components/ui/select-native';
 import { LoadingButton } from '@/components/ui/loading';
-import { logWeaponModification } from '../utils/discord';
+import { SelectNative } from '@/components/ui/select-native';
 import { useSession } from 'next-auth/react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useData } from '../context/DataContext';
+import { type Weapon, updateWeapon } from '../services/api';
+import { logWeaponModification } from '../utils/discord';
 
 interface EditWeaponFormProps {
   readonly isOpen: boolean;
@@ -21,6 +23,13 @@ interface EditWeaponFormProps {
   readonly weapon: Weapon | null;
   readonly onWeaponUpdated: () => void;
 }
+
+// Define animation variants for messages
+const messageVariants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: 10 },
+};
 
 export default function EditWeaponForm({
   isOpen,
@@ -35,9 +44,11 @@ export default function EditWeaponForm({
   const [bp, setBp] = useState(weapon?.bp ?? '');
   const [nomArme, setNomArme] = useState(weapon?.nom_arme ?? '');
   const [serigraphie, setSerigraphie] = useState(weapon?.serigraphie ?? '');
-  const [prix, setPrix] = useState(weapon ? (weapon.prix / 100).toString() : '');
+  const [prix, setPrix] = useState(
+    weapon ? (weapon.prix / 100).toString() : ''
+  );
   const [selectedBaseWeapon, setSelectedBaseWeapon] = useState(
-    baseWeapons.find(w => w.nom === weapon?.nom_arme) || null
+    baseWeapons.find((w) => w.nom === weapon?.nom_arme) || null
   );
   const [horodatage, setHorodatage] = useState(
     weapon ? new Date(weapon.horodateur).toISOString().slice(0, 16) : ''
@@ -54,7 +65,9 @@ export default function EditWeaponForm({
       setNomArme(weapon.nom_arme);
       setSerigraphie(weapon.serigraphie);
       setPrix((weapon.prix / 100).toString());
-      setSelectedBaseWeapon(baseWeapons.find(w => w.nom === weapon.nom_arme) || null);
+      setSelectedBaseWeapon(
+        baseWeapons.find((w) => w.nom === weapon.nom_arme) || null
+      );
       setHorodatage(new Date(weapon.horodateur).toISOString().slice(0, 16));
     }
     // Réinitialiser les états
@@ -111,7 +124,12 @@ export default function EditWeaponForm({
       const username = session?.user?.name || 'Utilisateur inconnu';
 
       // Envoyer les logs à Discord
-      logWeaponModification(weaponForLog, username, 'update', previousWeaponData).catch(error => {
+      logWeaponModification(
+        weaponForLog,
+        username,
+        'update',
+        previousWeaponData
+      ).catch((error) => {
         console.error("Erreur lors de l'envoi des logs:", error);
       });
 
@@ -128,7 +146,9 @@ export default function EditWeaponForm({
     }
   };
 
-  const handleBaseWeaponSelect = (baseWeapon: (typeof baseWeapons)[0] | null) => {
+  const handleBaseWeaponSelect = (
+    baseWeapon: (typeof baseWeapons)[0] | null
+  ) => {
     setSelectedBaseWeapon(baseWeapon);
     if (baseWeapon) {
       setNomArme(baseWeapon.nom);
@@ -140,28 +160,43 @@ export default function EditWeaponForm({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogPortal>
         <DialogOverlay />
-        <DialogContent className="sm:max-w-[425px]" data-testid="edit-weapon-form">
+        <DialogContent
+          className="max-w-md border border-neutral-800 bg-neutral-900 p-6 shadow-2xl"
+          data-testid="edit-weapon-form"
+        >
           <DialogTitle className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
             {weapon ? 'Modifier une arme' : 'Créer une nouvelle arme'}
           </DialogTitle>
 
           {error && (
-            <div className="mb-4 rounded border border-red-400 bg-red-100 p-3 text-red-700 dark:border-red-700 dark:bg-red-900 dark:text-red-300">
+            <motion.div
+              variants={messageVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="mb-4 rounded border-l-4 border-red-700 bg-red-900/50 p-2 text-sm text-red-300"
+            >
               {error}
-            </div>
+            </motion.div>
           )}
 
           {success && (
-            <div className="mb-4 rounded border border-green-400 bg-green-100 p-3 text-green-700 dark:border-green-700 dark:bg-green-900 dark:text-green-300">
+            <motion.div
+              variants={messageVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="mb-4 rounded border-l-4 border-emerald-700 bg-emerald-900/50 p-2 text-sm text-emerald-300"
+            >
               Mise à jour réussie !
-            </div>
+            </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div className="mb-4">
               <label
                 htmlFor="datetime"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 Date et heure
               </label>
@@ -169,8 +204,8 @@ export default function EditWeaponForm({
                 id="datetime"
                 type="datetime-local"
                 value={horodatage}
-                onChange={e => setHorodatage(e.target.value)}
-                className="w-full rounded border p-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                onChange={(e) => setHorodatage(e.target.value)}
+                className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 px-4 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                 required
                 disabled={isLoading}
               />
@@ -179,7 +214,7 @@ export default function EditWeaponForm({
             <div className="mb-4">
               <label
                 htmlFor="user"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 Utilisateur
               </label>
@@ -188,32 +223,32 @@ export default function EditWeaponForm({
                 type="text"
                 value={user}
                 readOnly
-                className="w-full rounded border bg-neutral-100 p-2 dark:border-neutral-500 dark:bg-neutral-600"
-                disabled={isLoading}
+                className="w-full rounded-md border border-neutral-600 bg-neutral-700 py-1.5 px-4 text-sm text-neutral-400 placeholder-neutral-500 focus:border-red-500 focus:ring-red-500 cursor-not-allowed"
+                disabled
               />
             </div>
 
             <div className="mb-4">
               <label
                 htmlFor="baseWeapon"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 Arme de base
               </label>
               <SelectNative
                 id="baseWeapon"
                 value={selectedBaseWeapon?.id ?? ''}
-                onChange={e => {
+                onChange={(e) => {
                   const baseWeapon = baseWeapons.find(
-                    w => w.id === Number.parseInt(e.target.value)
+                    (w) => w.id === Number.parseInt(e.target.value)
                   );
                   handleBaseWeaponSelect(baseWeapon || null);
                 }}
-                className="w-full rounded border p-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 pl-4 pr-10 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                 disabled={isLoading}
               >
                 <option value="">Sélectionner une arme de base</option>
-                {baseWeapons.map(weapon => (
+                {baseWeapons.map((weapon) => (
                   <option key={weapon.id} value={weapon.id}>
                     {weapon.nom} -{' '}
                     {new Intl.NumberFormat('en-US', {
@@ -228,7 +263,7 @@ export default function EditWeaponForm({
             <div className="mb-4">
               <label
                 htmlFor="holder"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 Détenteur
               </label>
@@ -236,8 +271,8 @@ export default function EditWeaponForm({
                 id="holder"
                 type="text"
                 value={detenteur}
-                onChange={e => setDetenteur(e.target.value)}
-                className="w-full rounded border p-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                onChange={(e) => setDetenteur(e.target.value)}
+                className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 px-4 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                 required
                 disabled={isLoading}
               />
@@ -246,7 +281,7 @@ export default function EditWeaponForm({
             <div className="mb-4">
               <label
                 htmlFor="bp"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 BP (Boîte Postale)
               </label>
@@ -254,8 +289,8 @@ export default function EditWeaponForm({
                 id="bp"
                 type="text"
                 value={bp}
-                onChange={e => setBp(e.target.value)}
-                className="w-full rounded border p-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                onChange={(e) => setBp(e.target.value)}
+                className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 px-4 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                 disabled={isLoading}
               />
             </div>
@@ -263,7 +298,7 @@ export default function EditWeaponForm({
             <div className="mb-4">
               <label
                 htmlFor="weaponName"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 Nom de l&apos;arme
               </label>
@@ -271,8 +306,12 @@ export default function EditWeaponForm({
                 id="weaponName"
                 type="text"
                 value={nomArme}
-                onChange={e => setNomArme(e.target.value)}
-                className="w-full rounded border p-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                onChange={(e) => setNomArme(e.target.value)}
+                className={`w-full rounded-md border border-neutral-600 py-1.5 px-4 text-sm placeholder-neutral-400 focus:border-red-500 focus:ring-red-500 ${
+                  selectedBaseWeapon
+                    ? 'bg-neutral-700 text-neutral-400 cursor-not-allowed'
+                    : 'bg-neutral-800 text-neutral-100'
+                }`}
                 required
                 readOnly={!!selectedBaseWeapon}
                 disabled={isLoading}
@@ -282,7 +321,7 @@ export default function EditWeaponForm({
             <div className="mb-4">
               <label
                 htmlFor="serigraphy"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 Sérigraphie
               </label>
@@ -290,8 +329,8 @@ export default function EditWeaponForm({
                 id="serigraphy"
                 type="text"
                 value={serigraphie}
-                onChange={e => setSerigraphie(e.target.value)}
-                className="w-full rounded border p-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                onChange={(e) => setSerigraphie(e.target.value)}
+                className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 px-4 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                 required
                 disabled={isLoading}
               />
@@ -300,7 +339,7 @@ export default function EditWeaponForm({
             <div className="mb-4">
               <label
                 htmlFor="price"
-                className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                className="mb-1 block text-sm font-medium text-neutral-300"
               >
                 Prix (en dollars)
               </label>
@@ -308,8 +347,8 @@ export default function EditWeaponForm({
                 id="price"
                 type="number"
                 value={prix}
-                onChange={e => setPrix(e.target.value)}
-                className="w-full rounded border p-2 dark:border-neutral-600 dark:bg-neutral-700 dark:text-white"
+                onChange={(e) => setPrix(e.target.value)}
+                className="w-full rounded-md border border-neutral-600 bg-neutral-800 py-1.5 px-4 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
                 required
                 min="0"
                 step="0.01"
@@ -317,22 +356,24 @@ export default function EditWeaponForm({
               />
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end space-x-2 pt-2">
               <Button
                 type="button"
                 onClick={onClose}
-                className="mr-2 rounded bg-neutral-500 px-4 py-2 text-white hover:bg-neutral-600 dark:bg-neutral-700 dark:hover:bg-neutral-800"
+                variant="outline"
+                className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
                 disabled={isLoading}
               >
                 Annuler
               </Button>
               <Button
                 type="submit"
-                className={`${
+                variant="destructive"
+                className={`flex items-center ${
                   isLoading
-                    ? 'bg-red-300 dark:bg-red-400'
-                    : 'bg-red-500 hover:bg-red-600 dark:bg-red-700 dark:hover:bg-red-800'
-                } flex items-center rounded px-4 py-2 text-white`}
+                    ? 'bg-red-500/50'
+                    : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500'
+                } text-white`}
                 disabled={isLoading}
               >
                 <LoadingButton loading={isLoading}>Mettre à jour</LoadingButton>

@@ -1,6 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { StatCardProps } from './types';
+import React from 'react';
+import type { StatCardProps } from './types';
 import { cardVariants } from './utils';
 
 const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (

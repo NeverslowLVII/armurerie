@@ -1,4 +1,4 @@
-import { SignOptions, sign, verify } from 'jsonwebtoken';
+import { type SignOptions, sign, verify } from 'jsonwebtoken';
 
 const SECRET_KEY = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -10,7 +10,7 @@ interface TokenPayload {
 
 type ExpiresIn = string | number;
 
-export function generateToken(payload: TokenPayload, expiresIn: ExpiresIn) {
+function generateToken(payload: TokenPayload, expiresIn: ExpiresIn) {
   return sign(payload, SECRET_KEY, { expiresIn } as SignOptions);
 }
 
@@ -23,7 +23,11 @@ export function verifyToken(token: string): TokenPayload | null {
   }
 }
 
-export function generateSetupLink(userId: number, email: string, baseUrl: string) {
+export function generateSetupLink(
+  userId: number,
+  email: string,
+  baseUrl: string
+) {
   const token = generateToken(
     { userId, email, type: 'setup' },
     '24h' // Expire après 24 heures
@@ -31,7 +35,11 @@ export function generateSetupLink(userId: number, email: string, baseUrl: string
   return `${baseUrl}/auth/setup?token=${token}`;
 }
 
-export function generateResetLink(userId: number, email: string, baseUrl: string) {
+export function generateResetLink(
+  userId: number,
+  email: string,
+  baseUrl: string
+) {
   const token = generateToken(
     { userId, email, type: 'reset' },
     '1h' // Expire après 1 heure

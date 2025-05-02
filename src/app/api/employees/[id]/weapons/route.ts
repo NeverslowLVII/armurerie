@@ -1,37 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { NextResponse, type NextRequest } from 'next/server';
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    // Parse user ID
-    const userId = Number.parseInt(params.id);
+    // Await params
+    const resolvedParams = await context.params;
+    const userId = Number.parseInt(resolvedParams.id);
     if (Number.isNaN(userId)) {
-      console.error('Invalid user ID:', params.id);
-      return NextResponse.json({ error: 'Invalid user ID', user_id: params.id }, { status: 400 });
+      return NextResponse.json(
+        { error: "ID d'utilisateur invalide" },
+        { status: 400 }
+      );
     }
 
-    // Validate user exists
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) {
-      console.error('User not found:', userId);
-      return NextResponse.json({ error: 'User not found', user_id: userId }, { status: 404 });
-    }
-
-    // Get weapons for user
     const weapons = await prisma.weapon.findMany({
       where: { user_id: userId },
       include: {
-        user: true,
         base_weapon: true,
       },
     });
 
     return NextResponse.json(weapons);
   } catch (error) {
-    console.error('Get user weapons error:', error);
-    return NextResponse.json({ error: 'Failed to fetch user weapons' }, { status: 500 });
+    console.error('Error fetching user weapons:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch user weapons' },
+      { status: 500 }
+    );
   }
 }
 

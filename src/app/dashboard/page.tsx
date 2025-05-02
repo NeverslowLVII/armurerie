@@ -1,8 +1,8 @@
-import { Metadata } from 'next';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
-import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { authOptions } from '@/lib/auth';
+import type { Metadata } from 'next';
+import { getServerSession } from 'next-auth/next';
+import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
   title: 'Tableau de bord - Armurerie',
@@ -25,7 +25,9 @@ export default async function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle className="text-neutral-900 dark:text-white">Profil</CardTitle>
+            <CardTitle className="text-neutral-900 dark:text-white">
+              Profil
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-neutral-700 dark:text-neutral-300">
@@ -33,10 +35,12 @@ export default async function DashboardPage() {
                 <span className="font-semibold">Nom :</span> {session.user.name}
               </p>
               <p>
-                <span className="font-semibold">Email :</span> {session.user.email}
+                <span className="font-semibold">Email :</span>{' '}
+                {session.user.email}
               </p>
               <p>
-                <span className="font-semibold">Rôle :</span> {session.user.role}
+                <span className="font-semibold">Rôle :</span>{' '}
+                {session.user.role}
               </p>
             </div>
           </CardContent>
@@ -44,7 +48,9 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-neutral-900 dark:text-white">Documents</CardTitle>
+            <CardTitle className="text-neutral-900 dark:text-white">
+              Documents
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2 text-neutral-700 dark:text-neutral-300">
@@ -65,7 +71,9 @@ export default async function DashboardPage() {
         {session.user.role === 'PATRON' && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-neutral-900 dark:text-white">Administration</CardTitle>
+              <CardTitle className="text-neutral-900 dark:text-white">
+                Administration
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2 text-neutral-700 dark:text-neutral-300">

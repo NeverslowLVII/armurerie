@@ -1,7 +1,13 @@
-import { Role } from '@prisma/client';
+// import type { Role } from '@prisma/client'; // Remove this
+import { type AppRole, ROLES } from '@/generated/roles'; // Import from generated file
 
-export function isValidRole(role: string): role is Role {
-  return Object.values(Role).includes(role as Role);
+// Remove AppRole and ALL_ROLES
+// export type AppRole = 'DEVELOPER' | 'PATRON' | 'CO_PATRON' | 'EMPLOYEE';
+// const ALL_ROLES: AppRole[] = ['DEVELOPER', 'PATRON', 'CO_PATRON', 'EMPLOYEE'];
+
+export function isValidRole(role: string): role is AppRole {
+  // Use the imported ROLES array
+  return (ROLES as readonly string[]).includes(role);
 }
 
 interface RoleConfig {
@@ -15,12 +21,14 @@ interface RoleConfig {
   canManageBaseWeapons: boolean;
 }
 
+// Use AppRole string literal type
 type RoleConfigurations = {
-  [key in Role]: RoleConfig;
+  [key in AppRole]: RoleConfig;
 };
 
+// Use string literal keys matching AppRole
 export const roleConfigurations: RoleConfigurations = {
-  [Role.DEVELOPER]: {
+  DEVELOPER: {
     commissionRate: 0,
     canManageUsers: true,
     canManageWeapons: true,
@@ -30,7 +38,7 @@ export const roleConfigurations: RoleConfigurations = {
     isSystemAdmin: true,
     canManageBaseWeapons: true,
   },
-  [Role.PATRON]: {
+  PATRON: {
     commissionRate: 0.5,
     canManageUsers: true,
     canManageWeapons: true,
@@ -40,7 +48,7 @@ export const roleConfigurations: RoleConfigurations = {
     isSystemAdmin: false,
     canManageBaseWeapons: true,
   },
-  [Role.CO_PATRON]: {
+  CO_PATRON: {
     commissionRate: 0.3,
     canManageUsers: false,
     canManageWeapons: true,
@@ -50,7 +58,7 @@ export const roleConfigurations: RoleConfigurations = {
     isSystemAdmin: false,
     canManageBaseWeapons: false,
   },
-  [Role.EMPLOYEE]: {
+  EMPLOYEE: {
     commissionRate: 0.2,
     canManageUsers: false,
     canManageWeapons: false,
@@ -62,65 +70,54 @@ export const roleConfigurations: RoleConfigurations = {
   },
 };
 
-export function getCommissionRate(role: Role): number {
-  return roleConfigurations[role as keyof typeof roleConfigurations].commissionRate;
+// Update function signatures to use AppRole
+export function getCommissionRate(role: AppRole): number {
+  return roleConfigurations[role].commissionRate;
 }
 
 export function hasPermission(
-  role: Role,
+  role: AppRole,
   permission: keyof Omit<RoleConfig, 'commissionRate'>
 ): boolean {
-  const config = roleConfigurations[role as keyof typeof roleConfigurations];
+  const config = roleConfigurations[role];
 
-  // Use a safer pattern to check permissions
+  // Switch logic remains the same
   const permissionValue = (() => {
     switch (permission) {
-      case 'canManageUsers': {
+      case 'canManageUsers':
         return config.canManageUsers;
-      }
-      case 'canManageWeapons': {
+      case 'canManageWeapons':
         return config.canManageWeapons;
-      }
-      case 'canViewStatistics': {
+      case 'canViewStatistics':
         return config.canViewStatistics;
-      }
-      case 'canManageFeedback': {
+      case 'canManageFeedback':
         return config.canManageFeedback;
-      }
-      case 'canAccessAdminPanel': {
+      case 'canAccessAdminPanel':
         return config.canAccessAdminPanel;
-      }
-      case 'isSystemAdmin': {
+      case 'isSystemAdmin':
         return config.isSystemAdmin;
-      }
-      case 'canManageBaseWeapons': {
+      case 'canManageBaseWeapons':
         return config.canManageBaseWeapons;
-      }
-      default: {
+      default:
         return false;
-      }
     }
   })();
 
   return permissionValue || config.isSystemAdmin;
 }
 
-export const getRoleName = (role: Role): string => {
+export const getRoleName = (role: AppRole): string => {
   switch (role) {
-    case Role.EMPLOYEE: {
+    case 'EMPLOYEE':
       return 'Employé';
-    }
-    case Role.DEVELOPER: {
+    case 'DEVELOPER':
       return 'Développeur';
-    }
-    case Role.CO_PATRON: {
+    case 'CO_PATRON':
       return 'Co-Patron';
-    }
-    case Role.PATRON: {
+    case 'PATRON':
       return 'Patron';
-    }
-    default: {
+    default:
+      // Optional: Add exhaustive check for AppRole if needed
       return String(role);
-    }
   }
 };

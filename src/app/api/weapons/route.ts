@@ -1,5 +1,18 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
+import { type NextRequest, NextResponse } from 'next/server';
+
+// Define an interface for the expected request body shape
+interface WeaponPostBody {
+  user_id: string | number;
+  nom_arme: string;
+  serigraphie: string;
+  horodateur?: string;
+  detenteur?: string;
+  bp?: string;
+  prix?: number;
+  cout_production?: number;
+}
 
 export async function GET() {
   try {
@@ -12,19 +25,26 @@ export async function GET() {
     return NextResponse.json(weapons);
   } catch (error) {
     console.error('Get weapons error:', error);
-    return NextResponse.json({ error: 'Failed to fetch weapons' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch weapons' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
-  let data: any;
+  let data: WeaponPostBody;
   let userId: number;
-  let baseWeapon: { prix_defaut: number; cout_production_defaut: number } | null;
-  let createWeaponData: any;
+  let baseWeapon: {
+    prix_defaut: number;
+    cout_production_defaut: number;
+  } | null;
+  // Initialize createWeaponData to null to satisfy linter
+  let createWeaponData: Prisma.WeaponCreateInput | null = null;
 
   try {
     data = await request.json();
-    console.log('Creating weapon with data:', JSON.stringify(data, null, 2));
+    console.info('Creating weapon with data:', JSON.stringify(data, null, 2));
 
     // Validate required fields
     if (!data.user_id || !data.nom_arme || !data.serigraphie) {
@@ -40,8 +60,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse user ID
-    userId = Number.parseInt(data.user_id);
+    // Parse user ID (ensure it's a string first)
+    const userIdString = String(data.user_id);
+    userId = Number.parseInt(userIdString);
     if (Number.isNaN(userId)) {
       console.error('Invalid user ID:', data.user_id);
       return NextResponse.json(
@@ -56,7 +77,10 @@ export async function POST(request: NextRequest) {
     });
     if (!user) {
       console.error('User not found:', userId);
-      return NextResponse.json({ error: 'User not found', user_id: userId }, { status: 404 });
+      return NextResponse.json(
+        { error: 'User not found', user_id: userId },
+        { status: 404 }
+      );
     }
 
     // Find base weapon by name
@@ -73,13 +97,15 @@ export async function POST(request: NextRequest) {
 
     createWeaponData = {
       horodateur: data.horodateur ? new Date(data.horodateur) : new Date(),
-      user_id: userId,
+      user: { connect: { id: userId } },
       detenteur: data.detenteur || '',
       bp: data.bp || null,
-      nom_arme: data.nom_arme,
+      // Connect base weapon by name
+      base_weapon: { connect: { nom: data.nom_arme } },
       serigraphie: data.serigraphie,
-      prix: data.prix || baseWeapon.prix_defaut,
-      cout_production: data.cout_production || baseWeapon.cout_production_defaut,
+      prix: data.prix ?? baseWeapon.prix_defaut,
+      cout_production:
+        data.cout_production ?? baseWeapon.cout_production_defaut,
     };
 
     // Create weapon
@@ -91,7 +117,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('Weapon created successfully:', JSON.stringify(weapon, null, 2));
+    console.info(
+      'Weapon created successfully:',
+      JSON.stringify(weapon, null, 2)
+    );
     return NextResponse.json(weapon);
   } catch (error) {
     console.error('Create weapon error:', error);
@@ -104,7 +133,9 @@ export async function POST(request: NextRequest) {
 
       // Handle ID sequence error
       if (
-        error.message.includes('Unique constraint failed on the fields: (`id`)') &&
+        error.message.includes(
+          'Unique constraint failed on the fields: (`id`)'
+        ) &&
         createWeaponData
       ) {
         try {
@@ -116,6 +147,13 @@ export async function POST(request: NextRequest) {
 
           // Reset the sequence to max + 1
           await prisma.$executeRaw`SELECT setval(pg_get_serial_sequence('"Weapon"', 'id'), ${maxId ? maxId.id + 1 : 1}, false);`;
+
+          // Ensure createWeaponData is defined before retry
+          if (!createWeaponData) {
+            throw new Error(
+              'Create weapon data is undefined after sequence reset'
+            );
+          }
 
           // Retry the creation
           const weapon = await prisma.weapon.create({

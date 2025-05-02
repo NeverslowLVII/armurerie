@@ -5,9 +5,9 @@ import { X } from 'lucide-react';
 import * as React from 'react';
 import { forwardRef, useEffect } from 'react';
 
+import { Button } from '@/components/ui/button';
 import { cn } from '../../lib/utils';
 import { Command, CommandGroup, CommandItem, CommandList } from './command';
-import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from './loading';
 
 export interface Option {
@@ -110,7 +110,7 @@ function transToGroupOption(options: Option[], groupBy?: string) {
   }
 
   const groupOption: GroupOption = {};
-  options.forEach(option => {
+  options.forEach((option) => {
     const key = (option[groupBy] as string) || '';
     if (!groupOption[key]) {
       groupOption[key] = [];
@@ -124,14 +124,18 @@ function removePickedOption(groupOption: GroupOption, picked: Option[]) {
   const cloneOption = JSON.parse(JSON.stringify(groupOption)) as GroupOption;
 
   for (const [key, value] of Object.entries(cloneOption)) {
-    cloneOption[key] = value.filter(val => !picked.find(p => p.value === val.value));
+    cloneOption[key] = value.filter(
+      (val) => !picked.find((p) => p.value === val.value)
+    );
   }
   return cloneOption;
 }
 
 function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
   for (const [, value] of Object.entries(groupOption)) {
-    if (value.some(option => targetOption.find(p => p.value === option.value))) {
+    if (
+      value.some((option) => targetOption.find((p) => p.value === option.value))
+    ) {
       return true;
     }
   }
@@ -165,7 +169,10 @@ const CommandEmpty = forwardRef<
 
 CommandEmpty.displayName = 'CommandEmpty';
 
-const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorProps>(
+const MultipleSelector = React.forwardRef<
+  MultipleSelectorRef,
+  MultipleSelectorProps
+>(
   (
     {
       value,
@@ -231,7 +238,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
 
     const handleUnselect = React.useCallback(
       (option: Option) => {
-        const newOptions = selected.filter(s => s.value !== option.value);
+        const newOptions = selected.filter((s) => s.value !== option.value);
         setSelected(newOptions);
         onChange?.(newOptions);
       },
@@ -346,7 +353,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
       if (!creatable) return undefined;
       if (
         isOptionsExist(options, [{ value: inputValue, label: inputValue }]) ||
-        selected.find(s => s.value === inputValue)
+        selected.find((s) => s.value === inputValue)
       ) {
         return undefined;
       }
@@ -430,9 +437,14 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
           handleKeyDown(e);
           commandProps?.onKeyDown?.(e);
         }}
-        className={cn('h-auto overflow-visible bg-transparent', commandProps?.className)}
+        className={cn(
+          'h-auto overflow-visible bg-transparent',
+          commandProps?.className
+        )}
         shouldFilter={
-          commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch
+          commandProps?.shouldFilter !== undefined
+            ? commandProps.shouldFilter
+            : !onSearch
         } // When onSearch is provided, we don&lsquo;t want to filter the options. You can still override it.
         filter={commandFilter() ?? (() => -1)}
       >
@@ -452,7 +464,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
           }}
         >
           <div className="flex flex-wrap gap-1">
-            {selected.map(option => {
+            {selected.map((option) => {
               return (
                 <div
                   key={option.value}
@@ -466,12 +478,12 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                   {option.label}
                   <Button
                     className="absolute -inset-y-px -end-px flex size-7 items-center justify-center rounded-e-lg border border-transparent p-0 text-muted-foreground/80 outline-0 transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70"
-                    onKeyDown={e => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleUnselect(option);
                       }
                     }}
-                    onMouseDown={e => {
+                    onMouseDown={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
                     }}
@@ -506,7 +518,11 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 }
                 inputProps?.onFocus?.(event);
               }}
-              placeholder={hidePlaceholderWhenSelected && selected.length !== 0 ? '' : placeholder}
+              placeholder={
+                hidePlaceholderWhenSelected && selected.length !== 0
+                  ? ''
+                  : placeholder
+              }
               className={cn(
                 'flex-1 bg-transparent outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed',
                 {
@@ -520,15 +536,15 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             <Button
               type="button"
               onClick={() => {
-                setSelected(selected.filter(s => s.fixed));
-                onChange?.(selected.filter(s => s.fixed));
+                setSelected(selected.filter((s) => s.fixed));
+                onChange?.(selected.filter((s) => s.fixed));
               }}
               className={cn(
                 'absolute end-0 top-0 flex size-9 items-center justify-center rounded-lg border border-transparent text-muted-foreground/80 transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70',
                 (hideClearAllButton ||
                   disabled ||
                   selected.length < 1 ||
-                  selected.filter(s => s.fixed).length === selected.length) &&
+                  selected.filter((s) => s.fixed).length === selected.length) &&
                   'hidden'
               )}
               aria-label="Clear all"
@@ -567,11 +583,17 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                   <>
                     {EmptyItem()}
                     {CreatableItem()}
-                    {!selectFirstItem && <CommandItem value="-" className="hidden" />}
+                    {!selectFirstItem && (
+                      <CommandItem value="-" className="hidden" />
+                    )}
                     {Object.entries(selectables).map(([key, dropdowns]) => (
-                      <CommandGroup key={key} heading={key} className="h-full overflow-auto">
+                      <CommandGroup
+                        key={key}
+                        heading={key}
+                        className="h-full overflow-auto"
+                      >
                         <>
-                          {dropdowns.map(option => {
+                          {dropdowns.map((option) => {
                             return (
                               <CommandItem
                                 key={option.value}
@@ -593,7 +615,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                 }}
                                 className={cn(
                                   'cursor-pointer',
-                                  option.disable && 'cursor-not-allowed opacity-50'
+                                  option.disable &&
+                                    'cursor-not-allowed opacity-50'
                                 )}
                               >
                                 {option.label}

@@ -1,32 +1,38 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { WeeklySales } from '@/components/WeeklySales';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { SkeletonLoading } from '@/components/ui/loading';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import {
-  motion,
-  useMotionValue,
-  useTransform,
-  useSpring,
-  useInView,
-  AnimatePresence,
-} from 'framer-motion';
-import {
-  DocumentIcon,
-  DocumentCheckIcon,
-  UserCircleIcon,
+  ArrowPathIcon,
   BanknotesIcon,
   CalendarIcon,
   ClockIcon,
-  ArrowPathIcon,
+  DocumentCheckIcon,
+  DocumentIcon,
   ShieldCheckIcon,
+  UserCircleIcon,
 } from '@heroicons/react/24/outline';
-import { Role } from '@prisma/client';
-import { Skeleton } from '@/components/ui/skeleton';
-import { SkeletonLoading } from '@/components/ui/loading';
+import type { Role } from '@prisma/client';
+import {
+  AnimatePresence,
+  motion,
+  useInView,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
+import { useSession } from 'next-auth/react';
+import { useEffect, useRef, useState } from 'react';
 
 interface UserInfo {
   id: number;
@@ -49,8 +55,14 @@ export default function EmployeeAccount() {
 
   // InView hooks for scroll animations
   const isInfoCardInView = useInView(infoCardRef, { once: true, amount: 0.3 });
-  const isSalesCardInView = useInView(salesCardRef, { once: true, amount: 0.3 });
-  const isContractCardInView = useInView(contractCardRef, { once: true, amount: 0.3 });
+  const isSalesCardInView = useInView(salesCardRef, {
+    once: true,
+    amount: 0.3,
+  });
+  const isContractCardInView = useInView(contractCardRef, {
+    once: true,
+    amount: 0.3,
+  });
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -159,7 +171,9 @@ export default function EmployeeAccount() {
             {lastUpdated && (
               <div className="mt-1 flex items-center gap-2 text-sm text-neutral-500 dark:text-neutral-400">
                 <ClockIcon className="h-3.5 w-3.5" />
-                <span>Dernière mise à jour: {lastUpdated.toLocaleTimeString()}</span>
+                <span>
+                  Dernière mise à jour: {lastUpdated.toLocaleTimeString()}
+                </span>
               </div>
             )}
           </motion.div>
@@ -187,7 +201,9 @@ export default function EmployeeAccount() {
               className="flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-4 py-2 shadow-sm dark:border-red-900/50 dark:bg-red-950/30"
             >
               <UserCircleIcon className="h-5 w-5 text-red-500" />
-              <span className="font-medium text-red-700 dark:text-red-300">{userInfo.role}</span>
+              <span className="font-medium text-red-700 dark:text-red-300">
+                {userInfo.role}
+              </span>
             </motion.div>
           </div>
         </div>
@@ -201,7 +217,7 @@ export default function EmployeeAccount() {
               y: isInfoCardInView ? 0 : 20,
             }}
             transition={{ duration: 0.5 }}
-            onMouseMove={e => {
+            onMouseMove={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               x.set(e.clientX - rect.left - rect.width / 2);
               y.set(e.clientY - rect.top - rect.height / 2);
@@ -220,8 +236,8 @@ export default function EmployeeAccount() {
               className="h-full"
             >
               <Card className="group relative h-full overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-amber-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-                <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-red-600/20 via-orange-500/20 to-amber-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-amber-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-red-600/20 via-orange-500/20 to-amber-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100" />
 
                 <CardHeader className="relative z-10">
                   <CardTitle className="flex items-center gap-2 text-neutral-900 dark:text-white">
@@ -235,19 +251,25 @@ export default function EmployeeAccount() {
                 <CardContent className="relative z-10 space-y-4">
                   <div className="space-y-2">
                     <div className="group flex items-center justify-between border-b py-3 dark:border-neutral-800">
-                      <span className="text-neutral-500 dark:text-neutral-400">Nom</span>
+                      <span className="text-neutral-500 dark:text-neutral-400">
+                        Nom
+                      </span>
                       <span className="font-medium text-neutral-900 transition-colors group-hover:text-red-600 dark:text-white dark:group-hover:text-red-400">
                         {userInfo.name}
                       </span>
                     </div>
                     <div className="group flex items-center justify-between border-b py-3 dark:border-neutral-800">
-                      <span className="text-neutral-500 dark:text-neutral-400">Email</span>
+                      <span className="text-neutral-500 dark:text-neutral-400">
+                        Email
+                      </span>
                       <span className="font-medium text-neutral-900 transition-colors group-hover:text-red-600 dark:text-white dark:group-hover:text-red-400">
                         {userInfo.email}
                       </span>
                     </div>
                     <div className="group flex items-center justify-between border-b py-3 dark:border-neutral-800">
-                      <span className="text-neutral-500 dark:text-neutral-400">Rôle</span>
+                      <span className="text-neutral-500 dark:text-neutral-400">
+                        Rôle
+                      </span>
                       <div className="flex items-center gap-2">
                         <ShieldCheckIcon className="h-4 w-4 text-red-500" />
                         <span className="font-medium text-neutral-900 transition-colors group-hover:text-red-600 dark:text-white dark:group-hover:text-red-400">
@@ -269,7 +291,7 @@ export default function EmployeeAccount() {
               y: isSalesCardInView ? 0 : 20,
             }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            onMouseMove={e => {
+            onMouseMove={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               x.set(e.clientX - rect.left - rect.width / 2);
               y.set(e.clientY - rect.top - rect.height / 2);
@@ -288,8 +310,8 @@ export default function EmployeeAccount() {
               className="h-full"
             >
               <Card className="group relative h-full overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-                <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-teal-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-teal-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100" />
 
                 <CardHeader className="relative z-10">
                   <div className="flex items-center justify-between">
@@ -324,8 +346,8 @@ export default function EmployeeAccount() {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Card className="group relative mt-6 overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
-            <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+            <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100" />
 
             <CardHeader className="relative z-10">
               <CardTitle className="flex items-center gap-2 text-neutral-900 dark:text-white">
@@ -367,7 +389,8 @@ export default function EmployeeAccount() {
                   <Button
                     variant="outline"
                     onClick={() =>
-                      userInfo.contractUrl && window.open(userInfo.contractUrl, '_blank')
+                      userInfo.contractUrl &&
+                      window.open(userInfo.contractUrl, '_blank')
                     }
                     className="w-full border-green-200 text-green-700 transition-all duration-300 hover:bg-green-50 dark:border-green-800 dark:text-green-300 dark:hover:bg-green-950/50 sm:w-auto"
                     aria-label="Voir le contrat"
@@ -391,7 +414,7 @@ export default function EmployeeAccount() {
                           scale: [1, 1.1, 1],
                         }}
                         transition={{
-                          repeat: Infinity,
+                          repeat: Number.POSITIVE_INFINITY,
                           duration: 2,
                         }}
                         className="absolute inset-0 -z-10 rounded-full bg-neutral-200 blur-md dark:bg-neutral-700"
@@ -402,8 +425,9 @@ export default function EmployeeAccount() {
                         Vous n&apos;avez pas encore de contrat.
                       </p>
                       <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-                        Contactez votre responsable pour plus d&apos;informations. Les contrats sont
-                        gérés par l&apos;administration.
+                        Contactez votre responsable pour plus
+                        d&apos;informations. Les contrats sont gérés par
+                        l&apos;administration.
                       </p>
                     </div>
                   </div>

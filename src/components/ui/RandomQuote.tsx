@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState, useId } from 'react';
-import { motion } from 'framer-motion';
 import { getQuoteByStableId } from '@/data/quotes';
+import { motion } from 'framer-motion';
+import { useEffect, useId, useState } from 'react';
 
 interface RandomQuoteProps {
   className?: string;
@@ -39,11 +39,15 @@ export function RandomQuote({ className = '' }: RandomQuoteProps) {
       className={`relative z-20 mt-auto ${className}`}
     >
       <blockquote className="space-y-2">
-        <p className="text-lg font-medium italic text-neutral-100">&ldquo;{quote.text}&rdquo;</p>
+        <p className="text-lg font-medium italic text-neutral-100">
+          &ldquo;{quote.text}&rdquo;
+        </p>
         <footer className="text-sm text-neutral-300">
           <span className="font-semibold">{quote.author}</span>
           {quote.year && (
-            <span className="text-neutral-400 before:mx-2 before:content-['—']">{quote.year}</span>
+            <span className="text-neutral-400 before:mx-2 before:content-['—']">
+              {quote.year}
+            </span>
           )}
         </footer>
       </blockquote>
