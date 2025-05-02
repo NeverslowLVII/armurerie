@@ -25,16 +25,12 @@ import {
   AnimatePresence,
   type Variants,
   motion,
-  useScroll,
-  useSpring,
-  useTransform,
 } from 'framer-motion';
 import { signOut, useSession } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import Tilt from 'react-parallax-tilt';
 
 interface NavigationItem {
   id: 'weapons' | 'statistics' | 'account' | 'comparison';
@@ -82,19 +78,6 @@ export default function Navbar() {
 
   const lastScrollY = useRef(0);
 
-  const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 50], [1, 0.98]);
-
-  const rawBlur = useTransform(scrollY, [0, 50], [12, 16]);
-  const smoothBlur = useSpring(rawBlur, { stiffness: 300, damping: 15 });
-  const smoothBackdrop = useTransform(
-    smoothBlur,
-    (value) => `blur(${value}px)`
-  );
-
-  const rawScale = useTransform(scrollY, [0, 50], [1, 0.98]);
-  const smoothScale = useSpring(rawScale, { stiffness: 300, damping: 15 });
-
   const { resolvedTheme, setTheme } = useTheme();
   const { data: session } = useSession();
 
@@ -121,12 +104,13 @@ export default function Navbar() {
     const handleScroll = () => {
       globalThis.requestAnimationFrame(() => {
         const currentScrollY = globalThis.scrollY;
-        if (currentScrollY > lastScrollY.current) {
+        if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
           setIsVisible(false);
         } else {
           setIsVisible(true);
         }
         lastScrollY.current = currentScrollY;
+        _setIsScrolled(currentScrollY > 10);
       });
     };
 
@@ -183,38 +167,26 @@ export default function Navbar() {
       initial="visible"
       animate={isVisible ? 'visible' : 'hidden'}
       onAnimationComplete={() => setIsHeaderFullyVisible(isVisible)}
-      style={{ opacity, scale: smoothScale, willChange: 'transform, opacity' }}
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-150 ${_isScrolled ? 'py-2' : 'py-4'}`}
+      style={{ willChange: 'transform, opacity' }}
+      className={`fixed left-0 right-0 top-0 z-50 py-4`}
     >
       <motion.nav
-        style={{
-          backdropFilter: smoothBackdrop,
-          willChange: 'backdrop-filter',
-        }}
-        className="relative mx-auto max-w-7xl rounded-2xl border border-white/20 bg-white/80 px-6 shadow-lg shadow-black/5 dark:border-neutral-800/50 dark:bg-neutral-900/80 dark:shadow-white/5"
+        style={{ willChange: 'background-color, border-color' }}
+        className="relative mx-auto max-w-7xl rounded-2xl border border-white/20 bg-white/90 px-6 shadow-lg shadow-black/5 backdrop-blur-lg dark:border-neutral-800/50 dark:bg-neutral-900/90 dark:shadow-white/5"
       >
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/dashboard/weapons">
-              <Tilt
-                tiltMaxAngleX={10}
-                tiltMaxAngleY={10}
-                scale={1.05}
-                transitionSpeed={2500}
-                className="relative"
+              <motion.div
+                className="relative flex-shrink-0"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <motion.div
-                  className="relative flex-shrink-0"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <h1 className="bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-3xl font-black text-transparent drop-shadow-sm">
-                    Armurerie
-                  </h1>
-                  <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 opacity-20 blur transition duration-1000 group-hover:opacity-30" />
-                </motion.div>
-              </Tilt>
+                <h1 className="bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-3xl font-black text-transparent drop-shadow-sm">
+                  Armurerie
+                </h1>
+              </motion.div>
             </Link>
 
             {/* Desktop Navigation Links */}
@@ -272,10 +244,9 @@ export default function Navbar() {
             {/* Theme Toggle and User Dropdown */}
             <div className="ml-auto flex items-center space-x-4">
               {/* ---- Theme Toggle START ---- */}
-              {/* Only render the theme toggle button after the component has mounted on the client */}
               {hasMounted && (
                 <motion.button
-                  key={resolvedTheme} // Add key to ensure re-render on theme change if needed
+                  key={resolvedTheme}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() =>
@@ -295,12 +266,11 @@ export default function Navbar() {
                   )}
                 </motion.button>
               )}
-              {/* Show a placeholder on the server / before mount to prevent layout shifts */}
               {!hasMounted && (
                 <div
                   className="hidden h-9 w-9 items-center justify-center rounded-lg p-2 md:flex"
                   aria-hidden="true"
-                /> // Placeholder with same size
+                />
               )}
               {/* ---- Theme Toggle END ---- */}
 

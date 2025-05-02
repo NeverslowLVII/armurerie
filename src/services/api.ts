@@ -77,6 +77,22 @@ interface BaseWeaponCreate {
   cout_production_defaut: number;
 }
 
+// Interface pour la réponse paginée
+interface PaginatedWeaponsResponse {
+  weapons: Weapon[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
+// Interface pour la réponse paginée des armes de base
+interface PaginatedBaseWeaponsResponse {
+  baseWeapons: BaseWeapon[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+}
+
 // User endpoints
 export const getUsers = async (): Promise<User[]> => {
   const response = await axiosInstance.get('/employees');
@@ -84,8 +100,17 @@ export const getUsers = async (): Promise<User[]> => {
 };
 
 // Weapon endpoints
-export const getWeapons = async (): Promise<Weapon[]> => {
-  const response = await axiosInstance.get('/weapons');
+export const getWeapons = async (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<PaginatedWeaponsResponse> => {
+  const response = await axiosInstance.get('/weapons', {
+    params: {
+      page,
+      pageSize,
+    },
+  });
+  // Assumer que l'API retourne maintenant l'objet PaginatedWeaponsResponse
   return response.data;
 };
 
@@ -124,8 +149,16 @@ export const updateWeapon = async (
 };
 
 // Base Weapons
-export const getBaseWeapons = async (): Promise<BaseWeapon[]> => {
-  const response = await axiosInstance.get('/base-weapons');
+export const getBaseWeapons = async (
+  page: number = 1,
+  pageSize: number = 50
+): Promise<PaginatedBaseWeaponsResponse> => {
+  const response = await axiosInstance.get('/base-weapons', {
+    params: {
+      page,
+      pageSize,
+    },
+  });
   return response.data;
 };
 

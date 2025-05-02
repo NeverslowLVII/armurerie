@@ -14,7 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useData, useShouldDisplayLoading } from '../context/DataContext';
 import type { Weapon } from '../services/api';
@@ -42,6 +42,8 @@ const rowVariants = {
 export default function WeaponsTable() {
   const {
     weapons,
+    totalWeapons,
+    pageSize,
     users,
     loading,
     error: apiError,
@@ -57,17 +59,22 @@ export default function WeaponsTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isBaseWeaponsOpen, setIsBaseWeaponsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const ITEMS_PER_PAGE = pageSize || 10;
 
-  // Include DEVELOPER in the check
+  useEffect(() => {
+    refreshWeapons(currentPage, ITEMS_PER_PAGE).catch((error) => {
+      console.error("Failed to load weapons for page", currentPage, error);
+    });
+  }, [currentPage, ITEMS_PER_PAGE, refreshWeapons]);
+
   const hasAdminAccess =
     session?.user.role === Role.PATRON ||
     session?.user.role === Role.CO_PATRON ||
     session?.user.role === Role.DEVELOPER;
-  const currentUserRole = session?.user.role as Role | undefined; // Get current user's role
+  const currentUserRole = session?.user.role as Role | undefined;
 
   const handleEdit = (weapon: Weapon) => {
-    if (!hasAdminAccess) return; // Use updated check
+    if (!hasAdminAccess) return;
     setSelectedWeapon(weapon);
     setIsEditFormOpen(true);
   };
@@ -78,12 +85,11 @@ export default function WeaponsTable() {
       !currentUserRole ||
       !hasPermission(currentUserRole, 'canManageWeapons')
     )
-      return; // Check permission for current user
+      return;
     try {
       if (
         globalThis.confirm('Êtes-vous sûr de vouloir supprimer cette arme ?')
       ) {
-        // Récupérer les informations de l'arme avant de la supprimer pour le log
         const weaponToDelete = weapons.find((w) => w.id === id);
         if (!weaponToDelete) {
           toast.error('Arme introuvable');
@@ -109,7 +115,7 @@ export default function WeaponsTable() {
 
         if (response.ok) {
           toast.success('Arme supprimée avec succès');
-          await refreshWeapons();
+          await refreshWeapons(currentPage, ITEMS_PER_PAGE);
         } else {
           toast.error("Erreur lors de la suppression de l'arme");
         }
@@ -126,42 +132,26 @@ export default function WeaponsTable() {
       !currentUserRole ||
       !hasPermission(currentUserRole, 'canManageUsers')
     )
-      return; // Check permission for current user
+      return;
     setIsColorManagerOpen(true);
+    if (users.length === 0) {
+      refreshUsers().catch(error => {
+        console.error("Failed to refresh users on opening manager:", error);
+        toast.error("Impossible de charger la liste des utilisateurs.");
+      });
+    }
   };
 
-  const filteredWeapons = weapons.filter((weapon) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      weapon.user.name.toLowerCase().includes(searchLower) ||
-      weapon.detenteur.toLowerCase().includes(searchLower) ||
-      weapon.nom_arme.toLowerCase().includes(searchLower) ||
-      weapon.serigraphie.toLowerCase().includes(searchLower)
-    );
-  });
+  const currentItems = weapons;
 
-  const sortedAndFilteredWeapons = filteredWeapons.sort(
-    (a, b) =>
-      new Date(b.horodateur).getTime() - new Date(a.horodateur).getTime()
-  );
+  const paginate = useCallback((pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  }, []);
 
-  // Get current items
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedAndFilteredWeapons.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
-  // Change page
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  // Only show loading spinner if we should display it (not using overlay)
   if (loading && shouldDisplayLoading) {
     return (
       <div className="px-4 sm:px-6 lg:px-8">
         <SkeletonLoading isLoading={true} className="space-y-4">
-          {/* Header skeleton */}
           <div className="sm:flex sm:items-center">
             <div className="sm:flex-auto">
               <Skeleton className="mb-2 h-8 w-64" />
@@ -174,10 +164,8 @@ export default function WeaponsTable() {
             </div>
           </div>
 
-          {/* Search bar skeleton */}
           <Skeleton className="mb-4 mt-8 h-10 w-full" />
 
-          {/* Table skeleton */}
           <div className="mt-8 flow-root">
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle">
@@ -212,7 +200,6 @@ export default function WeaponsTable() {
             </div>
           </div>
 
-          {/* Pagination skeleton */}
           <div className="mt-4 flex items-center justify-between">
             <Skeleton className="h-6 w-64" />
             <div className="flex items-center space-x-2">
@@ -388,7 +375,7 @@ export default function WeaponsTable() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-800">
-                  <AnimatePresence>
+                  <AnimatePresence mode="wait">
                     {currentItems.map((weapon) => (
                       <motion.tr
                         key={weapon.id}
@@ -497,7 +484,6 @@ export default function WeaponsTable() {
         </div>
       </motion.div>
 
-      {/* Pagination */}
       <motion.div
         className="mt-4 flex items-center justify-between"
         initial={{ opacity: 0 }}
@@ -506,9 +492,9 @@ export default function WeaponsTable() {
       >
         <div className="flex items-center">
           <span className="text-sm text-neutral-700 dark:text-neutral-300">
-            Affichage de {indexOfFirstItem + 1} à{' '}
-            {Math.min(indexOfLastItem, sortedAndFilteredWeapons.length)} sur{' '}
-            {sortedAndFilteredWeapons.length} entrées
+            Affichage de {(currentPage - 1) * ITEMS_PER_PAGE + 1} à{' '}
+            {Math.min(currentPage * ITEMS_PER_PAGE, totalWeapons)} sur{' '}
+            {totalWeapons} entrées
           </span>
         </div>
         <div className="flex items-center space-x-2">
@@ -526,11 +512,10 @@ export default function WeaponsTable() {
 
           {(() => {
             const totalPages = Math.ceil(
-              sortedAndFilteredWeapons.length / itemsPerPage
+              totalWeapons / ITEMS_PER_PAGE
             );
-            const maxVisiblePages = 5; // Nombre maximum de boutons de page à afficher
+            const maxVisiblePages = 5;
 
-            // Calculer les pages à afficher
             let startPage = Math.max(
               1,
               currentPage - Math.floor(maxVisiblePages / 2)
@@ -540,14 +525,12 @@ export default function WeaponsTable() {
               startPage + maxVisiblePages - 1
             );
 
-            // Ajuster si on est proche de la fin
             if (endPage - startPage + 1 < maxVisiblePages) {
               startPage = Math.max(1, endPage - maxVisiblePages + 1);
             }
 
             const pages = [];
 
-            // Première page et ellipse si nécessaire
             if (startPage > 1) {
               pages.push(
                 <Button
@@ -570,7 +553,6 @@ export default function WeaponsTable() {
               }
             }
 
-            // Pages visibles
             for (let i = startPage; i <= endPage; i++) {
               pages.push(
                 <Button
@@ -587,7 +569,6 @@ export default function WeaponsTable() {
               );
             }
 
-            // Dernière page et ellipse si nécessaire
             if (endPage < totalPages) {
               if (endPage < totalPages - 1) {
                 pages.push(
@@ -617,11 +598,11 @@ export default function WeaponsTable() {
             onClick={() => paginate(currentPage + 1)}
             disabled={
               currentPage ===
-              Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)
+              Math.ceil(totalWeapons / ITEMS_PER_PAGE)
             }
             className={`rounded-md px-3 py-1 ${
               currentPage ===
-              Math.ceil(sortedAndFilteredWeapons.length / itemsPerPage)
+              Math.ceil(totalWeapons / ITEMS_PER_PAGE)
                 ? 'cursor-not-allowed bg-neutral-100 text-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
                 : 'border bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700'
             }`}
@@ -636,21 +617,22 @@ export default function WeaponsTable() {
         onClose={() => setIsColorManagerOpen(false)}
         users={users}
         onUpdate={async () => {
-          await Promise.all([refreshUsers(), refreshWeapons()]);
+          await refreshUsers();
+          await refreshWeapons(currentPage, ITEMS_PER_PAGE);
         }}
       />
 
       <AddWeaponForm
         isOpen={isAddFormOpen}
         onClose={() => setIsAddFormOpen(false)}
-        onWeaponAdded={refreshWeapons}
+        onWeaponAdded={() => { void refreshWeapons(currentPage, ITEMS_PER_PAGE); }}
       />
 
       <EditWeaponForm
         isOpen={isEditFormOpen}
         onClose={() => setIsEditFormOpen(false)}
         weapon={selectedWeapon}
-        onWeaponUpdated={refreshWeapons}
+        onWeaponUpdated={() => { void refreshWeapons(currentPage, ITEMS_PER_PAGE); }}
       />
 
       <BaseWeaponsManager

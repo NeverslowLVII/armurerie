@@ -14,15 +14,76 @@ interface WeaponPostBody {
   cout_production?: number;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Get page and pageSize from query parameters, with defaults
+  const searchParams = request.nextUrl.searchParams;
+  const page = Number.parseInt(searchParams.get('page') || '1');
+  const pageSize = Number.parseInt(searchParams.get('pageSize') || '10'); // Default to 10 items per page
+
+  // Validate parameters
+  if (Number.isNaN(page) || page < 1) {
+    return NextResponse.json({ error: 'Invalid page number' }, { status: 400 });
+  }
+  if (Number.isNaN(pageSize) || pageSize < 1 || pageSize > 1000) {
+    return NextResponse.json(
+      { error: 'Invalid page size (must be between 1 and 1000)' },
+      { status: 400 }
+    );
+  }
+
+  // Calculate skip and take for Prisma
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
   try {
-    const weapons = await prisma.weapon.findMany({
-      include: {
-        user: true,
-        base_weapon: true,
-      },
+    // Use a transaction to get both paginated data and total count
+    const [weapons, totalCount] = await prisma.$transaction([
+      prisma.weapon.findMany({
+        select: {
+          id: true,
+          horodateur: true,
+          detenteur: true,
+          bp: true,
+          serigraphie: true,
+          prix: true,
+          cout_production: true,
+          user_id: true,
+          user: {
+            select: {
+              name: true,
+              color: true,
+              role: true,
+            },
+          },
+          base_weapon: {
+            select: {
+              nom: true,
+            },
+          },
+        },
+        orderBy: {
+          horodateur: 'desc',
+        },
+        skip: skip,
+        take: take,
+      }),
+      prisma.weapon.count(), // Get the total count of weapons
+    ]);
+
+    // Mapper base_weapon.nom vers nom_arme pour correspondre au frontend
+    const weaponsWithNomArme = weapons.map((weapon) => ({
+      ...weapon,
+      nom_arme: weapon.base_weapon?.nom || 'N/A', // Fournir une valeur par défaut si base_weapon est null
+      base_weapon: undefined,
+    }));
+
+    // Return paginated data along with total count
+    return NextResponse.json({
+      weapons: weaponsWithNomArme,
+      totalCount: totalCount,
+      page: page,
+      pageSize: pageSize,
     });
-    return NextResponse.json(weapons);
   } catch (error) {
     console.error('Get weapons error:', error);
     return NextResponse.json(

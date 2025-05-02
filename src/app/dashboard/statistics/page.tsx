@@ -6,6 +6,9 @@ import { getWeapons } from '@/services/api';
 import { useEffect, useState } from 'react';
 import type { JSX } from 'react';
 
+// Définir une constante pour la taille de page maximale
+const MAX_WEAPONS_FOR_STATS = 1000;
+
 export default function StatisticsPage() {
   const [weapons, setWeapons] = useState<Weapon[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -15,8 +18,10 @@ export default function StatisticsPage() {
     const fetchWeapons = async () => {
       try {
         setLoading(true);
-        const data = await getWeapons();
-        setWeapons(data);
+        // Demander toutes les armes (ou un très grand nombre)
+        const data = await getWeapons(1, MAX_WEAPONS_FOR_STATS);
+        // Extraire le tableau d'armes de la réponse paginée
+        setWeapons(data.weapons);
         setError(null);
       } catch (error_) {
         console.error('Failed to fetch weapons:', error_);

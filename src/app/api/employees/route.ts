@@ -12,9 +12,6 @@ export async function GET() {
         },
         deleted: false,
       },
-      include: {
-        weapons: true,
-      },
     });
     return NextResponse.json(users);
   } catch (error) {

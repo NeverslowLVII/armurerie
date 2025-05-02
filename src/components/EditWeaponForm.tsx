@@ -37,7 +37,7 @@ export default function EditWeaponForm({
   weapon,
   onWeaponUpdated,
 }: EditWeaponFormProps) {
-  const { baseWeapons } = useData();
+  const { baseWeapons, users, refreshUsers } = useData();
   const { data: session } = useSession();
   const [user, setUser] = useState(weapon?.user?.name ?? '');
   const [detenteur, setDetenteur] = useState(weapon?.detenteur ?? '');
@@ -56,6 +56,17 @@ export default function EditWeaponForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Charger les utilisateurs si nécessaire à l'ouverture
+  useEffect(() => {
+    if (isOpen && users.length === 0) {
+      refreshUsers().catch(error => {
+        console.error("Failed to load users for EditWeaponForm:", error);
+        // Idéalement, afficher une erreur à l'utilisateur
+        setError("Erreur: Impossible de charger la liste des utilisateurs pour l'édition.");
+      });
+    }
+  }, [isOpen, users.length, refreshUsers]);
 
   useEffect(() => {
     if (weapon) {

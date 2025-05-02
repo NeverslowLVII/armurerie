@@ -95,6 +95,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // Restore callbacks
     async jwt({ token, user }) {
       if (user) {
         const appUser = user as User;

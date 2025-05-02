@@ -1,10 +1,47 @@
 import { prisma } from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Récupérer page et pageSize des paramètres de requête, avec valeurs par défaut
+  const searchParams = request.nextUrl.searchParams;
+  const page = Number.parseInt(searchParams.get('page') || '1');
+  const pageSize = Number.parseInt(searchParams.get('pageSize') || '50'); // Valeur par défaut plus élevée car les armes de base sont généralement moins nombreuses
+
+  // Valider les paramètres
+  if (Number.isNaN(page) || page < 1) {
+    return NextResponse.json({ error: 'Invalid page number' }, { status: 400 });
+  }
+  if (Number.isNaN(pageSize) || pageSize < 1 || pageSize > 100) {
+    return NextResponse.json(
+      { error: 'Invalid page size (must be between 1 and 100)' },
+      { status: 400 }
+    );
+  }
+
+  // Calculer skip et take pour la pagination
+  const skip = (page - 1) * pageSize;
+  const take = pageSize;
+
   try {
-    const baseWeapons = await prisma.baseWeapon.findMany();
-    return NextResponse.json(baseWeapons);
+    // Exécuter la requête paginée et obtenir le compte total en une seule transaction
+    const [baseWeapons, totalCount] = await prisma.$transaction([
+      prisma.baseWeapon.findMany({
+        skip: skip,
+        take: take,
+        orderBy: {
+          nom: 'asc', // Trier par nom pour une expérience utilisateur cohérente
+        },
+      }),
+      prisma.baseWeapon.count(),
+    ]);
+
+    // Retourner les données paginées avec le compte total
+    return NextResponse.json({
+      baseWeapons: baseWeapons,
+      totalCount: totalCount,
+      page: page,
+      pageSize: pageSize,
+    });
     // --- TEMPORARY ---
     // console.log("[TEMP] GET /api/base-weapons returning dummy data");
     // return NextResponse.json([{ id: 1, nom: 'Dummy Weapon', prix_defaut: 100, cout_production_defaut: 50 }]);

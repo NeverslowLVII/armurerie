@@ -17,7 +17,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Plus, Trash } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import type React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { createWeapon } from '../services/api';
 import { logWeaponModification } from '../utils/discord';
@@ -76,7 +76,7 @@ export default function AddWeaponForm({
   onClose,
   onWeaponAdded,
 }: AddWeaponFormProps) {
-  const { users, baseWeapons } = useData();
+  const { users, baseWeapons, refreshUsers } = useData();
   const { toast } = useToast();
   const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<string>('single');
@@ -110,6 +110,20 @@ export default function AddWeaponForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  // Charger les utilisateurs si nécessaire à l'ouverture
+  useEffect(() => {
+    if (isOpen && users.length === 0) {
+      refreshUsers().catch(error => {
+        console.error("Failed to load users for AddWeaponForm:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Erreur de chargement',
+          description: 'Impossible de charger la liste des utilisateurs.',
+        });
+      });
+    }
+  }, [isOpen, users.length, refreshUsers, toast]);
 
   const resetForm = () => {
     setSelectedUser(null);

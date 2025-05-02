@@ -125,7 +125,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { baseWeapons, refreshBaseWeapons } = useData();
+  const { baseWeapons, refreshBaseWeapons, baseWeaponsPageSize } = useData();
   const [editingWeapon, setEditingWeapon] = useState<
     (typeof baseWeapons)[0] | null
   >(null);
@@ -146,6 +146,12 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({
       setContainerHeight(listContainerRef.current.clientHeight);
     }
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      refreshBaseWeapons(1, baseWeaponsPageSize || 100);
+    }
+  }, [isOpen, refreshBaseWeapons, baseWeaponsPageSize]);
 
   const filteredWeapons = useMemo(() => {
     return baseWeapons
@@ -197,7 +203,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({
       setNewWeaponPrice('');
       setNewWeaponCostProduction('');
       setSuccess('Arme de base ajoutée avec succès !');
-      refreshBaseWeapons();
+      refreshBaseWeapons(1, baseWeaponsPageSize || 100);
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       setError("Erreur lors de l'ajout de l'arme de base");
@@ -224,7 +230,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({
       setNewWeaponPrice('');
       setNewWeaponCostProduction('');
       setSuccess('Arme de base mise à jour avec succès !');
-      refreshBaseWeapons();
+      refreshBaseWeapons(1, baseWeaponsPageSize || 100);
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       setError("Erreur lors de la mise à jour de l'arme de base");
@@ -247,7 +253,7 @@ export const BaseWeaponsManager: React.FC<BaseWeaponsManagerProps> = ({
 
         if (response.ok) {
           toast.success('Arme de base supprimée avec succès');
-          refreshBaseWeapons();
+          refreshBaseWeapons(1, baseWeaponsPageSize || 100);
         } else {
           toast.error("Erreur lors de la suppression de l'arme de base");
         }
