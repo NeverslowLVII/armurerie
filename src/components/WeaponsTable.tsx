@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SkeletonLoading } from '@/components/ui/loading';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Role } from '@/services/api';
 import { getTextColorForBackground } from '@/utils/colors';
 import { getRoleName, hasPermission } from '@/utils/roles';
 import {
@@ -68,10 +67,10 @@ export default function WeaponsTable() {
   }, [currentPage, ITEMS_PER_PAGE, refreshWeapons]);
 
   const hasAdminAccess =
-    session?.user.role === Role.PATRON ||
-    session?.user.role === Role.CO_PATRON ||
-    session?.user.role === Role.DEVELOPER;
-  const currentUserRole = session?.user.role as Role | undefined;
+    session?.user.role === 'PATRON' ||
+    session?.user.role === 'CO_PATRON' ||
+    session?.user.role === 'DEVELOPER';
+  const currentUserRole = session?.user.role as string | undefined;
 
   const handleEdit = (weapon: Weapon) => {
     if (!hasAdminAccess) return;
@@ -403,9 +402,9 @@ export default function WeaponsTable() {
                             }
                           >
                             {weapon.user.name}
-                            {weapon.user.role !== Role.EMPLOYEE && (
+                            {weapon.user.role !== 'EMPLOYEE' && (
                               <span className="ml-1 text-xs">
-                                ({getRoleName(weapon.user.role as Role)})
+                                ({getRoleName(weapon.user.role as string)})
                               </span>
                             )}
                           </motion.span>

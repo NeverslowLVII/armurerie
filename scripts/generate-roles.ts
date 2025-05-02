@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Role } from '@prisma/client';
+// Remove the problematic import
+// import { Role } from '@prisma/client';
 
 // Get current directory in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -9,20 +10,51 @@ const __dirname = path.dirname(__filename);
 
 const OUTPUT_DIR = path.join(__dirname, '../src/generated');
 const OUTPUT_FILE = path.join(OUTPUT_DIR, 'roles.ts');
+const SCHEMA_PATH = path.join(__dirname, '../prisma/schema.prisma');
+
+// Function to extract enum values from schema file
+function extractEnumValues(schemaContent: string, enumName: string): string[] {
+  const enumRegex = new RegExp(`enum\\s+${enumName}\\s*\\{(.*?)\\}`, 's');
+  const match = schemaContent.match(enumRegex);
+
+  if (!match || !match[1]) {
+    throw new Error(`Enum '${enumName}' not found in schema.`);
+  }
+
+  const enumBody = match[1];
+  // Extract values - assumes one value per line, trim whitespace
+  const values = enumBody
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('//')); // Filter out empty lines and comments
+
+  return values;
+}
 
 function generateRolesFile() {
   console.log('Generating roles file...');
 
-  const roleValues = Object.values(Role);
+  // Read the schema file
+  let schemaContent;
+  try {
+    schemaContent = fs.readFileSync(SCHEMA_PATH, 'utf-8');
+  } catch (err) {
+    console.error(`Error reading Prisma schema file at ${SCHEMA_PATH}:`, err);
+    process.exit(1);
+  }
 
-  // Ensure the values are strings (TypeScript enums can have reverse number mappings)
-  const stringRoleValues = roleValues.filter(
-    (value) => typeof value === 'string'
-  );
+  // Extract Role enum values
+  let stringRoleValues: string[];
+  try {
+    stringRoleValues = extractEnumValues(schemaContent, 'Role');
+  } catch (err) {
+    console.error('Error extracting Role enum values:', err);
+    process.exit(1);
+  }
 
   if (stringRoleValues.length === 0) {
     console.error(
-      'Could not extract string values from Role enum. Check Prisma client generation.'
+      'Could not extract string values for Role enum. Check schema.prisma.'
     );
     process.exit(1);
   }
@@ -56,14 +88,5 @@ try {
   generateRolesFile();
 } catch (error) {
   console.error('Error generating roles file:', error);
-  // Attempting to access Role might fail if prisma generate hasn't run correctly yet.
-  if (
-    error instanceof TypeError &&
-    error.message.includes("Cannot read properties of undefined (reading '")
-  ) {
-    console.warn(
-      "Hint: This might be because the Prisma client hasn't been generated yet. Try running 'npx prisma generate' first."
-    );
-  }
   process.exit(1);
 }

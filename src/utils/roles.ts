@@ -76,9 +76,15 @@ export function getCommissionRate(role: AppRole): number {
 }
 
 export function hasPermission(
-  role: AppRole,
+  role: string | undefined | null, // Accept string | undefined | null
   permission: keyof Omit<RoleConfig, 'commissionRate'>
 ): boolean {
+  // Add validation check at the beginning
+  if (!role || !isValidRole(role)) {
+    return false; // Return false if role is invalid or undefined/null
+  }
+
+  // The rest of the function uses the validated `role` (now known to be AppRole)
   const config = roleConfigurations[role];
 
   // Switch logic remains the same
@@ -106,7 +112,13 @@ export function hasPermission(
   return permissionValue || config.isSystemAdmin;
 }
 
-export const getRoleName = (role: AppRole): string => {
+export const getRoleName = (role: string | undefined | null): string => {
+  // Add validation check
+  if (!role || !isValidRole(role)) {
+    return 'Rôle inconnu'; // Or handle as appropriate
+  }
+
+  // The rest of the function uses the validated `role`
   switch (role) {
     case 'EMPLOYEE':
       return 'Employé';

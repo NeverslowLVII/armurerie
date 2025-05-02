@@ -20,7 +20,6 @@ import {
   UserIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { Role } from '@prisma/client';
 import {
   AnimatePresence,
   type Variants,
@@ -86,8 +85,8 @@ export default function Navbar() {
     if (item.id === 'statistics') {
       // Allow PATRON and DEVELOPER to see Statistics
       return (
-        session?.user?.role === Role.PATRON ||
-        session?.user?.role === Role.DEVELOPER
+        session?.user?.role === 'PATRON' ||
+        session?.user?.role === 'DEVELOPER'
       );
     }
     return !item.hideFromNav; // Keep other items not explicitly hidden
