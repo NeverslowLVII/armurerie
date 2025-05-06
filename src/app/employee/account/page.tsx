@@ -235,7 +235,7 @@ export default function EmployeeAccount() {
               }}
               className="h-full"
             >
-              <Card className="group relative h-full overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
+              <Card className="group relative h-full overflow-hidden border border-neutral-200 bg-background shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
                 <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-amber-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-red-600/20 via-orange-500/20 to-amber-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100" />
 
@@ -309,7 +309,7 @@ export default function EmployeeAccount() {
               }}
               className="h-full"
             >
-              <Card className="group relative h-full overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
+              <Card className="group relative h-full overflow-hidden border border-neutral-200 bg-background shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
                 <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                 <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-green-500/20 via-emerald-500/20 to-teal-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100" />
 
@@ -345,7 +345,7 @@ export default function EmployeeAccount() {
           }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Card className="group relative mt-6 overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
+          <Card className="group relative mt-6 overflow-hidden border border-neutral-200 bg-background shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             <div className="absolute -inset-0.5 rounded-xl bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 opacity-0 blur transition-all duration-1000 group-hover:opacity-100" />
 

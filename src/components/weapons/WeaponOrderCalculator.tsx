@@ -882,7 +882,7 @@ function WeaponListItem({
                 onQuantityChange(weapon.name, value);
               }
             }}
-            className="h-7 w-12 border-neutral-200 bg-white text-center text-sm tabular-nums text-neutral-900 [appearance:textfield] dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="h-7 w-12 border-neutral-200 bg-background text-center text-sm tabular-nums text-neutral-900 [appearance:textfield] dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             aria-label={`Quantité de ${weapon.name}`}
           />
           <Button

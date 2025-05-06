@@ -40,7 +40,7 @@ const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-6 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-800"
+      className="mb-6 rounded-xl border border-neutral-200 bg-background p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-800"
     >
       <div className="flex flex-col items-start justify-between space-y-4 sm:flex-row sm:items-center sm:space-y-0">
         <div className="flex flex-wrap gap-2">

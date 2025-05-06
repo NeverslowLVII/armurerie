@@ -58,7 +58,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="container relative grid h-screen flex-col items-center justify-center bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container relative grid h-screen flex-col items-center justify-center bg-background dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col overflow-hidden bg-muted p-10 text-white lg:flex">
         <div className="absolute inset-0">
           <Image
@@ -154,7 +154,7 @@ export default function SignInPage() {
               )}
               <form
                 onSubmit={onSubmit}
-                className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900"
+                className="space-y-4 rounded-lg bg-background p-4 dark:bg-neutral-900"
               >
                 <div className="space-y-2">
                   <Label htmlFor="identifier">

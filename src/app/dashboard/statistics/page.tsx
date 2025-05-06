@@ -59,7 +59,7 @@ export default function StatisticsPage() {
     );
   } else {
     content = (
-      <div className="rounded-lg bg-white p-6 shadow-lg dark:bg-neutral-800 dark:shadow-neutral-700">
+      <div className="rounded-lg bg-background p-6 shadow-lg dark:bg-neutral-800 dark:shadow-neutral-700">
         <Statistics weapons={weapons} />
       </div>
     );

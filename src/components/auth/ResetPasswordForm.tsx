@@ -117,7 +117,7 @@ export default function ResetPasswordForm() {
       >
         <form
           onSubmit={onRequestReset}
-          className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900"
+          className="space-y-4 rounded-lg bg-background p-4 dark:bg-neutral-900"
         >
           <div className="grid gap-4">
             <div className="grid gap-2">
@@ -186,7 +186,7 @@ export default function ResetPasswordForm() {
     >
       <form
         onSubmit={onResetPassword}
-        className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900"
+        className="space-y-4 rounded-lg bg-background p-4 dark:bg-neutral-900"
       >
         <div className="grid gap-4">
           <div className="grid gap-2">

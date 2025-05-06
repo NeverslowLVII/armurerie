@@ -9,7 +9,7 @@ This document outlines the UI/UX standards for the Armurerie application to ensu
 - **Primary**: Red to orange gradient (`from-red-500 to-orange-500`, `from-red-600 to-amber-500`)
 - **Secondary**: Blue (`text-blue-500`, `dark:text-blue-400`)
 - **Neutral**:
-  - Light mode: White backgrounds (`bg-white`) with neutral text (`text-neutral-900`, `text-neutral-500`)
+  - Light mode: White backgrounds (`bg-background`) with neutral text (`text-neutral-900`, `text-neutral-500`)
   - Dark mode: Dark backgrounds (`bg-neutral-900`, `bg-neutral-800`) with light text (`text-white`, `text-neutral-400`)
 - **Accent**: Red (`text-red-500`, `text-red-600`) for emphasis and important elements
 
@@ -67,7 +67,7 @@ This document outlines the UI/UX standards for the Armurerie application to ensu
 Cards should have consistent styling:
 
 ```jsx
-<Card className="group relative h-full overflow-hidden border border-neutral-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
+<Card className="group relative h-full overflow-hidden border border-neutral-200 bg-background shadow-lg dark:border-neutral-800 dark:bg-neutral-900">
   <CardHeader>
     <CardTitle className="flex items-center gap-2 text-neutral-900 dark:text-white">
       <Icon className="h-5 w-5 text-red-500" />
@@ -107,7 +107,7 @@ Secondary buttons:
 Form elements should be consistent:
 
 ```jsx
-<div className="space-y-4 rounded-lg bg-white p-4 dark:bg-neutral-900">
+<div className="space-y-4 rounded-lg bg-background p-4 dark:bg-neutral-900">
   <div className="space-y-2">
     <Label htmlFor="field">Field Label</Label>
     <Input
@@ -131,7 +131,7 @@ Form elements should be consistent:
 Auth pages should follow this structure:
 
 ```jsx
-<div className="container relative grid min-h-screen flex-col items-center justify-center bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
+<div className="container relative grid min-h-screen flex-col items-center justify-center bg-background dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
   {/* Left side - Image with overlay */}
   <div className="relative hidden h-full flex-col overflow-hidden bg-muted p-10 text-white lg:flex">
     <div className="absolute inset-0">

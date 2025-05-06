@@ -168,7 +168,7 @@ export default function WeaponsTable() {
           <div className="mt-8 flow-root">
             <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle">
-                <div className="overflow-hidden bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 sm:rounded-lg">
+                <div className="overflow-hidden bg-background shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 sm:rounded-lg">
                   <table className="min-w-full divide-y divide-neutral-300 dark:divide-neutral-700">
                     <thead>
                       <tr>
@@ -246,7 +246,7 @@ export default function WeaponsTable() {
               hasAdminAccess &&
               currentUserRole &&
               hasPermission(currentUserRole, 'canManageUsers')
-                ? 'bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
+                ? 'bg-background text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
                 : 'cursor-not-allowed bg-neutral-100 text-neutral-400 ring-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:ring-neutral-500'
             }`}
             disabled={
@@ -265,7 +265,7 @@ export default function WeaponsTable() {
               hasAdminAccess &&
               currentUserRole &&
               hasPermission(currentUserRole, 'canManageBaseWeapons')
-                ? 'bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
+                ? 'bg-background text-neutral-900 ring-neutral-300 hover:bg-neutral-50 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:hover:bg-neutral-700'
                 : 'cursor-not-allowed bg-neutral-100 text-neutral-400 ring-neutral-200 dark:bg-neutral-700 dark:text-neutral-300 dark:ring-neutral-500'
             }`}
             disabled={
@@ -303,7 +303,7 @@ export default function WeaponsTable() {
           </div>
           <Input
             type="text"
-            className="block w-full rounded-lg border-0 bg-white py-2 pl-10 pr-3 text-neutral-900 ring-1 ring-inset ring-neutral-300 transition-all duration-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-red-600 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:placeholder:text-neutral-500 sm:text-sm sm:leading-6"
+            className="block w-full rounded-lg border-0 bg-background py-2 pl-10 pr-3 text-neutral-900 ring-1 ring-inset ring-neutral-300 transition-all duration-200 placeholder:text-neutral-400 focus:ring-2 focus:ring-inset focus:ring-red-600 dark:bg-neutral-800 dark:text-white dark:ring-neutral-600 dark:placeholder:text-neutral-500 sm:text-sm sm:leading-6"
             placeholder="Rechercher une arme, un détenteur, un employé..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -319,7 +319,7 @@ export default function WeaponsTable() {
       >
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle">
-            <div className="overflow-hidden bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 sm:rounded-lg">
+            <div className="overflow-hidden bg-background shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-800 sm:rounded-lg">
               <table className="min-w-full divide-y divide-neutral-300 dark:divide-neutral-700">
                 <thead className="bg-neutral-50 dark:bg-neutral-900">
                   <tr>
@@ -373,7 +373,7 @@ export default function WeaponsTable() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-800">
+                <tbody className="divide-y divide-neutral-200 bg-background dark:divide-neutral-700 dark:bg-neutral-800">
                   <AnimatePresence mode="wait">
                     {currentItems.map((weapon) => (
                       <motion.tr
@@ -503,7 +503,7 @@ export default function WeaponsTable() {
             className={`rounded-md px-3 py-1 ${
               currentPage === 1
                 ? 'cursor-not-allowed bg-neutral-100 text-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
-                : 'border bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700'
+                : 'border bg-background text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800'
             }`}
           >
             Précédent
@@ -535,7 +535,7 @@ export default function WeaponsTable() {
                 <Button
                   key={1}
                   onClick={() => paginate(1)}
-                  className="rounded-md border bg-white px-3 py-1 text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                  className="rounded-md border bg-background px-3 py-1 text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800"
                 >
                   1
                 </Button>
@@ -560,7 +560,7 @@ export default function WeaponsTable() {
                   className={`rounded-md px-3 py-1 ${
                     currentPage === i
                       ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white dark:bg-gradient-to-r dark:from-red-700 dark:to-orange-700'
-                      : 'border bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700'
+                      : 'border bg-background text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800'
                   }`}
                 >
                   {i}
@@ -583,7 +583,7 @@ export default function WeaponsTable() {
                 <Button
                   key={totalPages}
                   onClick={() => paginate(totalPages)}
-                  className="rounded-md border bg-white px-3 py-1 text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700"
+                  className="rounded-md border bg-background px-3 py-1 text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800"
                 >
                   {totalPages}
                 </Button>
@@ -603,7 +603,7 @@ export default function WeaponsTable() {
               currentPage ===
               Math.ceil(totalWeapons / ITEMS_PER_PAGE)
                 ? 'cursor-not-allowed bg-neutral-100 text-neutral-400 dark:bg-neutral-700 dark:text-neutral-300'
-                : 'border bg-white text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-white dark:hover:bg-neutral-700'
+                : 'border bg-background text-neutral-700 hover:bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-white dark:hover:bg-neutral-800'
             }`}
           >
             Suivant

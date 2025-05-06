@@ -149,7 +149,7 @@ export function DataProvider({
   useEffect(() => {
     // Charger tout au montage initial si authentifié
     if (status === 'authenticated' && !initialLoadDone.current) {
-       refreshAll();
+    refreshAll();
     }
   }, [status, refreshAll]);
 

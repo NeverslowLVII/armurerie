@@ -253,7 +253,7 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({
 
           <DropdownMenu.Portal>
             <DropdownMenu.Content
-              className="z-50 min-w-[10rem] overflow-hidden rounded-md border border-neutral-200 bg-white p-1 text-neutral-900 shadow-md dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50"
+              className="z-50 min-w-[10rem] overflow-hidden rounded-md border border-neutral-200 bg-background p-1 text-neutral-900 shadow-md dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-50"
               sideOffset={5}
               align="end"
             >
@@ -311,7 +311,7 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({
         />
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+      <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-background shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
         <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-700">
           <thead className="bg-neutral-50 dark:bg-neutral-800">
             <tr>
@@ -335,7 +335,7 @@ const IncomeStatementTab: React.FC<IncomeStatementProps> = ({
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-200 bg-white dark:divide-neutral-700 dark:bg-neutral-800">
+          <tbody className="divide-y divide-neutral-200 bg-background dark:divide-neutral-700 dark:bg-neutral-800">
             {/* Chiffre d'affaires */}
             <tr className="font-semibold">
               <td className="whitespace-nowrap px-6 py-4 text-sm text-neutral-900 dark:text-white">

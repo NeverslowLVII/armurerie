@@ -38,7 +38,7 @@ export default function UsersAdminClient({ users }: Props) {
         {users.map((user) => (
           <div
             key={user.id}
-            className="flex items-center justify-between rounded-lg bg-white p-4 shadow dark:bg-neutral-800"
+            className="flex items-center justify-between rounded-lg bg-background p-4 shadow dark:bg-neutral-800"
           >
             <div>
               <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">

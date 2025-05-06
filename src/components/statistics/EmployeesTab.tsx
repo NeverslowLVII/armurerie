@@ -43,7 +43,7 @@ const EmployeesTab: React.FC<EmployeesTabProps> = ({ employeeStats }) => {
           <motion.div
             key={employee.name}
             variants={cardVariants}
-            className="rounded-xl border border-neutral-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
+            className="rounded-xl border border-neutral-200 bg-background p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -80,7 +80,7 @@ const EmployeesTab: React.FC<EmployeesTabProps> = ({ employeeStats }) => {
       {/* Employee Performance */}
       <motion.div
         variants={chartVariants}
-        className="rounded-xl border border-neutral-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
+        className="rounded-xl border border-neutral-200 bg-background p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
       >
         <h3 className="mb-4 text-lg font-medium text-neutral-900 dark:text-white">
           Ventes par employé

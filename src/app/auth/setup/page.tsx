@@ -11,7 +11,7 @@ import { Suspense } from 'react';
 
 export default function SetupPage() {
   return (
-    <div className="container relative grid min-h-screen flex-col items-center justify-center bg-white dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container relative grid min-h-screen flex-col items-center justify-center bg-background dark:bg-neutral-900 lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col overflow-hidden bg-muted p-10 text-white lg:flex">
         <div className="absolute inset-0">
           <Image

@@ -48,7 +48,7 @@ function ErrorContent() {
   }
 
   return (
-    <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg dark:bg-neutral-800">
+    <div className="w-full max-w-md rounded-lg bg-background p-8 shadow-lg dark:bg-neutral-800">
       <div className="text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
           <ExclamationTriangleIcon
@@ -81,7 +81,7 @@ export default function AuthError() {
       <Suspense
         fallback={
           <SkeletonLoading isLoading={true}>
-            <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg dark:bg-neutral-800">
+            <div className="w-full max-w-md rounded-lg bg-background p-8 shadow-lg dark:bg-neutral-800">
               <div className="text-center">
                 <Skeleton className="mx-auto h-12 w-12 rounded-full" />
                 <Skeleton className="mx-auto mt-3 h-8 w-64" />

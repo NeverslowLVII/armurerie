@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
           base_weapon: {
             select: {
               nom: true,
-            },
+      },
           },
         },
         orderBy: {

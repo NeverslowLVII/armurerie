@@ -89,7 +89,7 @@ export function LoadingOverlay({
       {loading && (
         <div
           className={cn(
-            'absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-neutral-900/80',
+            'absolute inset-0 flex items-center justify-center bg-background/80 dark:bg-neutral-900/80',
             blur && 'backdrop-blur-sm'
           )}
         >

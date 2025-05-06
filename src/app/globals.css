@@ -3,6 +3,18 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  :root {
+    --background: hsl(0 0% 98%); /* ~ neutral-50 */
+    --foreground: hsl(240 10% 3.9%); /* ~ neutral-900/950 */
+    /* Add other base variables here if needed, e.g., for primary, secondary, etc. */
+  }
+
+  .dark {
+    --background: hsl(240 5% 10%); /* ~ neutral-900/950 */
+    --foreground: hsl(0 0% 95%); /* ~ neutral-100/200 */
+    /* Add dark mode overrides for other variables here */
+  }
+
   /* Basic resets or base styles can go here */
   body {
     /* Removed background/color rules - applied directly in layout.tsx */

@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto bg-white py-10 dark:bg-neutral-900">
+    <div className="container mx-auto bg-background py-10 dark:bg-neutral-900">
       <h1 className="mb-8 text-3xl font-bold text-neutral-900 dark:text-white">
         Bienvenue, {session.user.name}
       </h1>

@@ -10,7 +10,9 @@ vi.mock('@/lib/prisma', () => ({
     baseWeapon: {
       findMany: vi.fn(),
       create: vi.fn(),
+      count: vi.fn(),
     },
+    $transaction: vi.fn(),
   },
 }));
 
@@ -24,9 +26,23 @@ const createMockPostRequest = (body: any): Request => {
   return req;
 };
 
+// Helper function to create a mock NextRequest (for GET)
+const createMockGetRequest = (searchParams: URLSearchParams = new URLSearchParams()): NextRequest => {
+  const req = {
+    nextUrl: {
+      searchParams,
+    },
+    headers: new Headers(),
+    // Add other properties as needed by your GET handler
+  } as unknown as NextRequest;
+  return req;
+};
+
 // Cast mocked functions
 const mockedFindMany = vi.mocked(prisma.baseWeapon.findMany);
 const mockedCreate = vi.mocked(prisma.baseWeapon.create);
+const mockedCount = vi.mocked(prisma.baseWeapon.count);
+const mockedTransaction = vi.mocked(prisma.$transaction);
 
 describe('/api/base-weapons Route Handlers', () => {
   let testWeapons: BaseWeapon[];
@@ -63,25 +79,36 @@ describe('/api/base-weapons Route Handlers', () => {
     };
 
     // Default mock implementations
-    mockedFindMany.mockResolvedValue(testWeapons);
     mockedCreate.mockResolvedValue(createdWeapon);
+    mockedFindMany.mockResolvedValue(testWeapons);
+    mockedCount.mockResolvedValue(testWeapons.length);
+
+    // Mock the transaction to return results from the already mocked findMany and count
+    mockedTransaction.mockImplementation(async () => {
+      const findManyResult = await mockedFindMany();
+      const countResult = await mockedCount();
+      return [findManyResult, countResult] as any; // Cast to any to satisfy complex type
+    });
   });
 
   // --- GET Handler Tests ---
   describe('GET Handler', () => {
     it('should return all base weapons', async () => {
-      const response = await GET();
+      const mockRequest = createMockGetRequest();
+      const response = await GET(mockRequest);
       const body = await response.json();
 
-      expect(mockedFindMany).toHaveBeenCalledTimes(1);
+      expect(mockedTransaction).toHaveBeenCalledTimes(1);
       expect(response.status).toBe(200);
-      expect(body).toEqual(testWeapons);
-      expect(body.length).toBe(2);
+      expect(body.baseWeapons).toEqual(testWeapons);
+      expect(body.totalCount).toBe(testWeapons.length);
+      expect(body.baseWeapons.length).toBe(2);
     });
 
     it('should return 500 on database error', async () => {
-      mockedFindMany.mockRejectedValue(new Error('DB findMany error'));
-      const response = await GET();
+      mockedTransaction.mockRejectedValue(new Error('DB transaction error'));
+      const mockRequest = createMockGetRequest();
+      const response = await GET(mockRequest);
       const body = await response.json();
 
       expect(response.status).toBe(500);

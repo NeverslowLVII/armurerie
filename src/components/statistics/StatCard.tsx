@@ -6,7 +6,7 @@ import { cardVariants } from './utils';
 const StatCard = ({ title, value, icon: Icon }: StatCardProps) => (
   <motion.div
     variants={cardVariants}
-    className="relative overflow-hidden rounded-lg border border-neutral-200 bg-white p-3 shadow-lg backdrop-blur-xl transition-shadow duration-300 hover:shadow-xl dark:border-neutral-700 dark:bg-neutral-800"
+    className="relative overflow-hidden rounded-lg border border-neutral-200 bg-background p-3 shadow-lg backdrop-blur-xl transition-shadow duration-300 hover:shadow-xl dark:border-neutral-700 dark:bg-neutral-800"
     whileHover={{ y: -2, transition: { duration: 0.2 } }}
   >
     <div className="relative flex items-center">

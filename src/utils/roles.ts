@@ -114,8 +114,11 @@ export function hasPermission(
 
 export const getRoleName = (role: string | undefined | null): string => {
   // Add validation check
-  if (!role || !isValidRole(role)) {
+  if (!role) {
     return 'Rôle inconnu'; // Or handle as appropriate
+  }
+  if (!isValidRole(role)) {
+    return String(role); // Return the role string itself if not a known/valid role
   }
 
   // The rest of the function uses the validated `role`

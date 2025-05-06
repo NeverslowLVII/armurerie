@@ -2,15 +2,25 @@ import { prisma } from '@/lib/prisma';
 import type { User } from '@prisma/client';
 import { Role } from '@prisma/client';
 import type { Session } from 'next-auth';
-import { getServerSession } from 'next-auth/next';
+// import { getServerSession } from 'next-auth/next'; // Implicitly handled by vi.mock
 import { NextResponse } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GET } from './route';
 
-// Mock next-auth explicitly returning the mock function
-const mockGetServerSessionFn = vi.fn();
+// Use vi.hoisted to ensure mockGetServerSessionFn is initialized before vi.mock factory runs
+const { mockGetServerSessionFn } = vi.hoisted(() => {
+  return { mockGetServerSessionFn: vi.fn() };
+});
+
+// Mock next-auth
 vi.mock('next-auth/next', () => ({
   getServerSession: mockGetServerSessionFn,
+}));
+
+// Mock next/headers to prevent "called outside a request scope" error
+vi.mock('next/headers', () => ({
+  headers: vi.fn(() => new Headers()), // Return a new Headers object
+  cookies: vi.fn(() => new Map()), // Mock cookies if it were used directly
 }));
 
 // Mock @/lib/auth to provide minimal authOptions
@@ -53,8 +63,8 @@ describe('/api/employee/info Route Handler', () => {
   const testContractUrl = 'https://example.com/contract.pdf';
 
   let mockSession: Session | null;
-  // Use Partial<User> for the data Prisma mock should return
-  let mockUserDataForPrisma: Partial<User> | null;
+  // Use Partial<User> for the data Prisma mock should return -- NO LONGER FULLY NEEDED for this specific mock
+  // let mockUserDataForPrisma: Partial<User> | null;
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -69,34 +79,24 @@ describe('/api/employee/info Route Handler', () => {
       },
       expires: 'mock_expiry_date',
     };
-    // This is the data Prisma's findUnique should resolve with
-    // Include necessary fields + others as null/default to satisfy Partial<User>
-    mockUserDataForPrisma = {
-      id: testUserId,
-      email: testUserEmail,
-      name: testUserName,
-      role: testUserRole,
-      contractUrl: testContractUrl,
-      // Add other potentially required fields as null/defaults
-      username: null,
-      password: 'hashedpassword', // Needs a value, content doesn't matter
-      color: null,
-      lastLogin: null,
-      createdAt: new Date(), // Needs a value
-      updatedAt: new Date(), // Needs a value
-      deleted: false,
-      deletedAt: null,
-      commission: 0,
-    };
-
     mockedGetServerSession.mockResolvedValue(mockSession);
-    // Mock findUnique to return the partial user object, cast as User
-    mockedUserFindUnique.mockResolvedValue(mockUserDataForPrisma as User);
+    // No default implementation for mockedUserFindUnique here;
+    // it will be set in specific tests or use vi.fn() default behavior (undefined).
   });
 
   // --- GET Handler Tests ---
   describe('GET Handler', () => {
     it('should return user info if session is valid and user exists', async () => {
+      const expectedApiResult: ExpectedUserInfo = {
+        id: testUserId,
+        name: testUserName,
+        email: testUserEmail,
+        role: testUserRole,
+        contractUrl: testContractUrl,
+      };
+      // Specific mock for this test case
+      mockedUserFindUnique.mockResolvedValue(expectedApiResult as any as User);
+
       const response = await GET();
       const body = await response.json();
 
@@ -113,15 +113,7 @@ describe('/api/employee/info Route Handler', () => {
         },
       });
       expect(response.status).toBe(200);
-      // Assert against the expected shape, ignoring extra fields from mockUserDataForPrisma
-      const expectedBody: ExpectedUserInfo = {
-        id: testUserId,
-        name: testUserName,
-        email: testUserEmail,
-        role: testUserRole,
-        contractUrl: testContractUrl,
-      };
-      expect(body).toEqual(expectedBody);
+      expect(body).toEqual(expectedApiResult);
     });
 
     it('should return 401 if no session is found', async () => {

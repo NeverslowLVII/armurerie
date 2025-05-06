@@ -351,7 +351,7 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
+      <div className="rounded-xl border border-neutral-200 bg-background p-6 shadow-lg dark:border-neutral-700 dark:bg-neutral-800">
         <h2 className="mb-6 text-2xl font-bold text-neutral-900 dark:text-white">
           Statistiques
         </h2>
@@ -382,7 +382,7 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
                   className={({ selected }) =>
                     `flex items-center space-x-2 px-3 py-2.5 text-sm font-medium leading-5 ${
                       selected
-                        ? 'bg-white text-neutral-900 shadow dark:bg-neutral-800 dark:text-white'
+                        ? 'bg-background text-neutral-900 shadow dark:bg-neutral-800 dark:text-white'
                         : 'text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white'
                     } whitespace-nowrap rounded-lg outline-none ring-0 ring-offset-0`
                   }

@@ -171,21 +171,21 @@ export default function Navbar() {
     >
       <motion.nav
         style={{ willChange: 'background-color, border-color' }}
-        className="relative mx-auto max-w-7xl rounded-2xl border border-white/20 bg-white/90 px-6 shadow-lg shadow-black/5 backdrop-blur-lg dark:border-neutral-800/50 dark:bg-neutral-900/90 dark:shadow-white/5"
+        className="relative mx-auto max-w-7xl rounded-2xl border border-white/20 bg-background/90 px-6 shadow-lg shadow-black/5 backdrop-blur-lg dark:border-neutral-800/50 dark:bg-neutral-900/90 dark:shadow-white/5"
       >
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/dashboard/weapons">
-              <motion.div
-                className="relative flex-shrink-0"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <h1 className="bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-3xl font-black text-transparent drop-shadow-sm">
-                  Armurerie
-                </h1>
-              </motion.div>
+                <motion.div
+                  className="relative flex-shrink-0"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <h1 className="bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 bg-clip-text text-3xl font-black text-transparent drop-shadow-sm">
+                    Armurerie
+                  </h1>
+                </motion.div>
             </Link>
 
             {/* Desktop Navigation Links */}
@@ -300,7 +300,7 @@ export default function Navbar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="mt-2 w-48 rounded-xl border border-white/20 bg-white/90 p-1 shadow-lg backdrop-blur-md dark:border-neutral-800/50 dark:bg-neutral-900/90"
+                    className="mt-2 w-48 rounded-xl border border-white/20 bg-background/90 p-1 shadow-lg backdrop-blur-md dark:border-neutral-800/50 dark:bg-neutral-900/90"
                   >
                     <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800/50">
                       <Link

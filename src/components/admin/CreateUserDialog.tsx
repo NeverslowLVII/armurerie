@@ -73,7 +73,7 @@ export function CreateUserDialog() {
       <DialogTrigger asChild>
         <Button>Ajouter un utilisateur</Button>
       </DialogTrigger>
-      <DialogContent className="bg-white text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100 sm:max-w-[425px]">
+      <DialogContent className="bg-background text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100 sm:max-w-[425px]">
         <form onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle className="text-neutral-900 dark:text-neutral-100">

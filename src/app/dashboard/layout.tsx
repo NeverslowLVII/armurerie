@@ -14,7 +14,7 @@ export default function DashboardLayout({
   const { data: session } = useSession();
 
   return (
-    <div className="relative min-h-screen bg-white dark:bg-neutral-900">
+    <div className="relative min-h-screen bg-background dark:bg-neutral-900">
       <Navbar />
       <div className="pt-28">{children}</div>
 

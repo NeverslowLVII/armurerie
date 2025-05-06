@@ -139,7 +139,7 @@ export function WeaponComparison() {
               <SelectTrigger aria-label="Sélectionner la première arme">
                 <SelectValue placeholder="Sélectionner une arme" />
               </SelectTrigger>
-              <SelectContent className="max-h-[300px] border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+              <SelectContent className="max-h-[300px] border border-neutral-200 bg-background dark:border-neutral-800 dark:bg-neutral-950">
                 {weaponCategories.map((category) => (
                   <div key={category}>
                     <div className="bg-neutral-50 px-2 py-1.5 text-sm font-semibold text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">
@@ -175,7 +175,7 @@ export function WeaponComparison() {
               <SelectTrigger aria-label="Sélectionner la deuxième arme">
                 <SelectValue placeholder="Sélectionner une arme" />
               </SelectTrigger>
-              <SelectContent className="max-h-[300px] border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+              <SelectContent className="max-h-[300px] border border-neutral-200 bg-background dark:border-neutral-800 dark:bg-neutral-950">
                 {weaponCategories.map((category) => (
                   <div key={category}>
                     <div className="bg-neutral-50 px-2 py-1.5 text-sm font-semibold text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400">

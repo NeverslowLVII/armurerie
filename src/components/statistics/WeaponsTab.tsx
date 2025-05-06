@@ -43,7 +43,7 @@ const WeaponsTab: React.FC<WeaponsTabProps> = ({ weaponStats }) => {
       {/* Daily Trends */}
       <motion.div
         variants={chartVariants}
-        className="rounded-xl border border-neutral-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
+        className="rounded-xl border border-neutral-200 bg-background p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
       >
         <h3 className="mb-4 text-lg font-medium text-neutral-900 dark:text-white">
           Ventes quotidiennes
@@ -94,7 +94,7 @@ const WeaponsTab: React.FC<WeaponsTabProps> = ({ weaponStats }) => {
       {/* Weapon Types Distribution */}
       <motion.div
         variants={chartVariants}
-        className="rounded-xl border border-neutral-200 bg-white p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
+        className="rounded-xl border border-neutral-200 bg-background p-6 shadow-lg backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-800"
       >
         <h3 className="mb-4 text-lg font-medium text-neutral-900 dark:text-white">
           Types d&apos;armes vendues

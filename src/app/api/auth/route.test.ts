@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma';
 import type { User } from '@prisma/client';
 import { type NextRequest, NextResponse } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { POST, verifyAuthTokenAndGetUser } from './route'; // Import the handlers
+import { POST } from './route'; // Import the POST handler
+import { verifyAuthTokenAndGetUser } from '@/lib/authUtils'; // Import the utility function
 
 // Mock dependencies FIRST
 vi.mock('@/lib/prisma', () => ({
