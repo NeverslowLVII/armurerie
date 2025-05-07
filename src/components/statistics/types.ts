@@ -1,3 +1,42 @@
+import type { Weapon as PrismaWeapon, BaseWeapon, User, Role } from '@prisma/client';
+import type { ReactElement } from 'react';
+
+// Types étendus basés sur Prisma pour les données reçues de l'API
+export type WeaponWithRelations = PrismaWeapon & {
+  user: Pick<User, 'name' | 'role' | 'commission'>;
+  base_weapon?: Pick<BaseWeapon, 'nom' | 'prix_defaut' | 'cout_production_defaut'>;
+  nom_arme?: string; // Champ supplémentaire fourni par l'API
+};
+
+// Type utilitaire pour traiter la structure des données JSON/API
+export type ApiWeapon = Omit<WeaponWithRelations, 'horodateur'> & {
+  horodateur: string; // La date est reçue comme string du frontend/JSON
+};
+
+// Type principal utilisé dans les composants statistiques
+export type Weapon = ApiWeapon;
+
+/**
+ * Normalise les données d'arme pour qu'elles soient cohérentes
+ * Garanti que cout_production utilise la valeur par défaut de base_weapon si non défini
+ */
+export function normalizeWeapon(weapon: Partial<Weapon>): Weapon {
+  return {
+    id: weapon.id || 0,
+    horodateur: weapon.horodateur || new Date().toISOString(),
+    user_id: weapon.user_id || 0,
+    user: weapon.user || { name: 'Inconnu', role: 'EMPLOYEE' },
+    detenteur: weapon.detenteur || '',
+    bp: weapon.bp,
+    nom_arme: weapon.nom_arme || (weapon.base_weapon?.nom || ''),
+    serigraphie: weapon.serigraphie || '',
+    prix: weapon.prix || 0,
+    cout_production: weapon.cout_production ?? (weapon.base_weapon?.cout_production_defaut ?? 0),
+    base_weapon: weapon.base_weapon,
+  } as Weapon;
+}
+
+// Interfaces pour les statistiques
 export interface WeaponStats {
   totalWeapons: number;
   totalValue: number;
@@ -18,31 +57,6 @@ export interface WeaponStats {
     count: number;
   }[];
   profitByType: { name: string; profit: number; count: number }[];
-}
-
-// Define BaseWeapon here, unexported, as it's used by the Weapon interface below
-interface BaseWeapon {
-  id: number;
-  nom: string;
-  prix_defaut: number;
-  cout_production_defaut: number;
-}
-
-export interface Weapon {
-  id: number;
-  horodateur: string;
-  user_id: number;
-  user: {
-    name: string;
-    role: string;
-    commission?: number;
-  };
-  detenteur: string;
-  bp?: string;
-  nom_arme: string;
-  serigraphie: string;
-  prix: number;
-  base_weapon?: BaseWeapon;
 }
 
 export interface EmployeeStats {

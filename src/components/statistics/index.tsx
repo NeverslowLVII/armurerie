@@ -14,6 +14,7 @@ import IncomeStatementTab from './IncomeStatementTab';
 import OverviewTab from './OverviewTab';
 import WeaponsTab from './WeaponsTab';
 import type { DateRange, TabType, Weapon } from './types';
+import { normalizeWeapon } from './types';
 import { formatDate, getPresets, normalizeWeaponName } from './utils';
 
 interface StatisticsProps {
@@ -49,15 +50,20 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
     setActiveDatePreset(presetIndex);
   };
 
+  // Pré-traiter les armes pour garantir des données cohérentes
+  const normalizedWeapons = useMemo(() => {
+    return weapons.map(weapon => normalizeWeapon(weapon));
+  }, [weapons]);
+
   // Filtrer les armes en fonction de la plage de dates sélectionnée
   const filteredWeapons = useMemo(() => {
-    return weapons.filter((weapon) => {
+    return normalizedWeapons.filter((weapon) => {
       const weaponDate = new Date(weapon.horodateur);
       return (
         weaponDate >= dateRange.startDate && weaponDate <= dateRange.endDate
       );
     });
-  }, [weapons, dateRange]);
+  }, [normalizedWeapons, dateRange]);
 
   // Calculate weapon statistics
   const weaponStats = useMemo(() => {
@@ -87,7 +93,7 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
       0
     );
     const totalCostProduction = filteredWeapons.reduce((sum, weapon) => {
-      return sum + (weapon.base_weapon?.cout_production_defaut ?? 0);
+      return sum + (weapon.cout_production ?? 0);
     }, 0);
 
     const totalProfit = totalValue - totalCostProduction;
@@ -132,7 +138,7 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
         );
         const totalTypeCost = typeWeapons.reduce(
           (sum, weapon) =>
-            sum + (weapon.base_weapon?.cout_production_defaut || 0),
+            sum + (weapon.cout_production || 0),
           0
         );
         const typeProfit = totalTypeValue - totalTypeCost;
@@ -159,9 +165,9 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
         }
 
         acc[day].totalValue += weapon.prix;
-        acc[day].totalCost += weapon.base_weapon?.cout_production_defaut ?? 0;
+        acc[day].totalCost += weapon.cout_production ?? 0;
         acc[day].totalProfit +=
-          weapon.prix - (weapon.base_weapon?.cout_production_defaut ?? 0);
+          weapon.prix - (weapon.cout_production ?? 0);
         acc[day].count += 1;
 
         return acc;
@@ -244,7 +250,7 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
         );
         const totalCost = empWeapons.reduce(
           (sum, weapon) =>
-            sum + (weapon.base_weapon?.cout_production_defaut ?? 0),
+            sum + (weapon.cout_production ?? 0),
           0
         );
         const profit = totalValue - totalCost;
@@ -298,7 +304,7 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
       0
     );
     const productionCost = filteredWeapons.reduce(
-      (sum, weapon) => sum + (weapon.base_weapon?.cout_production_defaut ?? 0),
+      (sum, weapon) => sum + (weapon.cout_production ?? 0),
       0
     );
     const grossProfit = revenue - productionCost;
@@ -306,7 +312,7 @@ const Statistics: React.FC<StatisticsProps> = ({ weapons }) => {
     // Calculer les commissions en utilisant le taux stocké dans weapon.user.commission
     const commissions = filteredWeapons.reduce((sum, weapon) => {
       const weaponProfit =
-        weapon.prix - (weapon.base_weapon?.cout_production_defaut ?? 0);
+        weapon.prix - (weapon.cout_production ?? 0);
       const commissionRate = weapon.user?.commission ?? 0.1; // Default 10% if not set
       return sum + weaponProfit * commissionRate;
     }, 0);

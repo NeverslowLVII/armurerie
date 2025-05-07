@@ -33,7 +33,7 @@ export interface User {
   color: string | null;
   role: Role;
   contractUrl?: string;
-  commission?: number;
+  commission: number;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -44,7 +44,7 @@ export interface Weapon {
   horodateur: string;
   user_id: number;
   detenteur: string;
-  bp?: string;
+  bp: string | null;
   nom_arme: string;
   serigraphie: string;
   prix: number;

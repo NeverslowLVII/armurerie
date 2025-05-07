@@ -53,12 +53,13 @@ export async function GET(request: NextRequest) {
               name: true,
               color: true,
               role: true,
+              commission: true,
             },
           },
           base_weapon: {
             select: {
               nom: true,
-      },
+            },
           },
         },
         orderBy: {
