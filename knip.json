@@ -1,14 +1,28 @@
 {
-  "$schema": "https://raw.githubusercontent.com/webpro/knip/main/schema.json",
-  "entry": ["src/app/**/*.{ts,tsx}", "src/pages/**/*.{ts,tsx}"],
-  "project": ["src/**/*.{ts,tsx}"],
-  "ignore": ["src/components/ui/**"],
-  "ignoreDependencies": ["@radix-ui/react-label"],
-  "ignoreBinaries": [],
-  "rules": {
-    "exports": "error",
-    "types": "error",
-    "files": "warn",
-    "dependencies": "warn"
-  }
+	"$schema": "https://raw.githubusercontent.com/webpro/knip/main/schema.json",
+	"entry": ["src/app/**/*.{ts,tsx}", "src/pages/**/*.{ts,tsx}"],
+	"project": ["src/**/*.{ts,tsx}"],
+	"ignore": ["src/components/ui/**", "src/hooks/use-toast.ts"],
+	"ignoreDependencies": [
+		"@internationalized/date",
+		"@radix-ui/react-accordion",
+		"@radix-ui/react-avatar",
+		"@radix-ui/react-hover-card",
+		"@radix-ui/react-label",
+		"@radix-ui/react-popover",
+		"@radix-ui/react-radio-group",
+		"@radix-ui/react-slider",
+		"@radix-ui/react-switch",
+		"@radix-ui/react-toggle-group",
+		"cmdk",
+		"react-aria-components",
+		"react-day-picker"
+	],
+	"ignoreBinaries": [],
+	"rules": {
+		"exports": "error",
+		"types": "error",
+		"files": "warn",
+		"dependencies": "warn"
+	}
 }

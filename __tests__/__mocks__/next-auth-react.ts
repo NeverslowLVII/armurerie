@@ -1,8 +1,8 @@
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 const mockSession = {
-  data: null,
-  status: 'unauthenticated',
+	data: null,
+	status: "unauthenticated",
 };
 
 export const useSession = vi.fn(() => mockSession);
@@ -11,10 +11,10 @@ export const signOut = vi.fn();
 export const getSession = vi.fn();
 
 const NextAuthReactMock = {
-  useSession,
-  signIn,
-  signOut,
-  getSession,
+	useSession,
+	signIn,
+	signOut,
+	getSession,
 };
 
 export default NextAuthReactMock;

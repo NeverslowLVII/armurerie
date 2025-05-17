@@ -1,170 +1,148 @@
-// import { Role } from '@prisma/client';
-import { withAuth } from 'next-auth/middleware';
-import { NextResponse } from 'next/server';
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-// Define public routes that don't require authentication
 const publicRoutes = [
-  '/auth/signin',
-  '/auth/error',
-  '/auth/reset',
-  '/auth/setup',
-  '/api/auth/callback/credentials',
-  '/api/auth/csrf',
-  '/api/auth/session',
-  '/api/auth/providers',
-  '/api/auth/signin',
-  '/api/auth/signout',
-  '/favicon.ico',
-  '/_next',
-  '/images',
-  '/assets',
-  '/static',
-  '/vercel.svg',
+	"/auth/signin",
+	"/auth/error",
+	"/auth/reset",
+	"/auth/setup",
+	"/api/auth/callback/credentials",
+	"/api/auth/csrf",
+	"/api/auth/session",
+	"/api/auth/providers",
+	"/api/auth/signin",
+	"/api/auth/signout",
+	"/favicon.ico",
+	"/_next",
+	"/images",
+	"/assets",
+	"/static",
+	"/vercel.svg",
 ];
 
 export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const path = req.nextUrl.pathname;
-    const isApiRoute = path.startsWith('/api/');
+	function middleware(req) {
+		const token = req.nextauth.token;
+		const path = req.nextUrl.pathname;
+		const isApiRoute = path.startsWith("/api/");
 
-    // Check if the route is public
-    if (
-      publicRoutes.some((route) => {
-        // Exact match for paths like /auth/reset
-        if (path === route) return true;
-        // Prefix match for paths like /_next/...
-        if (
-          route.endsWith('/')
-            ? path.startsWith(route)
-            : path.startsWith(`${route}/`) || path === route
-        )
-          return true;
-        return false;
-      })
-    ) {
-      return NextResponse.next();
-    }
+		if (
+			publicRoutes.some((route) => {
+				if (path === route) return true;
 
-    // If already authenticated and on login page, redirect to /
-    if (token && path.startsWith('/auth/signin')) {
-      return NextResponse.redirect(new URL('/', req.url));
-    }
+				if (
+					route.endsWith("/")
+						? path.startsWith(route)
+						: path.startsWith(`${route}/`) || path === route
+				)
+					return true;
+				return false;
+			})
+		) {
+			return NextResponse.next();
+		}
 
-    // API routes should return 401 instead of redirecting
-    if (!token && isApiRoute) {
-      if (req.method === 'OPTIONS') {
-        return new NextResponse(null, {
-          status: 204,
-          headers: {
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Max-Age': '86400',
-          },
-        });
-      }
+		if (token && path.startsWith("/auth/signin")) {
+			return NextResponse.redirect(new URL("/", req.url));
+		}
 
-      return new NextResponse(
-        JSON.stringify({ error: 'Authentication required' }),
-        {
-          status: 401,
-          headers: {
-            'content-type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          },
-        }
-      );
-    }
+		if (!token && isApiRoute) {
+			if (req.method === "OPTIONS") {
+				return new NextResponse(null, {
+					status: 204,
+					headers: {
+						"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+						"Access-Control-Allow-Headers": "Content-Type, Authorization",
+						"Access-Control-Allow-Origin": "*",
+						"Access-Control-Max-Age": "86400",
+					},
+				});
+			}
 
-    // Protected routes - require auth
-    if (!token) {
-      const signInUrl = new URL('/auth/signin', req.url);
-      signInUrl.searchParams.set('callbackUrl', encodeURIComponent(req.url));
-      return NextResponse.redirect(signInUrl);
-    }
+			return new NextResponse(
+				JSON.stringify({ error: "Authentication required" }),
+				{
+					status: 401,
+					headers: {
+						"content-type": "application/json",
+						"Access-Control-Allow-Origin": "*",
+						"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+						"Access-Control-Allow-Headers": "Content-Type, Authorization",
+					},
+				},
+			);
+		}
 
-    // Admin routes - require PATRON, CO_PATRON, or DEVELOPER
-    const isAdminRoute = path.startsWith('/admin');
-    const isAdminRole =
-      token.role === 'PATRON' ||
-      token.role === 'CO_PATRON' ||
-      token.role === 'DEVELOPER';
+		if (!token) {
+			const signInUrl = new URL("/auth/signin", req.url);
+			signInUrl.searchParams.set("callbackUrl", encodeURIComponent(req.url));
+			return NextResponse.redirect(signInUrl);
+		}
 
-    if (isAdminRoute && !isAdminRole) {
-      if (isApiRoute) {
-        return new NextResponse(JSON.stringify({ error: 'Access denied' }), {
-          status: 403,
-          headers: {
-            'content-type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          },
-        });
-      }
-      return NextResponse.redirect(new URL('/dashboard', req.url));
-    }
+		const isAdminRoute = path.startsWith("/admin");
+		const isAdminRole =
+			token.role === "PATRON" ||
+			token.role === "CO_PATRON" ||
+			token.role === "DEVELOPER";
 
-    // Specific check for feedback API permissions
-    if (path.startsWith('/api/feedback')) {
-      const isPostRequest = req.method === 'POST';
+		if (isAdminRoute && !isAdminRole) {
+			if (isApiRoute) {
+				return new NextResponse(JSON.stringify({ error: "Access denied" }), {
+					status: 403,
+					headers: {
+						"content-type": "application/json",
+						"Access-Control-Allow-Origin": "*",
+						"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+						"Access-Control-Allow-Headers": "Content-Type, Authorization",
+					},
+				});
+			}
+			return NextResponse.redirect(new URL("/dashboard", req.url));
+		}
 
-      // Allow POST for any logged-in user
-      if (isPostRequest && token) {
-        // No specific role check needed for POST, just needs login (handled above)
-      }
-      // Restrict GET, PATCH, DELETE to DEVELOPER role
-      else if (!isPostRequest && token.role !== 'DEVELOPER') {
-        // Return 403 for non-POST requests by non-developers
-        return new NextResponse(JSON.stringify({ error: 'Access denied' }), {
-          status: 403,
-          headers: {
-            'content-type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          },
-        });
-      }
-      // If it's not a POST and the user is a DEVELOPER, or if it is a POST and user is logged in,
-      // execution will continue to NextResponse.next() below.
-    }
+		if (path.startsWith("/api/feedback")) {
+			const isPostRequest = req.method === "POST";
 
-    const response = NextResponse.next();
+			if (isPostRequest && token) {
+			} else if (!isPostRequest && token.role !== "DEVELOPER") {
+				return new NextResponse(JSON.stringify({ error: "Access denied" }), {
+					status: 403,
+					headers: {
+						"content-type": "application/json",
+						"Access-Control-Allow-Origin": "*",
+						"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+						"Access-Control-Allow-Headers": "Content-Type, Authorization",
+					},
+				});
+			}
+		}
 
-    // Add CORS headers to all responses
-    response.headers.set('Access-Control-Allow-Origin', '*');
-    response.headers.set(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, OPTIONS'
-    );
-    response.headers.set(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization'
-    );
+		const response = NextResponse.next();
 
-    return response;
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: '/auth/signin',
-    },
-  }
+		response.headers.set("Access-Control-Allow-Origin", "*");
+		response.headers.set(
+			"Access-Control-Allow-Methods",
+			"GET, POST, PUT, DELETE, OPTIONS",
+		);
+		response.headers.set(
+			"Access-Control-Allow-Headers",
+			"Content-Type, Authorization",
+		);
+
+		return response;
+	},
+	{
+		callbacks: {
+			authorized: ({ token }) => !!token,
+		},
+		pages: {
+			signIn: "/auth/signin",
+		},
+	},
 );
 
-// Restore config export to explicitly define public paths for the middleware
 export const config = {
-  matcher: [
-    // Apply middleware to all paths EXCEPT:
-    // - API routes for auth itself
-    // - Static files (_next/static, _next/image, favicon.ico, etc.)
-    // - Specific public auth pages (reset, setup)
-    '/((?!api/auth/|auth/reset|auth/setup|_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/).*)',
-  ],
+	matcher: [
+		"/((?!api/auth/|auth/reset|auth/setup|_next/static|_next/image|favicon.ico|vercel.svg|assets/|images/|static/).*)",
+	],
 };

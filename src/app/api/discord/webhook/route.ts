@@ -1,118 +1,98 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-/**
- * Configuration pour le webhook Discord
- */
-// Remove top-level const
-// const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-
-// Define a simple interface for order items
 interface WebhookItem {
-  quantity: number;
-  name: string;
+	quantity: number;
+	name: string;
 }
 
-/**
- * POST /api/discord/webhook
- *
- * Endpoint pour envoyer une notification Discord via webhook
- */
 export async function POST(request: Request) {
-  // Read the environment variable inside the function
-  const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
+	const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
 
-  // Vérifier que l'URL du webhook est configurée
-  if (!DISCORD_WEBHOOK_URL) {
-    console.error(
-      "DISCORD_WEBHOOK_URL n'est pas configuré dans les variables d'environnement"
-    );
-    return NextResponse.json(
-      { success: false, error: 'Webhook URL not configured' },
-      { status: 500 }
-    );
-  }
+	if (!DISCORD_WEBHOOK_URL) {
+		console.error(
+			"DISCORD_WEBHOOK_URL n'est pas configuré dans les variables d'environnement",
+		);
+		return NextResponse.json(
+			{ success: false, error: "Webhook URL not configured" },
+			{ status: 500 },
+		);
+	}
 
-  try {
-    // Récupérer les données du corps de la requête
-    const data = await request.json();
+	try {
+		const data = await request.json();
 
-    // Valider que les données nécessaires sont présentes
-    if (!data.orderData || !data.username) {
-      return NextResponse.json(
-        { success: false, error: 'Missing required data' },
-        { status: 400 }
-      );
-    }
+		if (!data.orderData || !data.username) {
+			return NextResponse.json(
+				{ success: false, error: "Missing required data" },
+				{ status: 400 },
+			);
+		}
 
-    const { orderData, username } = data;
+		const { orderData, username } = data;
 
-    // Créer un résumé de la commande
-    let orderSummary = '';
-    if (orderData.items && Array.isArray(orderData.items)) {
-      orderSummary = orderData.items
-        .map((item: WebhookItem) => `- ${item.quantity}x ${item.name}`)
-        .join('\n');
-    }
+		let orderSummary = "";
+		if (orderData.items && Array.isArray(orderData.items)) {
+			orderSummary = orderData.items
+				.map((item: WebhookItem) => `- ${item.quantity}x ${item.name}`)
+				.join("\n");
+		}
 
-    // Créer les données pour le webhook Discord
-    const webhookData = {
-      username: 'Armurerie Bot',
-      avatar_url: 'https://i.imgur.com/4M34hi2.png',
-      embeds: [
-        {
-          title: 'Nouvelle commande validée',
-          description: `Une commande a été validée par ${username}`,
-          // Use hexadecimal literal for color
-          color: 0x2ecc71,
-          timestamp: new Date().toISOString(),
-          fields: [
-            {
-              name: 'Détails de la commande',
-              value: orderSummary || 'Aucun détail disponible',
-            },
-            {
-              name: 'Total',
-              value: `${orderData.total || 0}$`,
-              inline: true,
-            },
-            {
-              name: 'Profit',
-              value: `${orderData.profit || 0}$`,
-              inline: true,
-            },
-          ],
-          footer: {
-            text: "Système d'Armurerie",
-          },
-        },
-      ],
-    };
+		const webhookData = {
+			username: "Armurerie Bot",
+			avatar_url: "https://i.imgur.com/4M34hi2.png",
+			embeds: [
+				{
+					title: "Nouvelle commande validée",
+					description: `Une commande a été validée par ${username}`,
 
-    // Envoyer la requête au webhook Discord
-    const response = await fetch(DISCORD_WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(webhookData),
-    });
+					color: 0x2ecc71,
+					timestamp: new Date().toISOString(),
+					fields: [
+						{
+							name: "Détails de la commande",
+							value: orderSummary || "Aucun détail disponible",
+						},
+						{
+							name: "Total",
+							value: `${orderData.total || 0}$`,
+							inline: true,
+						},
+						{
+							name: "Profit",
+							value: `${orderData.profit || 0}$`,
+							inline: true,
+						},
+					],
+					footer: {
+						text: "Système d'Armurerie",
+					},
+				},
+			],
+		};
 
-    // Vérifier la réponse
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Erreur lors de l'envoi du webhook Discord:", errorText);
-      return NextResponse.json(
-        { success: false, error: errorText },
-        { status: 500 }
-      );
-    }
+		const response = await fetch(DISCORD_WEBHOOK_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(webhookData),
+		});
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Exception lors de l'envoi du webhook Discord:", error);
-    return NextResponse.json(
-      { success: false, error: String(error) },
-      { status: 500 }
-    );
-  }
+		if (!response.ok) {
+			const errorText = await response.text();
+			console.error("Erreur lors de l'envoi du webhook Discord:", errorText);
+			return NextResponse.json(
+				{ success: false, error: errorText },
+				{ status: 500 },
+			);
+		}
+
+		return NextResponse.json({ success: true });
+	} catch (error) {
+		console.error("Exception lors de l'envoi du webhook Discord:", error);
+		return NextResponse.json(
+			{ success: false, error: String(error) },
+			{ status: 500 },
+		);
+	}
 }

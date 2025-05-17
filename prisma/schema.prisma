@@ -25,6 +25,7 @@ model User {
   commission  Float      @default(0)
   feedback    Feedback[]
   weapons     Weapon[]
+  orders      Order[]
 }
 
 model BaseWeapon {
@@ -33,6 +34,7 @@ model BaseWeapon {
   prix_defaut            Int
   cout_production_defaut Int      @default(0)
   weapons                Weapon[]
+  orderItems             OrderItem[]
 }
 
 model Weapon {
@@ -93,12 +95,44 @@ model Feedback {
   user        User?          @relation(fields: [user_id], references: [id])
 }
 
+model Order {
+  id         Int         @id @default(autoincrement())
+  createdAt  DateTime    @default(now())
+  userId     Int
+  totalPrice Int
+  status     OrderStatus @default(PENDING)
+  user       User        @relation(fields: [userId], references: [id])
+  items      OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id           Int        @id @default(autoincrement())
+  orderId      Int
+  baseWeaponId Int
+  quantity     Int
+  pricePerItem Int        // Prix au moment de la commande
+  costPerItem  Int        // Coût de production au moment de la commande
+  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  baseWeapon   BaseWeapon @relation(fields: [baseWeaponId], references: [id])
+
+  @@index([orderId])
+  @@index([baseWeaponId])
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
 enum Role {
   EMPLOYEE
   DEVELOPER
   CO_PATRON
   PATRON
-  
 }
 
 enum FeedbackType {

@@ -1,1130 +1,1119 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-} from '@/components/ui/dialog';
+	Dialog,
+	DialogContent,
+	DialogOverlay,
+	DialogPortal,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { SelectNative } from '@/components/ui/select-native';
-import { toast } from '@/components/ui/use-toast';
-import { Role, type User } from '@/services/api';
-import { getCommissionRate } from '@/utils/roles';
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { SelectNative } from "@/components/ui/select-native";
+import { toast } from "@/components/ui/use-toast";
+import { Role, type User } from "@/services/api";
+import { getCommissionRate } from "@/utils/roles";
 import {
-  ClockIcon,
-  DocumentArrowUpIcon,
-  DocumentIcon,
-  EnvelopeIcon,
-  PencilIcon,
-  PlusIcon,
-  TrashIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
-import { AnimatePresence, motion } from 'framer-motion';
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { useAppDispatch } from '../redux/hooks';
-import { updateUser } from '../redux/slices/userSlice';
+	ClockIcon,
+	DocumentArrowUpIcon,
+	DocumentIcon,
+	EnvelopeIcon,
+	PencilIcon,
+	PlusIcon,
+	TrashIcon,
+	XMarkIcon,
+} from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "../redux/hooks";
+import { updateUser } from "../redux/slices/userSlice";
 
 interface Props {
-  open: boolean;
-  onClose: () => void;
-  users: User[];
-  onUpdate: () => Promise<void>;
+	open: boolean;
+	onClose: () => void;
+	users: User[];
+	onUpdate: () => Promise<void>;
 }
 
 const listItemVariants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-    scale: 0.95,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-  exit: {
-    opacity: 0,
-    x: -20,
-    transition: {
-      duration: 0.2,
-    },
-  },
+	hidden: {
+		opacity: 0,
+		y: 20,
+		scale: 0.95,
+	},
+	visible: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
+		transition: {
+			type: "spring",
+			stiffness: 300,
+			damping: 30,
+		},
+	},
+	exit: {
+		opacity: 0,
+		x: -20,
+		transition: {
+			duration: 0.2,
+		},
+	},
 };
 
 const successVariants = {
-  hidden: { opacity: 0, y: -20 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: 20 },
+	hidden: { opacity: 0, y: -20 },
+	visible: { opacity: 1, y: 0 },
+	exit: { opacity: 0, y: 20 },
 };
 
 const viewContract = (contractUrl: string) => {
-  globalThis.open(contractUrl, '_blank');
+	globalThis.open(contractUrl, "_blank");
 };
 
 export default function UserManager({ open, onClose, users, onUpdate }: Props) {
-  const dispatch = useAppDispatch();
-  const [editingUser, setEditingUser] = useState<string | null>(null);
-  const [tempColor, setTempColor] = useState('#000000');
-  const [tempRole, setTempRole] = useState<Role>(Role.EMPLOYEE);
-  const [tempCommission, setTempCommission] = useState<number>(0);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newUserName, setNewUserName] = useState('');
-  const [newUsername, setNewUsername] = useState('');
-  const [newUserEmail, setNewUserEmail] = useState('');
-  const [setupLink, setSetupLink] = useState<string | null>(null);
-  const [isSetupLinkDialogOpen, setIsSetupLinkDialogOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [contractFile, setContractFile] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [showContractUpload, setShowContractUpload] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [isEmailSending, setIsEmailSending] = useState<Record<number, boolean>>(
-    {}
-  );
+	const dispatch = useAppDispatch();
+	const [editingUser, setEditingUser] = useState<string | null>(null);
+	const [tempColor, setTempColor] = useState("#000000");
+	const [tempRole, setTempRole] = useState<Role>(Role.EMPLOYEE);
+	const [tempCommission, setTempCommission] = useState<number>(0);
+	const [success, setSuccess] = useState<string | null>(null);
+	const [error, setError] = useState<string | null>(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [newUserName, setNewUserName] = useState("");
+	const [newUsername, setNewUsername] = useState("");
+	const [newUserEmail, setNewUserEmail] = useState("");
+	const [setupLink, setSetupLink] = useState<string | null>(null);
+	const [isSetupLinkDialogOpen, setIsSetupLinkDialogOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [contractFile, setContractFile] = useState<File | null>(null);
+	const [isUploading, setIsUploading] = useState(false);
+	const [showContractUpload, setShowContractUpload] = useState(false);
+	const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+	const [isEmailSending, setIsEmailSending] = useState<Record<number, boolean>>(
+		{},
+	);
 
-  // Mettre à jour la commission lorsque le rôle change
-  useEffect(() => {
-    const commissionRate = getCommissionRate(tempRole);
-    setTempCommission(commissionRate * 100); // Convertir en pourcentage pour l'affichage
-  }, [tempRole]);
+	// Mettre à jour la commission lorsque le rôle change
+	useEffect(() => {
+		const commissionRate = getCommissionRate(tempRole);
+		setTempCommission(commissionRate * 100); // Convertir en pourcentage pour l'affichage
+	}, [tempRole]);
 
-  const handleUserUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingUser) return;
+	const handleUserUpdate = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (!editingUser) return;
 
-    setIsSubmitting(true);
-    setError(null);
+		setIsSubmitting(true);
+		setError(null);
 
-    try {
-      const user = users.find((u) => u.name === editingUser);
-      if (!user) return;
+		try {
+			const user = users.find((u) => u.name === editingUser);
+			if (!user) return;
 
-      // Validation côté client
-      if (!newUserName.trim()) {
-        setError('Le nom ne peut pas être vide');
-        setIsSubmitting(false);
-        return;
-      }
+			if (!newUserName.trim()) {
+				setError("Le nom ne peut pas être vide");
+				setIsSubmitting(false);
+				return;
+			}
 
-      if (!newUsername.trim()) {
-        setError("Le nom d'utilisateur ne peut pas être vide");
-        setIsSubmitting(false);
-        return;
-      }
+			if (!newUsername.trim()) {
+				setError("Le nom d'utilisateur ne peut pas être vide");
+				setIsSubmitting(false);
+				return;
+			}
 
-      // Vérifier si le nom d'utilisateur est déjà utilisé par un autre utilisateur
-      const usernameExists = users.some(
-        (u) => u.username === newUsername.trim() && u.id !== user.id
-      );
+			const usernameExists = users.some(
+				(u) => u.username === newUsername.trim() && u.id !== user.id,
+			);
 
-      if (usernameExists) {
-        setError(
-          "Ce nom d'utilisateur est déjà utilisé par un autre utilisateur"
-        );
-        setIsSubmitting(false);
-        return;
-      }
+			if (usernameExists) {
+				setError(
+					"Ce nom d'utilisateur est déjà utilisé par un autre utilisateur",
+				);
+				setIsSubmitting(false);
+				return;
+			}
 
-      const updateData: Partial<User> = {
-        name: newUserName.trim(),
-        username: newUsername.trim(),
-        color: tempColor,
-        role: tempRole,
-        commission: tempCommission / 100, // Convertir le pourcentage en décimal pour le stockage
-        email: user.email, // Conserver l'email existant
-      };
+			const updateData: Partial<User> = {
+				name: newUserName.trim(),
+				username: newUsername.trim(),
+				color: tempColor,
+				role: tempRole,
+				commission: tempCommission / 100,
+				email: user.email,
+			};
 
-      await dispatch(
-        updateUser({
-          id: user.id,
-          data: updateData,
-        })
-      );
-      await onUpdate();
-      setSuccess('Informations mises à jour avec succès !');
-      setEditingUser(null);
-      // Reset form
-      setNewUserName('');
-      setNewUsername('');
-      setTempColor('#000000');
-      setTempRole(Role.EMPLOYEE);
-      setTempCommission(0);
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      console.error('Update error details:', {
-        error,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error',
-        errorStack: error instanceof Error ? error.stack : undefined,
-      });
+			await dispatch(
+				updateUser({
+					id: user.id,
+					data: updateData,
+				}),
+			);
+			await onUpdate();
+			setSuccess("Informations mises à jour avec succès !");
+			setEditingUser(null);
 
-      if (error instanceof Error) {
-        setError(error.message);
-      } else {
-        setError("Erreur lors de la mise à jour de l'utilisateur");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+			setNewUserName("");
+			setNewUsername("");
+			setTempColor("#000000");
+			setTempRole(Role.EMPLOYEE);
+			setTempCommission(0);
+			setTimeout(() => setSuccess(null), 3000);
+		} catch (error) {
+			console.error("Update error details:", {
+				error,
+				errorMessage: error instanceof Error ? error.message : "Unknown error",
+				errorStack: error instanceof Error ? error.stack : undefined,
+			});
 
-  const startEditing = (name: string, user: User) => {
-    setEditingUser(name);
+			if (error instanceof Error) {
+				setError(error.message);
+			} else {
+				setError("Erreur lors de la mise à jour de l'utilisateur");
+			}
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
-    // Animation séquentielle des champs
-    setTimeout(() => {
-      setNewUserName(user.name);
-      setNewUsername(user.username || '');
-      setTimeout(() => {
-        setTempColor(user.color || '#000000');
-        setTimeout(() => {
-          setTempRole(user.role as Role);
-          // Si l'utilisateur a une commission personnalisée, l'utiliser
-          // Sinon, utiliser la valeur par défaut basée sur le rôle
-          if (user.commission !== undefined && user.commission !== null) {
-            setTempCommission(user.commission * 100); // Convertir en pourcentage pour l'affichage
-          } else {
-            const defaultCommission =
-              getCommissionRate(user.role as Role) * 100;
-            setTempCommission(defaultCommission);
-          }
-        }, 100);
-      }, 100);
-    }, 100);
-  };
+	const startEditing = (name: string, user: User) => {
+		setEditingUser(name);
 
-  const handleAddUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    setSetupLink(null);
-    try {
-      const response = await fetch('/api/employees', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newUserName,
-          username: newUsername,
-          email: newUserEmail,
-          color: tempColor,
-          role: tempRole,
-          commission: tempCommission / 100, // Convertir le pourcentage en décimal pour le stockage
-        }),
-      });
+		setTimeout(() => {
+			setNewUserName(user.name);
+			setNewUsername(user.username || "");
+			setTimeout(() => {
+				setTempColor(user.color || "#000000");
+				setTimeout(() => {
+					setTempRole(user.role as Role);
 
-      const data = await response.json();
+					if (user.commission !== undefined && user.commission !== null) {
+						setTempCommission(user.commission * 100);
+					} else {
+						const defaultCommission =
+							getCommissionRate(user.role as Role) * 100;
+						setTempCommission(defaultCommission);
+					}
+				}, 100);
+			}, 100);
+		}, 100);
+	};
 
-      if (!response.ok) {
-        throw new Error(
-          data.error || "Erreur lors de l'ajout de l'utilisateur"
-        );
-      }
+	const handleAddUser = async (e: React.FormEvent) => {
+		e.preventDefault();
+		setIsSubmitting(true);
+		setError(null);
+		setSetupLink(null);
+		try {
+			const response = await fetch("/api/employees", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					name: newUserName,
+					username: newUsername,
+					email: newUserEmail,
+					color: tempColor,
+					role: tempRole,
+					commission: tempCommission / 100,
+				}),
+			});
 
-      await onUpdate();
-      setNewUserName('');
-      setNewUsername('');
-      setNewUserEmail('');
-      setTempColor('#000000');
-      setTempRole(Role.EMPLOYEE);
-      setTempCommission(0);
-      setSuccess('Utilisateur ajouté avec succès !');
-      setSetupLink(data.setupLink);
-      setIsSetupLinkDialogOpen(true);
-    } catch (error) {
-      setError("Erreur lors de l'ajout de l'utilisateur");
-      console.error('Error adding user:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+			const data = await response.json();
 
-  const handleCancel = () => {
-    setEditingUser(null);
-    setNewUserName('');
-    setNewUsername('');
-    setNewUserEmail('');
-    setTempColor('#000000');
-    setTempRole(Role.EMPLOYEE);
-    setTempCommission(0);
-    setSetupLink(null);
-  };
+			if (!response.ok) {
+				throw new Error(
+					data.error || "Erreur lors de l'ajout de l'utilisateur",
+				);
+			}
 
-  const handleDeleteUser = async (user: User) => {
-    if (
-      !globalThis.confirm(
-        `Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`
-      )
-    ) {
-      return;
-    }
+			await onUpdate();
+			setNewUserName("");
+			setNewUsername("");
+			setNewUserEmail("");
+			setTempColor("#000000");
+			setTempRole(Role.EMPLOYEE);
+			setTempCommission(0);
+			setSuccess("Utilisateur ajouté avec succès !");
+			setSetupLink(data.setupLink);
+			setIsSetupLinkDialogOpen(true);
+		} catch (error) {
+			setError("Erreur lors de l'ajout de l'utilisateur");
+			console.error("Error adding user:", error);
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
-    setIsSubmitting(true);
-    setError(null);
+	const handleCancel = () => {
+		setEditingUser(null);
+		setNewUserName("");
+		setNewUsername("");
+		setNewUserEmail("");
+		setTempColor("#000000");
+		setTempRole(Role.EMPLOYEE);
+		setTempCommission(0);
+		setSetupLink(null);
+	};
 
-    try {
-      const response = await fetch(`/api/employees/${user.id}`, {
-        method: 'DELETE',
-      });
+	const handleDeleteUser = async (user: User) => {
+		if (
+			!globalThis.confirm(
+				`Êtes-vous sûr de vouloir supprimer l'utilisateur ${user.name} ?`,
+			)
+		) {
+			return;
+		}
 
-      const data = await response.json();
+		setIsSubmitting(true);
+		setError(null);
 
-      if (!response.ok) {
-        if (
-          response.status === 400 &&
-          data.error === 'Cannot delete user with weapons'
-        ) {
-          setError(
-            `Impossible de supprimer ${user.name} car il possède encore ${data.weapon_count} arme(s). Veuillez d'abord transférer ou supprimer ses armes.`
-          );
-        } else {
-          setError(
-            data.error || "Erreur lors de la suppression de l'utilisateur"
-          );
-        }
-        return;
-      }
+		try {
+			const response = await fetch(`/api/employees/${user.id}`, {
+				method: "DELETE",
+			});
 
-      await onUpdate();
-      setSuccess('Utilisateur supprimé avec succès !');
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (error) {
-      setError("Erreur lors de la suppression de l'utilisateur");
-      console.error('Error deleting user:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+			const data = await response.json();
 
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newRole = e.target.value as Role;
-    setTempRole(newRole);
-    // La commission sera mise à jour automatiquement grâce à l'effet ci-dessus
-  };
+			if (!response.ok) {
+				if (
+					response.status === 400 &&
+					data.error === "Cannot delete user with weapons"
+				) {
+					setError(
+						`Impossible de supprimer ${user.name} car il possède encore ${data.weapon_count} arme(s). Veuillez d'abord transférer ou supprimer ses armes.`,
+					);
+				} else {
+					setError(
+						data.error || "Erreur lors de la suppression de l'utilisateur",
+					);
+				}
+				return;
+			}
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+			await onUpdate();
+			setSuccess("Utilisateur supprimé avec succès !");
+			setTimeout(() => setSuccess(null), 3000);
+		} catch (error) {
+			setError("Erreur lors de la suppression de l'utilisateur");
+			console.error("Error deleting user:", error);
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 
-  const handleUploadContract = async () => {
-    if (!contractFile || !selectedUserId) return;
+	const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+		const newRole = e.target.value as Role;
+		setTempRole(newRole);
+	};
 
-    setIsUploading(true);
-    try {
-      // Créer un FormData pour envoyer le fichier
-      const formData = new FormData();
-      formData.append('file', contractFile);
+	const filteredUsers = users.filter(
+		(user) =>
+			user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			user.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+	);
 
-      const response = await fetch(
-        `/api/employees/${selectedUserId}/contract`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+	const handleUploadContract = async () => {
+		if (!contractFile || !selectedUserId) return;
 
-      if (response.ok) {
-        toast({
-          title: 'Succès',
-          description: 'Contrat uploadé avec succès',
-        });
-        setContractFile(null);
-        setShowContractUpload(false);
-        await onUpdate();
-      } else {
-        throw new Error("Erreur lors de l'upload du contrat");
-      }
-    } catch {
-      toast({
-        title: 'Erreur',
-        description: "Impossible d'uploader le contrat",
-        variant: 'destructive',
-      });
-    } finally {
-      setIsUploading(false);
-    }
-  };
+		setIsUploading(true);
+		try {
+			const formData = new FormData();
+			formData.append("file", contractFile);
 
-  const openContractUpload = (userId: number) => {
-    setSelectedUserId(userId);
-    setShowContractUpload(true);
-  };
+			const response = await fetch(
+				`/api/employees/${selectedUserId}/contract`,
+				{
+					method: "POST",
+					body: formData,
+				},
+			);
 
-  const deleteContract = async (userId: number) => {
-    if (
-      !globalThis.confirm('Êtes-vous sûr de vouloir supprimer ce contrat ?')
-    ) {
-      return;
-    }
+			if (response.ok) {
+				toast({
+					title: "Succès",
+					description: "Contrat uploadé avec succès",
+				});
+				setContractFile(null);
+				setShowContractUpload(false);
+				await onUpdate();
+			} else {
+				throw new Error("Erreur lors de l'upload du contrat");
+			}
+		} catch {
+			toast({
+				title: "Erreur",
+				description: "Impossible d'uploader le contrat",
+				variant: "destructive",
+			});
+		} finally {
+			setIsUploading(false);
+		}
+	};
 
-    try {
-      const response = await fetch(`/api/employees/${userId}/contract`, {
-        method: 'DELETE',
-      });
+	const openContractUpload = (userId: number) => {
+		setSelectedUserId(userId);
+		setShowContractUpload(true);
+	};
 
-      if (response.ok) {
-        toast({
-          title: 'Succès',
-          description: 'Contrat supprimé avec succès',
-        });
-        await onUpdate();
-      } else {
-        throw new Error('Erreur lors de la suppression du contrat');
-      }
-    } catch {
-      toast({
-        title: 'Erreur',
-        description: 'Impossible de supprimer le contrat',
-        variant: 'destructive',
-      });
-    }
-  };
+	const deleteContract = async (userId: number) => {
+		if (
+			!globalThis.confirm("Êtes-vous sûr de vouloir supprimer ce contrat ?")
+		) {
+			return;
+		}
 
-  const sendSetupEmail = async (userId: number) => {
-    try {
-      setIsEmailSending((prev) => ({ ...prev, [userId]: true }));
-      const response = await fetch(`/api/employees/${userId}/setup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+		try {
+			const response = await fetch(`/api/employees/${userId}/contract`, {
+				method: "DELETE",
+			});
 
-      const data = await response.json();
+			if (response.ok) {
+				toast({
+					title: "Succès",
+					description: "Contrat supprimé avec succès",
+				});
+				await onUpdate();
+			} else {
+				throw new Error("Erreur lors de la suppression du contrat");
+			}
+		} catch {
+			toast({
+				title: "Erreur",
+				description: "Impossible de supprimer le contrat",
+				variant: "destructive",
+			});
+		}
+	};
 
-      if (!response.ok) {
-        throw new Error(data.error || "Erreur lors de l'envoi de l'email");
-      }
+	const sendSetupEmail = async (userId: number) => {
+		try {
+			setIsEmailSending((prev) => ({ ...prev, [userId]: true }));
+			const response = await fetch(`/api/employees/${userId}/setup`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
 
-      toast({
-        title: 'Email envoyé',
-        description: `Un email de configuration a été envoyé à l'employé.`,
-        variant: 'default',
-      });
+			const data = await response.json();
 
-      // Copier le lien dans le presse-papier pour l'administrateur
-      if (data.setupLink) {
-        navigator.clipboard.writeText(data.setupLink);
-        toast({
-          title: 'Lien copié',
-          description:
-            'Le lien de configuration a été copié dans le presse-papier.',
-          variant: 'default',
-        });
-      }
-    } catch (error) {
-      console.error('Error sending setup email:', error);
-      toast({
-        title: 'Erreur',
-        description:
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de l'envoi de l'email",
-        variant: 'destructive',
-      });
-    } finally {
-      setIsEmailSending((prev) => ({ ...prev, [userId]: false }));
-    }
-  };
+			if (!response.ok) {
+				throw new Error(data.error || "Erreur lors de l'envoi de l'email");
+			}
 
-  const copySetupLink = async (userId: number) => {
-    try {
-      setIsEmailSending((prev) => ({ ...prev, [userId]: true }));
-      const response = await fetch(`/api/employees/${userId}/setup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ generateLinkOnly: true }),
-      });
+			toast({
+				title: "Email envoyé",
+				description: `Un email de configuration a été envoyé à l'employé.`,
+				variant: "default",
+			});
 
-      const data = await response.json();
+			if (data.setupLink) {
+				navigator.clipboard.writeText(data.setupLink);
+				toast({
+					title: "Lien copié",
+					description:
+						"Le lien de configuration a été copié dans le presse-papier.",
+					variant: "default",
+				});
+			}
+		} catch (error) {
+			console.error("Error sending setup email:", error);
+			toast({
+				title: "Erreur",
+				description:
+					error instanceof Error
+						? error.message
+						: "Erreur lors de l'envoi de l'email",
+				variant: "destructive",
+			});
+		} finally {
+			setIsEmailSending((prev) => ({ ...prev, [userId]: false }));
+		}
+	};
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de la génération du lien');
-      }
+	const copySetupLink = async (userId: number) => {
+		try {
+			setIsEmailSending((prev) => ({ ...prev, [userId]: true }));
+			const response = await fetch(`/api/employees/${userId}/setup`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ generateLinkOnly: true }),
+			});
 
-      // Copier le lien dans le presse-papier pour l'administrateur
-      if (data.setupLink) {
-        navigator.clipboard.writeText(data.setupLink);
-        toast({
-          title: 'Lien copié',
-          description:
-            'Le lien de configuration a été copié dans le presse-papier.',
-          variant: 'default',
-        });
-      } else {
-        throw new Error('Aucun lien généré');
-      }
-    } catch (error) {
-      console.error('Error generating setup link:', error);
-      toast({
-        title: 'Erreur',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Erreur lors de la génération du lien',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsEmailSending((prev) => ({ ...prev, [userId]: false }));
-    }
-  };
+			const data = await response.json();
 
-  return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogPortal>
-        <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
-        <DialogContent
-          className="h-[85vh] max-w-[95vw] border border-neutral-800 bg-neutral-900 p-0 shadow-2xl xl:max-w-[90vw] 2xl:max-w-[85vw]"
-          aria-describedby="user-manager-description"
-        >
-          <div className="flex h-full flex-col">
-            <div className="border-b border-neutral-700 p-3">
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-xl font-semibold text-neutral-100">
-                  Gérer les utilisateurs
-                </DialogTitle>
-                <div className="sr-only" id="user-manager-description">
-                  Interface de gestion des utilisateurs permettant
-                  d&apos;ajouter, modifier et supprimer des utilisateurs
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Input
-                      type="text"
-                      placeholder="Rechercher un utilisateur..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-64 rounded-md border border-neutral-600 bg-neutral-800 py-1.5 pl-4 pr-10 text-sm text-neutral-100 placeholder-neutral-400 focus:border-red-500 focus:ring-red-500"
-                    />
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                      <svg
-                        className="h-4 w-4 text-neutral-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <title>Icône de recherche</title>
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={onClose}
-                    variant="outline"
-                    className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
-                  >
-                    Fermer
-                  </Button>
-                </div>
-              </div>
-            </div>
+			if (!response.ok) {
+				throw new Error(data.error || "Erreur lors de la génération du lien");
+			}
 
-            <div className="flex min-h-0 flex-1">
-              {/* Left Panel - Form */}
-              <div className="w-1/3 overflow-y-auto border-r border-neutral-700 bg-neutral-900">
-                <div className="space-y-4 p-4">
-                  {error && (
-                    <div className="rounded border-l-4 border-red-700 bg-red-900/50 p-2 text-sm text-red-300">
-                      {error}
-                    </div>
-                  )}
+			if (data.setupLink) {
+				navigator.clipboard.writeText(data.setupLink);
+				toast({
+					title: "Lien copié",
+					description:
+						"Le lien de configuration a été copié dans le presse-papier.",
+					variant: "default",
+				});
+			} else {
+				throw new Error("Aucun lien généré");
+			}
+		} catch (error) {
+			console.error("Error generating setup link:", error);
+			toast({
+				title: "Erreur",
+				description:
+					error instanceof Error
+						? error.message
+						: "Erreur lors de la génération du lien",
+				variant: "destructive",
+			});
+		} finally {
+			setIsEmailSending((prev) => ({ ...prev, [userId]: false }));
+		}
+	};
 
-                  {success && (
-                    <motion.div
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      variants={successVariants}
-                      className="rounded border-l-4 border-emerald-700 bg-emerald-900/50 p-2 text-sm text-emerald-300"
-                    >
-                      {success}
-                    </motion.div>
-                  )}
+	return (
+		<Dialog open={open} onOpenChange={onClose}>
+			<DialogPortal>
+				<DialogOverlay className="bg-black/30 backdrop-blur-sm" />
+				<DialogContent
+					className="h-[85vh] max-w-[95vw] border border-zinc-800 bg-zinc-900 p-0 shadow-2xl xl:max-w-[90vw] 2xl:max-w-[85vw]"
+					aria-describedby="user-manager-description"
+				>
+					<div className="flex h-full flex-col">
+						<div className="border-b border-zinc-700 p-3">
+							<div className="flex items-center justify-between">
+								<DialogTitle className="text-xl font-semibold text-zinc-100">
+									Gérer les utilisateurs
+								</DialogTitle>
+								<div className="sr-only" id="user-manager-description">
+									Interface de gestion des utilisateurs permettant
+									d&apos;ajouter, modifier et supprimer des utilisateurs
+								</div>
+								<div className="flex items-center space-x-4">
+									<div className="relative">
+										<Input
+											type="text"
+											placeholder="Rechercher un utilisateur..."
+											value={searchQuery}
+											onChange={(e) => setSearchQuery(e.target.value)}
+											className="w-64 rounded-md border border-zinc-600 bg-zinc-800 py-1.5 pl-4 pr-10 text-sm text-zinc-100 placeholder-zinc-400 focus:border-red-500 focus:ring-red-500"
+										/>
+										<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+											<svg
+												className="h-4 w-4 text-zinc-500"
+												fill="none"
+												viewBox="0 0 24 24"
+												stroke="currentColor"
+											>
+												<title>Icône de recherche</title>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+												/>
+											</svg>
+										</div>
+									</div>
+									<Button
+										type="button"
+										onClick={onClose}
+										variant="outline"
+										className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+									>
+										Fermer
+									</Button>
+								</div>
+							</div>
+						</div>
 
-                  <form
-                    onSubmit={editingUser ? handleUserUpdate : handleAddUser}
-                    className="space-y-4"
-                  >
-                    <div>
-                      <label
-                        htmlFor="userName"
-                        className="mb-1 block text-sm font-medium text-neutral-300"
-                      >
-                        Nom complet
-                      </label>
-                      <Input
-                        id="userName"
-                        type="text"
-                        value={newUserName}
-                        onChange={(e) => setNewUserName(e.target.value)}
-                        className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
-                        placeholder="John Doe"
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
+						<div className="flex min-h-0 flex-1">
+							<div className="w-1/3 overflow-y-auto border-r border-zinc-700 bg-zinc-900">
+								<div className="space-y-4 p-4">
+									{error && (
+										<div className="rounded border-l-4 border-red-700 bg-red-900/50 p-2 text-sm text-red-300">
+											{error}
+										</div>
+									)}
 
-                    <div>
-                      <label
-                        htmlFor="userUsername"
-                        className="mb-1 block text-sm font-medium text-neutral-300"
-                      >
-                        Nom d&apos;utilisateur
-                      </label>
-                      <Input
-                        id="userUsername"
-                        type="text"
-                        value={newUsername}
-                        onChange={(e) => setNewUsername(e.target.value)}
-                        className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
-                        placeholder="johndoe"
-                        required
-                        disabled={isSubmitting}
-                      />
-                      <p className="mt-1 text-xs text-neutral-500">
-                        Ce nom d&apos;utilisateur sera utilisé pour la connexion
-                      </p>
-                    </div>
+									{success && (
+										<motion.div
+											initial="hidden"
+											animate="visible"
+											exit="exit"
+											variants={successVariants}
+											className="rounded border-l-4 border-emerald-700 bg-emerald-900/50 p-2 text-sm text-emerald-300"
+										>
+											{success}
+										</motion.div>
+									)}
 
-                    {!editingUser && (
-                      <div>
-                        <label
-                          htmlFor="userEmail"
-                          className="mb-1 block text-sm font-medium text-neutral-300"
-                        >
-                          Email
-                        </label>
-                        <Input
-                          id="userEmail"
-                          type="email"
-                          value={newUserEmail}
-                          onChange={(e) => setNewUserEmail(e.target.value)}
-                          className="w-full border-neutral-600 bg-neutral-800 text-neutral-100 placeholder-neutral-400"
-                          placeholder="john.doe@example.com"
-                          required
-                          disabled={isSubmitting}
-                        />
-                      </div>
-                    )}
+									<form
+										onSubmit={editingUser ? handleUserUpdate : handleAddUser}
+										className="space-y-4"
+									>
+										<div>
+											<label
+												htmlFor="userName"
+												className="mb-1 block text-sm font-medium text-zinc-300"
+											>
+												Nom complet
+											</label>
+											<Input
+												id="userName"
+												type="text"
+												value={newUserName}
+												onChange={(e) => setNewUserName(e.target.value)}
+												className="w-full border-zinc-600 bg-zinc-800 text-zinc-100 placeholder-zinc-400"
+												placeholder="John Doe"
+												required
+												disabled={isSubmitting}
+											/>
+										</div>
 
-                    <div>
-                      <label
-                        htmlFor="userRole"
-                        className="mb-1 block text-sm font-medium text-neutral-300"
-                      >
-                        Rôle
-                      </label>
-                      <SelectNative
-                        id="userRole"
-                        value={tempRole}
-                        onChange={handleRoleChange}
-                        className="w-full border-neutral-600 bg-neutral-800 text-neutral-100"
-                        required
-                        disabled={isSubmitting}
-                      >
-                        {Object.values(Role).map((role) => (
-                          <option key={role} value={role}>
-                            {role}
-                          </option>
-                        ))}
-                      </SelectNative>
-                    </div>
+										<div>
+											<label
+												htmlFor="userUsername"
+												className="mb-1 block text-sm font-medium text-zinc-300"
+											>
+												Nom d&apos;utilisateur
+											</label>
+											<Input
+												id="userUsername"
+												type="text"
+												value={newUsername}
+												onChange={(e) => setNewUsername(e.target.value)}
+												className="w-full border-zinc-600 bg-zinc-800 text-zinc-100 placeholder-zinc-400"
+												placeholder="johndoe"
+												required
+												disabled={isSubmitting}
+											/>
+											<p className="mt-1 text-xs text-zinc-500">
+												Ce nom d&apos;utilisateur sera utilisé pour la connexion
+											</p>
+										</div>
 
-                    <div>
-                      <label
-                        htmlFor="userColor"
-                        className="mb-1 block text-sm font-medium text-neutral-300"
-                      >
-                        Couleur
-                      </label>
-                      <Input
-                        id="userColor"
-                        type="color"
-                        value={tempColor}
-                        onChange={(e) => setTempColor(e.target.value)}
-                        className="h-10 w-full border-neutral-600 bg-neutral-800"
-                        disabled={isSubmitting}
-                      />
-                    </div>
+										{!editingUser && (
+											<div>
+												<label
+													htmlFor="userEmail"
+													className="mb-1 block text-sm font-medium text-zinc-300"
+												>
+													Email
+												</label>
+												<Input
+													id="userEmail"
+													type="email"
+													value={newUserEmail}
+													onChange={(e) => setNewUserEmail(e.target.value)}
+													className="w-full border-zinc-600 bg-zinc-800 text-zinc-100 placeholder-zinc-400"
+													placeholder="john.doe@example.com"
+													required
+													disabled={isSubmitting}
+												/>
+											</div>
+										)}
 
-                    <div>
-                      <label
-                        htmlFor="userCommission"
-                        className="mb-1 block text-sm font-medium text-neutral-300"
-                      >
-                        Commission (%)
-                      </label>
-                      <Input
-                        id="userCommission"
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="0.1"
-                        value={tempCommission}
-                        onChange={(e) =>
-                          setTempCommission(
-                            Number.parseFloat(e.target.value) || 0
-                          )
-                        }
-                        className="w-full border-neutral-600 bg-neutral-800 text-neutral-100"
-                        placeholder="0"
-                        disabled={isSubmitting}
-                      />
-                      <p className="mt-1 text-xs text-neutral-500">
-                        Pourcentage de commission sur les ventes
-                      </p>
-                    </div>
+										<div>
+											<label
+												htmlFor="userRole"
+												className="mb-1 block text-sm font-medium text-zinc-300"
+											>
+												Rôle
+											</label>
+											<SelectNative
+												id="userRole"
+												value={tempRole}
+												onChange={handleRoleChange}
+												className="w-full border-zinc-600 bg-zinc-800 text-zinc-100"
+												required
+												disabled={isSubmitting}
+											>
+												{Object.values(Role).map((role) => (
+													<option key={role} value={role}>
+														{role}
+													</option>
+												))}
+											</SelectNative>
+										</div>
 
-                    <div className="pt-2">
-                      <div className="flex justify-between space-x-2">
-                        {editingUser && (
-                          <Button
-                            type="button"
-                            onClick={handleCancel}
-                            variant="outline"
-                            className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
-                            disabled={isSubmitting}
-                          >
-                            <XMarkIcon className="mr-1.5 h-4 w-4" />
-                            Annuler
-                          </Button>
-                        )}
-                        <Button
-                          type="submit"
-                          className={`flex-1 ${
-                            isSubmitting
-                              ? 'bg-red-500/50'
-                              : 'bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500'
-                          } text-white`}
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? (
-                            <>
-                              <svg
-                                className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <title>Chargement...</title>
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                />
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                />
-                              </svg>
-                              {editingUser ? 'Mise à jour...' : 'Ajout...'}
-                            </>
-                          ) : (
-                            <>
-                              {editingUser ? (
-                                <>
-                                  <PencilIcon className="mr-1.5 h-4 w-4" />
-                                  Mettre à jour
-                                </>
-                              ) : (
-                                <>
-                                  <PlusIcon className="mr-1.5 h-4 w-4" />
-                                  Ajouter
-                                </>
-                              )}
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
+										<div>
+											<label
+												htmlFor="userColor"
+												className="mb-1 block text-sm font-medium text-zinc-300"
+											>
+												Couleur
+											</label>
+											<Input
+												id="userColor"
+												type="color"
+												value={tempColor}
+												onChange={(e) => setTempColor(e.target.value)}
+												className="h-10 w-full border-zinc-600 bg-zinc-800"
+												disabled={isSubmitting}
+											/>
+										</div>
 
-              {/* Right Panel - List */}
-              <div className="flex min-h-0 flex-1 flex-col bg-neutral-900">
-                <div className="border-b border-neutral-700 bg-neutral-800 px-4 py-2">
-                  <h3 className="text-sm font-medium text-neutral-100">
-                    Utilisateurs existants
-                    <span className="ml-2 text-xs text-neutral-400">
-                      ({filteredUsers.length} résultats)
-                    </span>
-                  </h3>
-                </div>
+										<div>
+											<label
+												htmlFor="userCommission"
+												className="mb-1 block text-sm font-medium text-zinc-300"
+											>
+												Commission (%)
+											</label>
+											<Input
+												id="userCommission"
+												type="number"
+												min="0"
+												max="100"
+												step="0.1"
+												value={tempCommission}
+												onChange={(e) =>
+													setTempCommission(
+														Number.parseFloat(e.target.value) || 0,
+													)
+												}
+												className="w-full border-zinc-600 bg-zinc-800 text-zinc-100"
+												placeholder="0"
+												disabled={isSubmitting}
+											/>
+											<p className="mt-1 text-xs text-zinc-500">
+												Pourcentage de commission sur les ventes
+											</p>
+										</div>
 
-                <div className="flex-1 overflow-y-auto">
-                  <div className="divide-y divide-neutral-800">
-                    <AnimatePresence mode="popLayout">
-                      {filteredUsers.map((user) => (
-                        <motion.div
-                          key={user.id}
-                          variants={listItemVariants}
-                          initial="hidden"
-                          animate={
-                            editingUser === user.name ? 'editing' : 'visible'
-                          }
-                          exit="exit"
-                          className="px-4 py-3 transition-colors duration-150 hover:bg-neutral-800"
-                        >
-                          <div className="flex items-center justify-between">
-                            <motion.div
-                              className="min-w-0 flex-1"
-                              whileHover={{ x: 5 }}
-                              transition={{ type: 'spring', stiffness: 400 }}
-                            >
-                              <p className="truncate text-sm font-medium text-red-400">
-                                {user.name}
-                              </p>
-                              <div className="mt-2 flex items-center space-x-4 text-sm text-neutral-400">
-                                <span className="text-neutral-500">
-                                  {user.email}
-                                </span>
-                                <span className="text-neutral-500">
-                                  {user.role}
-                                </span>
-                                <div
-                                  className="h-4 w-4 rounded-full"
-                                  style={{
-                                    backgroundColor: user.color || '#000000',
-                                  }}
-                                />
-                                {user.contractUrl && (
-                                  <span className="inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
-                                    <DocumentIcon className="mr-1 h-3 w-3" />
-                                    Contrat
-                                  </span>
-                                )}
-                              </div>
-                            </motion.div>
-                            <div className="flex items-center space-x-2">
-                              <Button
-                                onClick={() => openContractUpload(user.id)}
-                                variant="ghost"
-                                className={`${user.contractUrl ? 'text-green-400 hover:text-green-300' : 'text-blue-400 hover:text-blue-300'} hover:bg-neutral-800`}
-                                disabled={isSubmitting}
-                                title={
-                                  user.contractUrl
-                                    ? 'Voir ou remplacer le contrat'
-                                    : 'Uploader un contrat'
-                                }
-                              >
-                                <DocumentIcon className="h-5 w-5" />
-                              </Button>
-                              <Button
-                                onClick={() => startEditing(user.name, user)}
-                                variant="ghost"
-                                className="text-red-400 hover:bg-neutral-800 hover:text-red-300"
-                                disabled={isSubmitting}
-                              >
-                                <PencilIcon className="h-5 w-5" />
-                              </Button>
-                              <Button
-                                onClick={() => handleDeleteUser(user)}
-                                variant="ghost"
-                                className="text-red-400 hover:bg-neutral-800 hover:text-red-300"
-                                disabled={isSubmitting}
-                              >
-                                <TrashIcon className="h-5 w-5" />
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    className="text-blue-400 hover:bg-neutral-800 hover:text-blue-300"
-                                    disabled={
-                                      isSubmitting || isEmailSending[user.id]
-                                    }
-                                    title="Options de configuration"
-                                  >
-                                    {isEmailSending[user.id] ? (
-                                      <svg
-                                        className="h-5 w-5 animate-spin"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <title>Envoi en cours...</title>
-                                        <circle
-                                          className="opacity-25"
-                                          cx="12"
-                                          cy="12"
-                                          r="10"
-                                          stroke="currentColor"
-                                          strokeWidth="4"
-                                        />
-                                        <path
-                                          className="opacity-75"
-                                          fill="currentColor"
-                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        />
-                                      </svg>
-                                    ) : (
-                                      <EnvelopeIcon className="h-5 w-5" />
-                                    )}
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                  align="end"
-                                  className="z-[9999] border-neutral-700 bg-neutral-800 text-neutral-100"
-                                  forceMount
-                                  sideOffset={5}
-                                  side="bottom"
-                                  avoidCollisions={true}
-                                >
-                                  <DropdownMenuItem
-                                    onClick={() => sendSetupEmail(user.id)}
-                                    className="cursor-pointer hover:bg-neutral-700 focus:bg-neutral-700"
-                                  >
-                                    <EnvelopeIcon className="mr-2 h-4 w-4" />
-                                    Envoyer email de configuration
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => copySetupLink(user.id)}
-                                    className="cursor-pointer hover:bg-neutral-700 focus:bg-neutral-700"
-                                  >
-                                    <svg
-                                      className="mr-2 h-4 w-4"
-                                      viewBox="0 0 20 20"
-                                      fill="currentColor"
-                                      stroke="currentColor"
-                                    >
-                                      <title>Copier le lien</title>
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                      />
-                                    </svg>
-                                    Copier le lien uniquement
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                    {filteredUsers.length === 0 && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="p-4 text-center text-neutral-400"
-                      >
-                        Aucun utilisateur trouvé
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </DialogPortal>
+										<div className="pt-2">
+											<div className="flex justify-between space-x-2">
+												{editingUser && (
+													<Button
+														type="button"
+														onClick={handleCancel}
+														variant="outline"
+														className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+														disabled={isSubmitting}
+													>
+														<XMarkIcon className="mr-1.5 h-4 w-4" />
+														Annuler
+													</Button>
+												)}
+												<Button
+													type="submit"
+													className={`flex-1 ${
+														isSubmitting
+															? "bg-red-500/50"
+															: "bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500"
+													} text-white`}
+													disabled={isSubmitting}
+												>
+													{isSubmitting ? (
+														<>
+															<svg
+																className="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+																xmlns="http://www.w3.org/2000/svg"
+																fill="none"
+																viewBox="0 0 24 24"
+															>
+																<title>Chargement...</title>
+																<circle
+																	className="opacity-25"
+																	cx="12"
+																	cy="12"
+																	r="10"
+																	stroke="currentColor"
+																	strokeWidth="4"
+																/>
+																<path
+																	className="opacity-75"
+																	fill="currentColor"
+																	d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+																/>
+															</svg>
+															{editingUser ? "Mise à jour..." : "Ajout..."}
+														</>
+													) : (
+														<>
+															{editingUser ? (
+																<>
+																	<PencilIcon className="mr-1.5 h-4 w-4" />
+																	Mettre à jour
+																</>
+															) : (
+																<>
+																	<PlusIcon className="mr-1.5 h-4 w-4" />
+																	Ajouter
+																</>
+															)}
+														</>
+													)}
+												</Button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
 
-      {/* Dialog pour le lien de configuration */}
-      <Dialog
-        open={isSetupLinkDialogOpen}
-        onOpenChange={() => setIsSetupLinkDialogOpen(false)}
-      >
-        <DialogPortal>
-          <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
-          <DialogContent className="max-w-lg border border-neutral-800 bg-neutral-900 p-6 shadow-2xl">
-            <div className="space-y-4">
-              <DialogTitle className="text-xl font-semibold text-neutral-100">
-                Lien de configuration
-              </DialogTitle>
-              <div className="space-y-4">
-                <div className="rounded-lg border border-neutral-700 bg-neutral-800 p-4">
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="text"
-                      value={setupLink || ''}
-                      readOnly
-                      className="flex-1 border-neutral-700 bg-neutral-900 text-xs text-neutral-400"
-                    />
-                    <Button
-                      onClick={() => {
-                        if (setupLink) {
-                          navigator.clipboard.writeText(setupLink);
-                          setSuccess('Lien copié !');
-                          setTimeout(() => setSuccess(null), 3000);
-                        }
-                      }}
-                      variant="outline"
-                      className="border-neutral-600 text-neutral-300 hover:bg-neutral-700"
-                    >
-                      Copier
-                    </Button>
-                  </div>
-                  <p className="mt-2 text-xs text-neutral-500">
-                    Envoyez ce lien à l&apos;employé pour qu&apos;il puisse
-                    configurer son compte. Le lien est valable pendant 24
-                    heures.
-                  </p>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => setIsSetupLinkDialogOpen(false)}
-                    variant="outline"
-                    className="border-neutral-600 text-neutral-300 hover:bg-neutral-800"
-                  >
-                    Fermer
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </DialogPortal>
-      </Dialog>
+							<div className="flex min-h-0 flex-1 flex-col bg-zinc-900">
+								<div className="border-b border-zinc-700 bg-zinc-800 px-4 py-2">
+									<h3 className="text-sm font-medium text-zinc-100">
+										Utilisateurs existants
+										<span className="ml-2 text-xs text-zinc-400">
+											({filteredUsers.length} résultats)
+										</span>
+									</h3>
+								</div>
 
-      {/* Dialog pour l'upload de contrat */}
-      <Dialog
-        open={showContractUpload}
-        onOpenChange={() => setShowContractUpload(false)}
-      >
-        <DialogPortal>
-          <DialogOverlay className="bg-black/30 backdrop-blur-sm" />
-          <DialogContent className="max-w-md border border-neutral-800 bg-neutral-900 p-5 shadow-2xl">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-xl font-semibold text-neutral-100">
-                  Upload de contrat
-                </DialogTitle>
-                <Button
-                  onClick={() => setShowContractUpload(false)}
-                  variant="ghost"
-                  className="h-8 w-8 rounded-full p-0 text-neutral-400 hover:bg-neutral-800 hover:text-neutral-100"
-                >
-                  <XMarkIcon className="h-5 w-5" />
-                  <span className="sr-only">Fermer</span>
-                </Button>
-              </div>
-              <div className="space-y-4">
-                {selectedUserId && (
-                  <div className="mb-4">
-                    {users.find((u) => u.id === selectedUserId)?.contractUrl ? (
-                      <div className="rounded-lg border border-green-800 bg-green-900/20 p-4">
-                        <div className="flex flex-col space-y-3">
-                          <div className="flex items-center gap-2">
-                            <DocumentIcon className="h-5 w-5 text-green-500" />
-                            <span className="text-green-400">
-                              Cet employé a déjà un contrat
-                            </span>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button
-                              onClick={() =>
-                                viewContract(
-                                  users.find((u) => u.id === selectedUserId)
-                                    ?.contractUrl || ''
-                                )
-                              }
-                              variant="outline"
-                              className="flex-1 border-green-700 text-green-400 hover:bg-green-900/30"
-                            >
-                              Voir le contrat
-                            </Button>
-                            <Button
-                              onClick={() => deleteContract(selectedUserId)}
-                              variant="outline"
-                              className="flex-1 border-red-700 text-red-400 hover:bg-red-900/30"
-                            >
-                              Supprimer
-                            </Button>
-                          </div>
-                          <p className="text-xs text-neutral-400">
-                            L&apos;upload d&apos;un nouveau contrat remplacera
-                            le contrat existant.
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="rounded-lg border border-amber-800 bg-amber-900/20 p-4">
-                        <div className="flex items-center gap-2">
-                          <DocumentIcon className="h-5 w-5 text-amber-500" />
-                          <span className="text-amber-400">
-                            Cet employé n&apos;a pas encore de contrat
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <div className="rounded-lg border border-neutral-700 bg-neutral-800 p-4">
-                  <div className="space-y-4">
-                    <Input
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      onChange={(e) =>
-                        setContractFile(e.target.files?.[0] || null)
-                      }
-                      className="flex-1 border-neutral-700 bg-neutral-900"
-                    />
-                    <p className="text-xs text-neutral-500">
-                      Formats acceptés: PDF, DOC, DOCX
-                    </p>
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        onClick={handleUploadContract}
-                        disabled={!contractFile || isUploading}
-                        className={`w-full ${
-                          isUploading
-                            ? 'bg-blue-500/50'
-                            : 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400'
-                        } text-white`}
-                      >
-                        {isUploading ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <ClockIcon className="h-4 w-4 animate-spin" />
-                            Upload...
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-2">
-                            <DocumentArrowUpIcon className="h-4 w-4" />
-                            Upload
-                          </div>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </DialogPortal>
-      </Dialog>
-    </Dialog>
-  );
+								<div className="flex-1 overflow-y-auto">
+									<div className="divide-y divide-zinc-800">
+										<AnimatePresence mode="popLayout">
+											{filteredUsers.map((user) => (
+												<motion.div
+													key={user.id}
+													variants={listItemVariants}
+													initial="hidden"
+													animate={
+														editingUser === user.name ? "editing" : "visible"
+													}
+													exit="exit"
+													className="px-4 py-3 transition-colors duration-150 hover:bg-zinc-800"
+												>
+													<div className="flex items-center justify-between">
+														<motion.div
+															className="min-w-0 flex-1"
+															whileHover={{ x: 5 }}
+															transition={{ type: "spring", stiffness: 400 }}
+														>
+															<p className="truncate text-sm font-medium text-red-400">
+																{user.name}
+															</p>
+															<div className="mt-2 flex items-center space-x-4 text-sm text-zinc-400">
+																<span className="text-zinc-500">
+																	{user.email}
+																</span>
+																<span className="text-zinc-500">
+																	{user.role}
+																</span>
+																<div
+																	className="h-4 w-4 rounded-full"
+																	style={{
+																		backgroundColor: user.color || "#000000",
+																	}}
+																/>
+																{user.contractUrl && (
+																	<span className="inline-flex items-center rounded bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-300">
+																		<DocumentIcon className="mr-1 h-3 w-3" />
+																		Contrat
+																	</span>
+																)}
+															</div>
+														</motion.div>
+														<div className="flex items-center space-x-2">
+															<Button
+																onClick={() => openContractUpload(user.id)}
+																variant="ghost"
+																className={`${user.contractUrl ? "text-green-400 hover:text-green-300" : "text-red-400 hover:text-red-300"} hover:bg-zinc-800`}
+																disabled={isSubmitting}
+																title={
+																	user.contractUrl
+																		? "Voir ou remplacer le contrat"
+																		: "Uploader un contrat"
+																}
+															>
+																<DocumentIcon className="h-5 w-5" />
+															</Button>
+															<Button
+																onClick={() => startEditing(user.name, user)}
+																variant="ghost"
+																className="text-red-400 hover:bg-zinc-800 hover:text-red-300"
+																disabled={isSubmitting}
+															>
+																<PencilIcon className="h-5 w-5" />
+															</Button>
+															<Button
+																onClick={() => handleDeleteUser(user)}
+																variant="ghost"
+																className="text-red-400 hover:bg-zinc-800 hover:text-red-300"
+																disabled={isSubmitting}
+															>
+																<TrashIcon className="h-5 w-5" />
+															</Button>
+															<DropdownMenu>
+																<DropdownMenuTrigger asChild>
+																	<Button
+																		variant="ghost"
+																		className="text-red-400 hover:bg-zinc-800 hover:text-red-300"
+																		disabled={
+																			isSubmitting || isEmailSending[user.id]
+																		}
+																		title="Options de configuration"
+																	>
+																		{isEmailSending[user.id] ? (
+																			<svg
+																				className="h-5 w-5 animate-spin"
+																				xmlns="http://www.w3.org/2000/svg"
+																				fill="none"
+																				viewBox="0 0 24 24"
+																			>
+																				<title>Envoi en cours...</title>
+																				<circle
+																					className="opacity-25"
+																					cx="12"
+																					cy="12"
+																					r="10"
+																					stroke="currentColor"
+																					strokeWidth="4"
+																				/>
+																				<path
+																					className="opacity-75"
+																					fill="currentColor"
+																					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+																				/>
+																			</svg>
+																		) : (
+																			<EnvelopeIcon className="h-5 w-5" />
+																		)}
+																	</Button>
+																</DropdownMenuTrigger>
+																<DropdownMenuContent
+																	align="end"
+																	className="z-[9999] border-zinc-700 bg-zinc-800 text-zinc-100"
+																	forceMount
+																	sideOffset={5}
+																	side="bottom"
+																	avoidCollisions={true}
+																>
+																	<DropdownMenuItem
+																		onClick={() => sendSetupEmail(user.id)}
+																		className="cursor-pointer hover:bg-zinc-700 focus:bg-zinc-700"
+																	>
+																		<EnvelopeIcon className="mr-2 h-4 w-4" />
+																		Envoyer email de configuration
+																	</DropdownMenuItem>
+																	<DropdownMenuItem
+																		onClick={() => copySetupLink(user.id)}
+																		className="cursor-pointer hover:bg-zinc-700 focus:bg-zinc-700"
+																	>
+																		<svg
+																			className="mr-2 h-4 w-4"
+																			viewBox="0 0 20 20"
+																			fill="currentColor"
+																			stroke="currentColor"
+																		>
+																			<title>Copier le lien</title>
+																			<path
+																				strokeLinecap="round"
+																				strokeLinejoin="round"
+																				strokeWidth={2}
+																				d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+																			/>
+																		</svg>
+																		Copier le lien uniquement
+																	</DropdownMenuItem>
+																</DropdownMenuContent>
+															</DropdownMenu>
+														</div>
+													</div>
+												</motion.div>
+											))}
+										</AnimatePresence>
+										{filteredUsers.length === 0 && (
+											<motion.div
+												initial={{ opacity: 0 }}
+												animate={{ opacity: 1 }}
+												exit={{ opacity: 0 }}
+												className="p-4 text-center text-zinc-400"
+											>
+												Aucun utilisateur trouvé
+											</motion.div>
+										)}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</DialogContent>
+			</DialogPortal>
+
+			<Dialog
+				open={isSetupLinkDialogOpen}
+				onOpenChange={() => setIsSetupLinkDialogOpen(false)}
+			>
+				<DialogPortal>
+					<DialogOverlay className="bg-black/30 backdrop-blur-sm" />
+					<DialogContent className="max-w-lg border border-zinc-800 bg-zinc-900 p-6 shadow-2xl">
+						<div className="space-y-4">
+							<DialogTitle className="text-xl font-semibold text-zinc-100">
+								Lien de configuration
+							</DialogTitle>
+							<div className="space-y-4">
+								<div className="rounded-lg border border-zinc-700 bg-zinc-800 p-4">
+									<div className="flex items-center gap-2">
+										<Input
+											type="text"
+											value={setupLink || ""}
+											readOnly
+											className="flex-1 border-zinc-700 bg-zinc-900 text-xs text-zinc-400"
+										/>
+										<Button
+											onClick={() => {
+												if (setupLink) {
+													navigator.clipboard.writeText(setupLink);
+													setSuccess("Lien copié !");
+													setTimeout(() => setSuccess(null), 3000);
+												}
+											}}
+											variant="outline"
+											className="border-zinc-600 text-zinc-300 hover:bg-zinc-700"
+										>
+											Copier
+										</Button>
+									</div>
+									<p className="mt-2 text-xs text-zinc-500">
+										Envoyez ce lien à l&apos;employé pour qu&apos;il puisse
+										configurer son compte. Le lien est valable pendant 24
+										heures.
+									</p>
+								</div>
+								<div className="flex justify-end">
+									<Button
+										onClick={() => setIsSetupLinkDialogOpen(false)}
+										variant="outline"
+										className="border-zinc-600 text-zinc-300 hover:bg-zinc-800"
+									>
+										Fermer
+									</Button>
+								</div>
+							</div>
+						</div>
+					</DialogContent>
+				</DialogPortal>
+			</Dialog>
+
+			{/* Dialog pour l'upload de contrat */}
+			<Dialog
+				open={showContractUpload}
+				onOpenChange={() => setShowContractUpload(false)}
+			>
+				<DialogPortal>
+					<DialogOverlay className="bg-black/30 backdrop-blur-sm" />
+					<DialogContent className="max-w-md border border-zinc-800 bg-zinc-900 p-5 shadow-2xl">
+						<div className="space-y-4">
+							<div className="flex items-center justify-between">
+								<DialogTitle className="text-xl font-semibold text-zinc-100">
+									Upload de contrat
+								</DialogTitle>
+								<Button
+									onClick={() => setShowContractUpload(false)}
+									variant="ghost"
+									className="h-8 w-8 rounded-full p-0 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+								>
+									<XMarkIcon className="h-5 w-5" />
+									<span className="sr-only">Fermer</span>
+								</Button>
+							</div>
+							<div className="space-y-4">
+								{selectedUserId && (
+									<div className="mb-4">
+										{users.find((u) => u.id === selectedUserId)?.contractUrl ? (
+											<div className="rounded-lg border border-green-800 bg-green-900/20 p-4">
+												<div className="flex flex-col space-y-3">
+													<div className="flex items-center gap-2">
+														<DocumentIcon className="h-5 w-5 text-green-500" />
+														<span className="text-green-400">
+															Cet employé a déjà un contrat
+														</span>
+													</div>
+													<div className="flex space-x-2">
+														<Button
+															onClick={() =>
+																viewContract(
+																	users.find((u) => u.id === selectedUserId)
+																		?.contractUrl || "",
+																)
+															}
+															variant="outline"
+															className="flex-1 border-green-700 text-green-400 hover:bg-green-900/30"
+														>
+															Voir le contrat
+														</Button>
+														<Button
+															onClick={() => deleteContract(selectedUserId)}
+															variant="outline"
+															className="flex-1 border-red-700 text-red-400 hover:bg-red-900/30"
+														>
+															Supprimer
+														</Button>
+													</div>
+													<p className="text-xs text-zinc-400">
+														L&apos;upload d&apos;un nouveau contrat remplacera
+														le contrat existant.
+													</p>
+												</div>
+											</div>
+										) : (
+											<div className="rounded-lg border border-amber-800 bg-amber-900/20 p-4">
+												<div className="flex items-center gap-2">
+													<DocumentIcon className="h-5 w-5 text-amber-500" />
+													<span className="text-amber-400">
+														Cet employé n&apos;a pas encore de contrat
+													</span>
+												</div>
+											</div>
+										)}
+									</div>
+								)}
+								<div className="rounded-lg border border-zinc-700 bg-zinc-800 p-4">
+									<div className="space-y-4">
+										<Input
+											type="file"
+											accept=".pdf,.doc,.docx"
+											onChange={(e) =>
+												setContractFile(e.target.files?.[0] || null)
+											}
+											className="flex-1 border-zinc-700 bg-zinc-900"
+										/>
+										<p className="text-xs text-zinc-500">
+											Formats acceptés: PDF, DOC, DOCX
+										</p>
+										<div className="flex justify-end space-x-2">
+											<Button
+												onClick={handleUploadContract}
+												disabled={!contractFile || isUploading}
+												className={`w-full ${
+													isUploading
+														? "bg-red-500/50"
+														: "bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400"
+												} text-white`}
+											>
+												{isUploading ? (
+													<div className="flex items-center justify-center gap-2">
+														<ClockIcon className="h-4 w-4 animate-spin" />
+														Upload...
+													</div>
+												) : (
+													<div className="flex items-center justify-center gap-2">
+														<DocumentArrowUpIcon className="h-4 w-4" />
+														Upload
+													</div>
+												)}
+											</Button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</DialogContent>
+				</DialogPortal>
+			</Dialog>
+		</Dialog>
+	);
 }

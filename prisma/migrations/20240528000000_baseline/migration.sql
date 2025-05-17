@@ -1,0 +1,4 @@
+-- This is an empty migration file that serves as a baseline
+-- It tells Prisma that the current state of the database
+-- matches the current schema.prisma file (without the Order models we just added)
+-- See: https://www.prisma.io/docs/orm/prisma-migrate/workflows/baselining-a-database 

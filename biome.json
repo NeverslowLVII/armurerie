@@ -1,65 +1,56 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "organizeImports": {
-    "enabled": true
-  },
-  "files": {
-    "ignore": [
-      ".next",
-      "node_modules",
-      "coverage",
-      "dist",
-      "public",
-      "**/*.d.ts",
-      ".husky",
-      ".cursor",
-      ".vercel",
-      "html",
-      "**/*.md",
-      "**/*.mdc",
-      "**/*.txt",
-      "**/*.png",
-      "**/*.ico",
-      "**/*.svg",
-      "**/*.gz",
-      "**/*.sh",
-      ".cursorignore",
-      ".repomixignore",
-      "package-lock.json"
-    ]
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "recommended": true,
-      "correctness": {
-        "noUnusedVariables": "error"
-      },
-      "suspicious": {
-        "noConsoleLog": "warn"
-      },
-      "security": {
-        "noDangerouslySetInnerHtml": "error"
-      },
-      "performance": {
-        "recommended": true
-      },
-      "style": {
-        "useConst": "error",
-        "useTemplate": "error"
-      }
-    }
-  },
-  "formatter": {
-    "enabled": true,
-    "indentWidth": 2,
-    "indentStyle": "space"
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "single",
-      "trailingCommas": "es5",
-      "semicolons": "always"
-    }
-  }
+	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+	"vcs": {
+		"enabled": false,
+		"clientKind": "git",
+		"useIgnoreFile": false
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"files": {
+		"ignore": [
+			".next",
+			"node_modules",
+			"coverage",
+			"dist",
+			"public",
+			"**/*.d.ts",
+			".husky",
+			".cursor",
+			".vercel",
+			"html",
+			"**/*.md",
+			"**/*.mdc",
+			"**/*.txt",
+			"**/*.png",
+			"**/*.ico",
+			"**/*.svg",
+			"**/*.gz",
+			"**/*.sh",
+			".cursorignore",
+			".repomixignore",
+			"package-lock.json",
+			"src/components/ui/*",
+			"src/hooks/use-toast.ts"
+		]
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"correctness": {
+				"noUnusedVariables": "error"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	}
 }

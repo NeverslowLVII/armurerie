@@ -1,49 +1,46 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
-// Create a Nodemailer transporter using SMTP configuration from environment variables
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: true, // Enable SSL/TLS
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  tls: {
-    // Do not fail on invalid certs
-    rejectUnauthorized: false,
-  },
+	host: process.env.SMTP_HOST,
+	port: Number(process.env.SMTP_PORT),
+	secure: true,
+	auth: {
+		user: process.env.SMTP_USER,
+		pass: process.env.SMTP_PASS,
+	},
+	tls: {
+		rejectUnauthorized: false,
+	},
 });
 
-// Use the NOTIFICATION_EMAIL environment variable for sender email
 const senderEmail = process.env.NOTIFICATION_EMAIL;
 if (!senderEmail) {
-  console.error('NOTIFICATION_EMAIL is not set in environment variables');
+	console.error("NOTIFICATION_EMAIL is not set in environment variables");
 }
 
 interface EmailOptions {
-  to: string;
-  subject: string;
-  html: string;
+	to: string;
+	subject: string;
+	html: string;
 }
 
 export async function sendEmail({ to, subject, html }: EmailOptions) {
-  try {
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to,
-      subject,
-      html,
-    });
-    return { success: true, data: info };
-  } catch (error) {
-    console.error('Error sending email with Nodemailer:', error);
-    return { success: false, error };
-  }
+	try {
+		const info = await transporter.sendMail({
+			from: process.env.SMTP_USER,
+			to,
+			subject,
+			html,
+		});
+		return { success: true, data: info };
+	} catch (error) {
+		console.error("Error sending email with Nodemailer:", error);
+		return { success: false, error };
+	}
 }
 
 export function generateSetupEmailHtml(setupLink: string, name: string) {
-  return `
+	return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Bienvenue sur Armurerie !</h2>
       <p>Bonjour ${name},</p>
@@ -61,7 +58,7 @@ export function generateSetupEmailHtml(setupLink: string, name: string) {
 }
 
 export function generateResetPasswordEmailHtml(resetLink: string) {
-  return `
+	return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2>Réinitialisation de votre mot de passe</h2>
       <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>

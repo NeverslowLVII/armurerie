@@ -1,76 +1,71 @@
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { Role } from '@/services/api';
-import bcrypt from 'bcryptjs';
-import { getServerSession } from 'next-auth/next';
-import { NextResponse } from 'next/server';
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { Role } from "@/services/api";
+import bcrypt from "bcryptjs";
+import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  try {
-    // Vérifier que l'utilisateur est un patron
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'PATRON') {
-      return NextResponse.json(
-        { error: 'Unauthorized - Only PATRON can create user accounts' },
-        { status: 403 }
-      );
-    }
+	try {
+		const session = await getServerSession(authOptions);
+		if (!session || session.user.role !== "PATRON") {
+			return NextResponse.json(
+				{ error: "Unauthorized - Only PATRON can create user accounts" },
+				{ status: 403 },
+			);
+		}
 
-    const { name, email, password, color, contractUrl, commission } =
-      await request.json();
+		const { name, email, password, color, contractUrl, commission } =
+			await request.json();
 
-    // Validation des données
-    if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
+		if (!name || !email || !password) {
+			return NextResponse.json(
+				{ error: "Missing required fields" },
+				{ status: 400 },
+			);
+		}
 
-    // Vérifier si l'email existe déjà
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+		const existingUser = await prisma.user.findUnique({
+			where: { email },
+		});
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email already exists' },
-        { status: 400 }
-      );
-    }
+		if (existingUser) {
+			return NextResponse.json(
+				{ error: "Email already exists" },
+				{ status: 400 },
+			);
+		}
 
-    // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(password, 10);
+		const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Créer l'utilisateur
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        color,
-        contractUrl,
-        commission: commission || 0,
-        role: Role.EMPLOYEE,
-      },
-    });
+		const user = await prisma.user.create({
+			data: {
+				name,
+				email,
+				password: hashedPassword,
+				color,
+				contractUrl,
+				commission: commission || 0,
+				role: Role.EMPLOYEE,
+			},
+		});
 
-    return NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        contractUrl: user.contractUrl,
-        commission: user.commission,
-      },
-    });
-  } catch (error) {
-    console.error('Create user error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create user account' },
-      { status: 500 }
-    );
-  }
+		return NextResponse.json({
+			success: true,
+			user: {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				role: user.role,
+				contractUrl: user.contractUrl,
+				commission: user.commission,
+			},
+		});
+	} catch (error) {
+		console.error("Create user error:", error);
+		return NextResponse.json(
+			{ error: "Failed to create user account" },
+			{ status: 500 },
+		);
+	}
 }

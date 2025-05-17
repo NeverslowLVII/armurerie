@@ -1,35 +1,33 @@
-import type { Metadata } from 'next';
-import { Poppins } from 'next/font/google';
-import './globals.css';
-import { initializeApp } from '@/lib/init';
-import { Providers } from './providers';
+import type { Metadata } from "next";
+import { Poppins } from "next/font/google";
+import "./globals.css";
+import { initializeApp } from "@/lib/init";
+import { Providers } from "./providers";
 
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '700'] });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
-  title: 'Armurerie',
-  description: "Gestion d'armes",
-  icons: {
-    icon: '/favicon.ico',
-  },
+	title: "Armurerie",
+	description: "Gestion d'armes",
+	icons: {
+		icon: "/favicon.ico",
+	},
 };
 
-// Initialize the app on the server side
 try {
-  await initializeApp();
+	await initializeApp();
 } catch (error) {
-  console.error('Failed to initialize app:', error);
+	console.error("Failed to initialize app:", error);
 }
 
 export default function RootLayout({
-  children,
+	children,
 }: { children: React.ReactNode }) {
-  return (
-    <html lang="fr" suppressHydrationWarning>
-      {/* Restore original body className if desired, or leave minimal */}
-      <body className={`${poppins.className}`}>
-        <Providers>{children}</Providers>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="fr" suppressHydrationWarning>
+			<body className={`${poppins.className}`}>
+				<Providers>{children}</Providers>
+			</body>
+		</html>
+	);
 }
