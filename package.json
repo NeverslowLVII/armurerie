@@ -1,7 +1,7 @@
 {
 	"name": "armurerie",
 	"private": true,
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
 		"dev": "cross-env NEXTAUTH_DEBUG=true NODE_ENV=development next dev",
