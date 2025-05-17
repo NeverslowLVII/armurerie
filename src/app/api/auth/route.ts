@@ -1,4 +1,4 @@
-import { verifyAuthTokenAndGetUser } from "@/lib/authUtils";
+import { verifyAuthTokenAndGetUser } from "@/features/auth/services/authUtils";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";

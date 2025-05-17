@@ -17,7 +17,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { useData } from "../context/DataContext";
 import { type Weapon, updateWeapon } from "../services/api";
-import { logWeaponModification } from "../utils/discord";
+import { logWeaponModification } from "../services/discord";
 
 interface EditWeaponFormProps {
 	readonly isOpen: boolean;

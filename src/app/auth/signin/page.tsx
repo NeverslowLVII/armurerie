@@ -1,6 +1,6 @@
 "use client";
 
-import SignInPage from "@/components/auth/SignInPage";
+import SignInPage from "@/features/auth/components/SignInPage";
 import { FullPageSkeletonLoading } from "@/components/ui/loading";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";

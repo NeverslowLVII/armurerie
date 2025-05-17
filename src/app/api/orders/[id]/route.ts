@@ -1,5 +1,5 @@
-import { authOptions } from "@/lib/auth";
-import { verifyAuthTokenAndGetUser } from "@/lib/authUtils";
+import { authOptions } from "@/features/auth/services/auth";
+import { verifyAuthTokenAndGetUser } from "@/features/auth/services/authUtils";
 import { prisma } from "@/lib/prisma";
 import { OrderStatus, type Role } from "@prisma/client";
 import { getToken } from "next-auth/jwt";

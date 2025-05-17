@@ -137,4 +137,4 @@ export async function logWeaponModification(
 		console.error("Exception lors de l'envoi du log d'arme:", error);
 		return false;
 	}
-}
+} 

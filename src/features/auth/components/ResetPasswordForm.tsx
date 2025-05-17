@@ -18,7 +18,7 @@ export default function ResetPasswordForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const token = searchParams?.get("token");
-	const [currentStep, setCurrentStep] = useState<"request" | "reset">(
+	const [currentStep] = useState<"request" | "reset">(
 		token ? "reset" : "request",
 	);
 
@@ -228,17 +228,6 @@ export default function ResetPasswordForm() {
 					<Button
 						type="button"
 						variant="outline"
-						onClick={() => {
-							setCurrentStep("request");
-							setError(null);
-						}}
-						className="w-full dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-800"
-					>
-						Retour
-					</Button>
-					<Button
-						type="button"
-						variant="outline"
 						asChild
 						className="w-full dark:border-zinc-700 dark:text-white dark:hover:bg-zinc-800"
 					>
@@ -251,4 +240,4 @@ export default function ResetPasswordForm() {
 			</form>
 		</motion.div>
 	);
-}
+} 

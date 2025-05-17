@@ -1,4 +1,4 @@
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/services/auth";
 import { prisma } from "@/lib/prisma";
 import { isValidRole } from "@/utils/roles";
 import { Role } from "@prisma/client";

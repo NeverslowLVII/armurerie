@@ -40,4 +40,4 @@ export async function verifyAuthTokenAndGetUser(authToken: string | undefined) {
 
 		return { error: "Invalid token", status: 401 };
 	}
-}
+} 

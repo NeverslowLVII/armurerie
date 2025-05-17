@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "cross-env NEXTAUTH_DEBUG=true NODE_ENV=development next dev",
-		"nocomments": "node strip-comments.mjs",
+		"nocomments": "node scripts/strip-comments.mjs",
 		"build": "npm run generate:roles && prisma generate && next build",
 		"start": "next start",
 		"generate:roles": "tsx ./scripts/generate-roles.ts",

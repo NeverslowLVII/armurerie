@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Path to directory you want to process
-const directoryPath = path.join(__dirname, "src");
+const directoryPath = path.join(__dirname, "../src"); // Adjusted path
 
 // Function to process a file
 function processFile(filePath) {
@@ -38,4 +38,4 @@ function processDirectory(directory) {
 }
 
 // Start processing
-processDirectory(directoryPath);
+processDirectory(directoryPath); 

@@ -23,7 +23,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { useData } from "../context/DataContext";
 import { createWeapon } from "../services/api";
-import { logWeaponModification } from "../utils/discord";
+import { logWeaponModification } from "@/services/discord";
 
 interface AddWeaponFormProps {
 	readonly isOpen: boolean;

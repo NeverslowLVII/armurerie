@@ -3,6 +3,8 @@ import type { BaseWeapon } from "@prisma/client";
 import type { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "./route";
+import { cookies } from "next/headers";
+import { type User } from "@prisma/client";
 
 vi.mock("next/headers", () => {
 	const cookiesStore = {
@@ -19,7 +21,7 @@ vi.mock("next/headers", () => {
 	};
 });
 
-vi.mock("@/lib/authUtils", () => {
+vi.mock("@/features/auth/services/authUtils", () => {
 	return {
 		verifyAuthTokenAndGetUser: vi.fn((token) => {
 			if (token === "mock-token") {

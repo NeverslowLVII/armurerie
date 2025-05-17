@@ -215,7 +215,7 @@ export async function DELETE(
 
 			if (bodyData.weaponData && bodyData.username) {
 				try {
-					const { logWeaponModification } = await import("@/utils/discord");
+					const { logWeaponModification } = await import("@/services/discord");
 
 					await logWeaponModification(
 						bodyData.weaponData,
@@ -229,7 +229,7 @@ export async function DELETE(
 				}
 			} else if (weapon) {
 				try {
-					const { logWeaponModification } = await import("@/utils/discord");
+					const { logWeaponModification } = await import("@/services/discord");
 
 					await logWeaponModification(
 						{

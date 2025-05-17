@@ -1,7 +1,7 @@
 "use client";
 
 import armurerie from "@/assets/armurerie.webp";
-import SetupForm from "@/components/auth/SetupForm";
+import SetupForm from "@/features/auth/components/SetupForm";
 import { RandomQuote } from "@/components/ui/RandomQuote";
 import { SkeletonLoading } from "@/components/ui/loading";
 import { Skeleton } from "@/components/ui/skeleton";

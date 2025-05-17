@@ -1,4 +1,4 @@
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/services/auth";
 import { generateSetupEmailHtml, sendEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 import { generateSetupLink } from "@/lib/tokens";

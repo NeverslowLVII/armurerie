@@ -7,7 +7,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { User as AuthUser } from "@/lib/auth";
+import type { User as AuthUser } from "@/features/auth/services/auth";
 import {
 	ArrowRightOnRectangleIcon,
 	Bars3Icon,

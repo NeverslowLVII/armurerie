@@ -200,27 +200,54 @@ export default function SignInPage() {
 											<AlertDialogTitle className="sr-only">
 												Erreur
 											</AlertDialogTitle>
-											<AlertDialogDescription>{error}</AlertDialogDescription>
-											<Button className="mt-4" onClick={() => setError(null)}>
+											<AlertDialogDescription className="text-red-500">
+												{error}
+											</AlertDialogDescription>
+											<Button
+												className="mt-4"
+												onClick={() => setError(null)}
+											>
 												Fermer
 											</Button>
 										</AlertDialogContent>
 									</AlertDialog>
 								)}
 								<Button
-									className="w-full dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700"
 									type="submit"
+									className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white transition-all hover:from-red-600 hover:to-orange-600 hover:shadow-lg active:scale-95 dark:text-white"
 									disabled={isLoading}
 								>
-									<LoadingButton loading={isLoading} spinnerSize="xs">
+									<LoadingButton loading={isLoading} spinnerSize="sm">
 										Se connecter
 									</LoadingButton>
 								</Button>
 							</form>
 						</div>
+						<motion.p
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ duration: 0.5, delay: 0.6 }}
+							className="px-8 text-center text-sm text-muted-foreground"
+						>
+							En cliquant sur continuer, vous acceptez nos{" "}
+							<Link
+								href="/terms"
+								className="underline underline-offset-4 hover:text-primary"
+							>
+								Conditions d&apos;utilisation
+							</Link>{" "}
+							et notre{" "}
+							<Link
+								href="/privacy"
+								className="underline underline-offset-4 hover:text-primary"
+							>
+								Politique de confidentialité
+							</Link>
+							.
+						</motion.p>
 					</motion.div>
 				</div>
 			</motion.div>
 		</div>
 	);
-}
+} 

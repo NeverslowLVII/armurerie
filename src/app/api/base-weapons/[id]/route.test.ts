@@ -19,7 +19,7 @@ vi.mock("next/headers", () => {
 	};
 });
 
-vi.mock("@/lib/authUtils", () => {
+vi.mock("@/features/auth/services/authUtils", () => {
 	return {
 		verifyAuthTokenAndGetUser: vi.fn((token) => {
 			if (token === "mock-token") {

@@ -1,5 +1,5 @@
 import UsersAdminClient from "@/components/admin/UsersAdminClient";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/features/auth/services/auth";
 import { prisma } from "@/lib/prisma";
 import type { Role } from "@prisma/client";
 import type { Metadata } from "next";

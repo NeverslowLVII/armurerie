@@ -1,4 +1,4 @@
-import { verifyAuthTokenAndGetUser } from "@/lib/authUtils";
+import { verifyAuthTokenAndGetUser } from "@/features/auth/services/authUtils";
 import { prisma } from "@/lib/prisma";
 import type { User } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
